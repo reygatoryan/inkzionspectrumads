@@ -1,0 +1,23 @@
+node_modules/
+data/contacts.db
+.env
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# PHP / XAMPP
+*.log
+db-config.php
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+Thumbs.db
+.DS_Store
+*.log
+db-config.php
+.vscode/
+.idea/

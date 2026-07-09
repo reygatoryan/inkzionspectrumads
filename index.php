@@ -1,0 +1,510 @@
+﻿<?php
+session_start();
+$flash = $_SESSION['flash'] ?? null;
+unset($_SESSION['flash']);
+$loggedIn = !empty($_SESSION['user_id']);
+$userName = $loggedIn ? trim($_SESSION['user_name'] ?? '') : '';
+$userInitials = '';
+if ($loggedIn && $userName !== '') {
+    $parts = array_filter(preg_split('/\s+/', $userName));
+    $userInitials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
+}
+if ($loggedIn && $userInitials === '') {
+    $userInitials = 'ME';
+}
+
+// Load site content for hero/about/contact
+require_once 'db-config.php';
+$siteContent = [];
+$result = $conn->query("SELECT section_key, title, subtitle, content, image_url, meta FROM site_content");
+while ($row = $result->fetch_assoc()) {
+    if ($row['meta']) $row['meta'] = json_decode($row['meta'], true);
+    $siteContent[$row['section_key']] = $row;
+}
+$heroContent = $siteContent['homepage_hero'] ?? [];
+$aboutContent = $siteContent['about_us'] ?? [];
+$contactContent = $siteContent['contact_info'] ?? [];
+?>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <?php
+  require_once 'includes/seo-helper.php';
+  $seoTitle = 'Inkzion Spectrum Ads | Printing Services';
+  $seoDescription = 'Inkzion Spectrum Ads delivers premium printing services, creative advertising, and full-spectrum brand experiences.';
+  $seoKeywords = 'printing, advertising, business cards, marketing materials, signage, apparel, custom merchandise, promotional items';
+  outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
+  ?>
+  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    .g-signin-wrapper { display: flex; align-items: center; }
+    .g-signin-wrapper > div > iframe { max-width: 210px !important; }
+    .g-signin-wrapper .g_id_signin { display: flex; align-items: center; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="topbar"></div>
+    <div class="container header-inner">
+      <a href="index.php" class="brand">
+        <img src="assets/logo.png" alt="Inkzion Spectrum Ads logo" class="site-logo">
+        <div>
+          <span class="brand-title">INKZION</span>
+          <span class="brand-subtitle">SPECTRUM ADS</span>
+        </div>
+      </a>
+      <button id="nav-toggle" aria-expanded="false" aria-controls="nav-list">Menu</button>
+      <nav>
+        <ul id="nav-list" class="nav-list">
+          <li><a href="customer/store-product.php">Products</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+
+        </ul>
+      </nav>
+      <div class="header-action-set">
+      <div class="fb-dropdown">
+        <button id="fb-btn" class="facebook-button" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open Facebook menu">
+          <i class="fab fa-facebook-f"></i>
+          <span class="facebook-label">Facebook</span>
+          <i class="fas fa-caret-down"></i>
+        </button>
+        <ul class="fb-dropdown-menu" aria-labelledby="fb-btn" role="menu" aria-hidden="true">
+          <li role="none"><a role="menuitem" href="https://www.facebook.com/profile.php?id=61581351683926" target="_blank" rel="noopener noreferrer">Inkzion Spectrum Ads</a></li>
+          <li role="none"><a role="menuitem" href="https://www.facebook.com/profile.php?id=61588137340105" target="_blank" rel="noopener noreferrer">Inkzion Flyers Lab</a></li>
+          <li role="none"><a role="menuitem" href="https://www.facebook.com/profile.php?id=61587826864930" target="_blank" rel="noopener noreferrer">Inkzion Uniform & Sports Apparel Hub</a></li>
+        </ul>
+        </div>
+      <a href="https://shopee.ph/inkzionspectrumads?entryPoint=ShopBySearch&searchKeyword=inkzionspectrumads" class="shp-btn shopee-button" target="_blank" rel="noopener noreferrer" title="Visit our Shopee shop">
+        <i class="fas fa-bag-shopping"></i>
+        <span class="shp-label">Shopee</span>
+      </a>
+      <?php if ($loggedIn): ?>
+        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+        <a href="admin/dashboard.php" class="btn auth-btn">
+          <i class="fas fa-shield-alt"></i> Admin
+        </a>
+        <a href="logout.php" class="btn auth-btn">Logout</a>
+        <?php else: ?>
+        <a href="customer/profile.php" class="btn auth-btn nav-icon-btn" title="My Profile">
+          <i class="fas fa-user"></i>
+          <span class="nav-icon-label">Profile</span>
+        </a>
+        <a href="logout.php" class="btn auth-btn">Logout</a>
+        <?php endif; ?>
+      <?php else: ?>
+        <div class="g-signin-wrapper">
+          <div id="g_id_onload"
+               data-client_id="710352328695-8n7ggg4rg6c89rga59kn9fb5ueffb6kl.apps.googleusercontent.com"
+               data-callback="handleGoogleCredential"
+               data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin"
+               data-type="standard"
+               data-shape="pill"
+               data-theme="outline"
+               data-text="sign_in_with"
+               data-size="medium"
+               data-logo_alignment="left">
+          </div>
+        </div>
+      <?php endif; ?>
+      </div>
+    </div>
+  </header>
+
+  <?php if (!empty($flash)): ?>
+    <div class="flash-message <?= htmlspecialchars($flash['type'], ENT_QUOTES, 'UTF-8') ?>">
+      <?= htmlspecialchars($flash['message'], ENT_QUOTES, 'UTF-8') ?>
+    </div>
+  <?php endif; ?>
+
+  <main>
+    <section class="hero">
+      <div class="hero-bg">
+        <div class="orb orb-pink"></div>
+        <div class="orb orb-cyan"></div>
+        <div class="orb orb-green"></div>
+        <div class="orb orb-gold"></div>
+        <div class="grid-pattern"></div>
+      </div>
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <h1><?php echo htmlspecialchars($heroContent['title'] ?? 'INKZION SPECTRUM ADS'); ?></h1>
+          <p><?php echo htmlspecialchars($heroContent['subtitle'] ?? 'Your trusted partner for high-quality and affordable printing solutions.'); ?></p>
+          <?php if (!empty($heroContent['content'])): ?>
+          <p style="font-size:0.95rem;margin-top:0.5rem;"><?php echo htmlspecialchars($heroContent['content']); ?></p>
+          <?php endif; ?>
+          <div class="hero-actions">
+            <?php 
+            $btnText = $heroContent['meta']['button_text'] ?? 'Explore Services';
+            $btnLink = $heroContent['meta']['button_link'] ?? '#services';
+            ?>
+            <a href="<?php echo htmlspecialchars($btnLink); ?>" class="btn primary"><?php echo htmlspecialchars($btnText); ?></a>
+            <a href="customer/store-product.php" class="btn ghost">Shop Now</a>
+          </div>
+        </div>
+       
+      </div>
+    </section>
+     <section id="customized-apparel" class="section customized-apparel">
+      
+      <div class="services-scroll-wrapper">
+        <div class="services-horizontal" id="services-list">
+          <div class="service-item">SUBLIMATION ROUND NECK T SHIRT</div>
+          <div class="service-item">SUBLIMATION POLO SHIRT ZIPPER TYPE/BUTTON TYPE</div>
+          <div class="service-item">SUBLIMATION VARSITY JACKET</div>
+          <div class="service-item">SUBLIMATION CHINESE COLLAR</div>
+          <div class="service-item">SUBLIMATION BASKET BALL JERSEY</div>
+          <div class="service-item">TARPAULINS</div>
+          <div class="service-item">PANAFLEX</div>
+          <div class="service-item">VINYL STICKERS</div>
+          <div class="service-item">CALENDARS</div>
+          <div class="service-item">CALLING CARDS</div>
+          <div class="service-item">LANYARDS</div>
+          <div class="service-item">PVC IDs</div>
+          <div class="service-item">GIVEAWAYS</div>
+          <div class="service-item">PHOTO PRINTING</div>
+          <div class="service-item">STAND BANNERS</div>
+          <div class="service-item">SIGNAGE</div>
+          <div class="service-item">CERTIFICATE PRINTING</div>
+          <div class="service-item">MUG</div>
+          <div class="service-item">CAPS</div>
+          <div class="service-item">DTF</div>
+          <div class="service-item">FLYERS</div>
+          <div class="service-item">TUMBLER</div>
+          <div class="service-item">MOUSE PAD</div>
+          <div class="service-item">FULL SUBLIMATION ROUND NECK T SHIRT</div>
+          <div class="service-item">FULL SUBLIMATION POLO SHIRT ZIPPER TYPE/BUTTON TYPE</div>
+          <div class="service-item">FULL SUBLIMATION VARSITY JACKET</div>
+          <div class="service-item">FULL SUBLIMATION CHINESE COLLAR</div>
+          <div class="service-item">FULL SUBLIMATION BASKET BALL JERSEY</div>
+          <div class="service-item">TARPAULINS</div>
+          <div class="service-item">PANAFLEX</div>
+          <div class="service-item">VINYL STICKERS</div>
+          <div class="service-item">CALENDARS</div>
+          <div class="service-item">CALLING CARDS</div>
+          <div class="service-item">LANYARDS</div>
+          <div class="service-item">PVC IDs</div>
+          <div class="service-item">GIVEAWAYS</div>
+          <div class="service-item">PHOTO PRINTING</div>
+          <div class="service-item">STAND BANNERS</div>
+          <div class="service-item">SIGNAGE</div>
+          <div class="service-item">CERTIFICATE PRINTING</div>
+          <div class="service-item">MUG</div>
+          <div class="service-item">CAPS</div>
+          <div class="service-item">DTF</div>
+          <div class="service-item">FLYERS</div>
+          <div class="service-item">TUMBLER</div>
+          <div class="service-item">MOUSE PAD</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="special-offers" class="section special-offers">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-overline">SPECIAL OFFERS</span>
+          <h2>Promos & Packages</h2>
+          <p>Save more when you print more! Quality prints at prices that fit your budget. Free consultation on large orders, flexible pricing options, and fast reliable service.</p>
+        </div>
+        <div class="offer-top-row">
+          <div class="offer-highlights">
+            <span class="offer-chip"><i class="fas fa-bolt"></i> Fast Turnaround</span>
+            <span class="offer-chip"><i class="fas fa-gift"></i> Free Design Review</span>
+            <span class="offer-chip"><i class="fas fa-shield-alt"></i> Quality Guarantee</span>
+          </div>
+        </div>
+        <div class="offer-grid">
+          <article class="offer-card">
+            <div class="offer-icon"><i class="fas fa-box-open"></i></div>
+            <h3>Bulk Printing Discounts</h3>
+            <p>Get lower rates for large volume orders&#8212;perfect for businesses, schools, and events.</p>
+          </article>
+          <article class="offer-card">
+            <div class="offer-icon"><i class="fas fa-graduation-cap"></i></div>
+            <h3>Student-Friendly Prices</h3>
+            <p>Special pricing packages designed for student clubs, school projects, and campus promotions.</p>
+          </article>
+          <article class="offer-card">
+            <div class="offer-icon"><i class="fas fa-boxes"></i></div>
+            <h3>Package Deals Available</h3>
+            <p>Combine business cards, flyers, banners, and promotional items into one cost-saving bundle.</p>
+          </article>
+          <article class="offer-card">
+            <div class="offer-icon"><i class="fas fa-briefcase"></i></div>
+            <h3>Business Client Rates</h3>
+            <p>Exclusive special rates for corporate orders, reorders, and recurring marketing materials.</p>
+          </article>
+          <article class="offer-card">
+            <div class="offer-icon"><i class="fas fa-calendar-check"></i></div>
+            <h3>Seasonal Promos</h3>
+            <p>Limited-time offers and event-based discounts to help you stay on budget all year round.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="section services">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-overline">Our Services</span>
+          <h2>Everything you need to <span class="gradient-text">print</span></h2>
+          <p>From concept to completion, we deliver premium printing solutions that make your brand unforgettable.</p>
+        </div>
+        <div class="cards-grid">
+          <article class="service-card">
+            <div class="service-icon service-icon-pink"><i class="fas fa-id-card"></i></div>
+            <h3>Business Cards</h3>
+            <p>Calling cards, premium cardstock with matte, gloss, or embossed finishes.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon service-icon-cyan"><i class="fas fa-file-lines"></i></div>
+            <h3>Brochures & Flyers</h3>
+            <p>Tri-fold brochures, postcards, and bold marketing materials designed to convert.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon service-icon-green"><i class="fas fa-image"></i></div>
+            <h3>Large Format Printing</h3>
+            <p>Banners, signage, tarpaulins, panaflex, and posters for indoor & outdoor use.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon service-icon-gold"><i class="fas fa-shirt"></i></div>
+            <h3>Apparel & Sublimation</h3>
+            <p>T-shirts, polo shirts, varsity jackets, basketball jerseys, and custom apparel printing.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon service-icon-purple"><i class="fas fa-mug-hot"></i></div>
+            <h3>Custom Merchandise</h3>
+            <p>Mugs, tumblers, mouse pads, caps, lanyards, and promotional items.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon service-icon-blue"><i class="fas fa-certificate"></i></div>
+            <h3>Specialty Printing</h3>
+            <p>Certificates, vinyl stickers, PVC IDs, calendars, photo printing, and DTF printing.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon service-icon-pink"><i class="fas fa-palette"></i></div>
+            <h3>Design Services</h3>
+            <p>Creative design that turns concepts into polished, print-ready visuals.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon service-icon-cyan"><i class="fas fa-print"></i></div>
+            <h3>Digital Printing</h3>
+            <p>Fast, accurate digital printing for short runs, urgent projects, and special events.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+
+
+    <section id="about" class="section about">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-overline">About Us</span>
+          <h2><?php echo htmlspecialchars($aboutContent['title'] ?? 'Your Complete Printing <span class="gradient-text">Solution</span>'); ?></h2>
+          <p><?php echo htmlspecialchars($aboutContent['subtitle'] ?? 'We provide high-quality printing solutions tailored to your needs.'); ?></p>
+        </div>
+        <div class="about-grid">
+          <div class="about-images">
+            <div class="image-large">
+              <img src="<?php echo !empty($aboutContent['image_url']) ? htmlspecialchars($aboutContent['image_url']) : 'assets/products-demo.jpg'; ?>" alt="Inkzion Spectrum Ads printing showcase" loading="lazy" />
+            </div>
+            <div class="about-image-row">
+              <img src="assets/APPAREL_AND_SUBLIMATION/T%20SHIRT%20BELTECH.png" alt="Custom apparel printing" loading="lazy" />
+              <img src="assets/MARKETING_MATERIALS/FLYERS.png" alt="Marketing materials" loading="lazy" />
+            </div>
+          </div>
+          <div class="about-copy">
+            <?php if (!empty($aboutContent['content'])): ?>
+            <p style="white-space:pre-line;"><?php echo htmlspecialchars($aboutContent['content']); ?></p>
+            <?php else: ?>
+            <h3>Our Mission</h3>
+            <p>We are dedicated to helping individuals and businesses stand out through vibrant, durable, and professional prints. With modern equipment and a passionate team, we guarantee reliable service you can trust.</p>
+            <h3>What Sets Us Apart</h3>
+            <div class="feature-list">
+              <div class="feature-item"><span class="feature-dot"></span>Clear and vibrant prints</div>
+              <div class="feature-item"><span class="feature-dot"></span>Durable materials</div>
+              <div class="feature-item"><span class="feature-dot"></span>Quick turnaround time</div>
+              <div class="feature-item"><span class="feature-dot"></span>Friendly service</div>
+              <div class="feature-item"><span class="feature-dot"></span>Competitive pricing</div>
+              <div class="feature-item"><span class="feature-dot"></span>Free design consultation</div>
+            </div>
+            <p class="about-cta-text">From concept to completion, we bring your vision to life. Whether you need business cards, banners, custom apparel, or promotional items &#8212; we've got you covered.</p>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact-section">
+      <div class="container contact-grid">
+        <div class="contact-info">
+          <span class="section-overline">Contact Us</span>
+          <h2><?php echo htmlspecialchars($contactContent['title'] ?? "Let's bring your vision to life"); ?></h2>
+          <p><?php echo htmlspecialchars($contactContent['subtitle'] ?? 'Ready to start your next printing project? Get in touch for a free consultation and quote.'); ?></p>
+          <?php if (!empty($contactContent['content'])): ?>
+          <p style="margin-top:0.75rem;"><?php echo htmlspecialchars($contactContent['content']); ?></p>
+          <?php endif; ?>
+          <div class="contact-cards">
+            <?php if (!empty($contactContent['meta']['address'])): ?>
+            <div class="info-card"><strong>Visit Us</strong><p><?php echo htmlspecialchars($contactContent['meta']['address']); ?></p></div>
+            <?php else: ?>
+            <div class="info-card"><strong>Visit Us</strong><p>Jimsville Executive BLDG, Tayud, Liloan, Cebu</p></div>
+            <?php endif; ?>
+            <?php if (!empty($contactContent['meta']['phone'])): ?>
+            <div class="info-card"><strong>Call Us</strong><p><?php echo htmlspecialchars($contactContent['meta']['phone']); ?></p></div>
+            <?php else: ?>
+            <div class="info-card"><strong>Call Us</strong><p>+639754263237</p></div>
+            <?php endif; ?>
+            <?php if (!empty($contactContent['meta']['email'])): ?>
+            <div class="info-card"><strong>Email Us</strong><p><?php echo htmlspecialchars($contactContent['meta']['email']); ?></p></div>
+            <?php else: ?>
+            <div class="info-card"><strong>Email Us</strong><p>inkzionspectrum.com</p></div>
+            <?php endif; ?>
+          </div>
+          <?php if (!empty($contactContent['meta']['map_url'])): ?>
+          <div style="margin-top:1rem;border-radius:12px;overflow:hidden;border:1px solid var(--border-color);">
+            <iframe src="<?php echo htmlspecialchars($contactContent['meta']['map_url']); ?>" width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+          <?php endif; ?>
+          <div class="business-hours">
+            <strong>Business Hours</strong>
+            <p>Monday - Saturday: 8:00 AM - 5:00 PM</p>
+            <p>Sunday: Closed</p>
+          </div>
+        </div>
+        <div class="contact-social-card">
+          <h3>Connect With Us</h3>
+          <p class="contact-social-desc">Follow us on social media or visit our Shopee store to see our latest products and promotions.</p>
+          <div class="contact-social-links">
+            <a href="https://www.facebook.com/profile.php?id=61581351683926" target="_blank" rel="noopener noreferrer" class="contact-social-item fb-social">
+              <div class="contact-social-icon"><i class="fab fa-facebook-f"></i></div>
+              <div class="contact-social-info">
+                <span class="contact-social-label">Facebook</span>
+                <span class="contact-social-name">Inkzion Spectrum Ads</span>
+              </div>
+              <i class="fas fa-external-link-alt contact-social-arrow"></i>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61588137340105" target="_blank" rel="noopener noreferrer" class="contact-social-item fb-social">
+              <div class="contact-social-icon"><i class="fab fa-facebook-f"></i></div>
+              <div class="contact-social-info">
+                <span class="contact-social-label">Facebook</span>
+                <span class="contact-social-name">Inkzion Flyers Lab</span>
+              </div>
+              <i class="fas fa-external-link-alt contact-social-arrow"></i>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61587826864930" target="_blank" rel="noopener noreferrer" class="contact-social-item fb-social">
+              <div class="contact-social-icon"><i class="fab fa-facebook-f"></i></div>
+              <div class="contact-social-info">
+                <span class="contact-social-label">Facebook</span>
+                <span class="contact-social-name">Inkzion Uniform & Sports Apparel Hub</span>
+              </div>
+              <i class="fas fa-external-link-alt contact-social-arrow"></i>
+            </a>
+            <a href="https://shopee.ph/inkzionspectrumads?entryPoint=ShopBySearch&searchKeyword=inkzionspectrumads" target="_blank" rel="noopener noreferrer" class="contact-social-item shp-social">
+              <div class="contact-social-icon"><i class="fas fa-bag-shopping"></i></div>
+              <div class="contact-social-info">
+                <span class="contact-social-label">Shopee</span>
+                <span class="contact-social-name">Inkzion Spectrum Ads</span>
+              </div>
+              <i class="fas fa-external-link-alt contact-social-arrow"></i>
+            </a>
+          </div>
+          <div class="connect-us-image">
+            <img src="assets/CONNECTUS.png" alt="Connect with Inkzion Spectrum Ads" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-top"></div>
+    <div class="container footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="Inkzion Spectrum Ads Logo" class="footer-logo">
+          <div>
+            <strong>INKZION</strong>
+            <span>SPECTRUM ADS</span>
+          </div>
+        </div>
+        <p>Premium printing and advertising services for businesses and individuals.</p>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#services">Business Cards</a></li>
+          <li><a href="#services">Brochures</a></li>
+          <li><a href="#services">Banners</a></li>
+          <li><a href="#services">Merchandise</a></li>
+          <li><a href="#services">Design Services</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#about">About Us</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Support</h4>
+        <ul>
+          <li><a href="customer/help-center.php">FAQ</a></li>
+          <li><a href="customer/help-center.php">Shipping Info</a></li>
+          <li><a href="customer/help-center.php">Help Center</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; <span id="year"></span> Inkzion Spectrum Ads. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#contact">Privacy</a>
+        <a href="#contact">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js?v=4"></script>
+  <div id="gToast" style="position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:0.85rem 1.8rem;border-radius:12px;font-size:0.9rem;font-weight:500;z-index:9999;color:white;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.3);"></div>
+  <script>
+    function showGToast(msg, type) {
+      var t = document.getElementById('gToast');
+      t.textContent = msg;
+      t.style.background = type === 'error' ? 'rgba(239,68,68,0.9)' : 'rgba(5,150,105,0.9)';
+      t.style.display = 'block';
+      setTimeout(function(){ t.style.display = 'none'; }, 4000);
+    }
+    async function handleGoogleCredential(response) {
+      try {
+        const res = await fetch('api/google-auth.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          window.location.href = data.redirect;
+        } else {
+          console.error('Google auth error:', data);
+          showGToast(data.error || 'Sign-in failed. Please try again.', 'error');
+        }
+      } catch (e) {
+        console.error('Google auth exception:', e);
+        showGToast('Sign-in failed. Please try again.', 'error');
+      }
+    }
+  </script>
+  <script>navigator.sendBeacon('../api/track-visit.php?url=' + encodeURIComponent(location.pathname + location.search) + '&_=' + Date.now());</script>
+</body>
+</html>
