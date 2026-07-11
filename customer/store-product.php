@@ -3,6 +3,11 @@ session_start();
 require_once '../db-config.php';
 require_once dirname(__DIR__) . '/includes/seo-helper.php';
 
+if (!empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
+    header('Location: ../admin/dashboard.php');
+    exit;
+}
+
 $loggedIn = !empty($_SESSION['user_id']);
 $userName = $loggedIn ? trim($_SESSION['user_name'] ?? '') : '';
 $userInitials = '';

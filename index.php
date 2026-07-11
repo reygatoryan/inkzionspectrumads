@@ -37,7 +37,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
   $seoKeywords = 'printing, advertising, business cards, marketing materials, signage, apparel, custom merchandise, promotional items';
   outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
   ?>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -151,7 +151,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
             <a href="customer/store-product.php" class="btn ghost">Shop Now</a>
           </div>
         </div>
-       
+
       </div>
     </section>
      <section id="customized-apparel" class="section customized-apparel">
@@ -316,29 +316,22 @@ $contactContent = $siteContent['contact_info'] ?? [];
         <div class="about-grid">
           <div class="about-images">
             <div class="image-large">
-              <img src="<?php echo !empty($aboutContent['image_url']) ? htmlspecialchars($aboutContent['image_url']) : 'assets/products-demo.jpg'; ?>" alt="Inkzion Spectrum Ads printing showcase" loading="lazy" />
+              <img src="<?php echo !empty($aboutContent['image_url']) ? htmlspecialchars($aboutContent['image_url']) : 'assets/aboutpic.jpg'; ?>" alt="Inkzion Spectrum Ads printing showcase" loading="lazy" />
             </div>
             <div class="about-image-row">
-              <img src="assets/APPAREL_AND_SUBLIMATION/T%20SHIRT%20BELTECH.png" alt="Custom apparel printing" loading="lazy" />
-              <img src="assets/MARKETING_MATERIALS/FLYERS.png" alt="Marketing materials" loading="lazy" />
+              <img src="assets/aboutpic1.png" alt="Custom apparel printing" loading="lazy" />
+              <img src="assets/aboutpic2.png" alt="Marketing materials" loading="lazy" />
             </div>
           </div>
           <div class="about-copy">
             <?php if (!empty($aboutContent['content'])): ?>
             <p style="white-space:pre-line;"><?php echo htmlspecialchars($aboutContent['content']); ?></p>
             <?php else: ?>
-            <h3>Our Mission</h3>
-            <p>We are dedicated to helping individuals and businesses stand out through vibrant, durable, and professional prints. With modern equipment and a passionate team, we guarantee reliable service you can trust.</p>
-            <h3>What Sets Us Apart</h3>
-            <div class="feature-list">
-              <div class="feature-item"><span class="feature-dot"></span>Clear and vibrant prints</div>
-              <div class="feature-item"><span class="feature-dot"></span>Durable materials</div>
-              <div class="feature-item"><span class="feature-dot"></span>Quick turnaround time</div>
-              <div class="feature-item"><span class="feature-dot"></span>Friendly service</div>
-              <div class="feature-item"><span class="feature-dot"></span>Competitive pricing</div>
-              <div class="feature-item"><span class="feature-dot"></span>Free design consultation</div>
-            </div>
-            <p class="about-cta-text">From concept to completion, we bring your vision to life. Whether you need business cards, banners, custom apparel, or promotional items &#8212; we've got you covered.</p>
+            <p>Inkzion Spectrum Ads is a full-service printing and advertising company based in Liloan, Cebu. We are dedicated to helping businesses, organizations, and individuals bring their creative visions to life through exceptional print quality and personalized service. From concept to completion, every project we handle reflects our passion for craftsmanship and attention to detail.</p>
+            <p>Our comprehensive range of services covers everything from sublimation apparel such as t-shirts, polo shirts, varsity jackets, and basketball jerseys, to essential marketing materials like business cards, brochures, flyers, and certificates. We also specialize in large format printing including banners, tarpaulins, panaflex, signage, and stand banners, as well as custom merchandise such as mugs, tumblers, caps, mouse pads, lanyards, and PVC IDs. Whether you need a single item or bulk orders, we have the capability to deliver consistent, high-quality results.</p>
+            <p>We take pride in using modern printing equipment and premium materials to ensure every output features vibrant colors, sharp details, and long-lasting durability. Our team continuously invests in the latest technology and techniques to stay at the forefront of the printing industry. From DTF transfers to full sublimation, every process is handled with precision and care to meet the highest standards of quality.</p>
+            <p>What sets us apart is our commitment to the customer experience. We begin every project with a free consultation and design review, ensuring that your vision is clearly understood before any work begins. Our team provides end-to-end support, guiding you through material selection, design refinement, and production timelines. We offer fast turnaround times without compromising on quality, and we maintain transparent pricing with no hidden fees.</p>
+            <p>Whether you are a student organizing a campus event, a startup launching your brand, a school outfitting a team, or an established business scaling your marketing efforts, Inkzion Spectrum Ads is here to deliver printing solutions that make a lasting impression. We believe that great printing tells a story, and we are honored to be part of yours. Let us create something extraordinary together.</p>
             <?php endif; ?>
           </div>
         </div>

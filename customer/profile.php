@@ -715,6 +715,25 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     @media (max-width: 480px) {
       .top-header-center { display: none; }
     }
+
+    .notif-item {
+      display: flex; gap: 0.85rem; padding: 1rem;
+      border-radius: 12px; margin-bottom: 0.5rem;
+      border: 1px solid var(--border-light);
+      transition: background 0.2s; align-items: flex-start;
+    }
+    .notif-item:hover { background: #f8fafc; }
+    .notif-item.notif-unread { background: var(--primary-bg); border-color: rgba(233,30,142,0.15); }
+    .notif-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(233,30,142,0.08); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; }
+    .notif-content { flex: 1; min-width: 0; }
+    .notif-title { font-size: 0.85rem; font-weight: 600; color: #0f172a; }
+    .notif-body { font-size: 0.78rem; color: #64748b; margin-top: 0.15rem; }
+    .notif-time { font-size: 0.7rem; color: #94a3b8; margin-top: 0.3rem; }
+    .notif-mark-read { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0.35rem; border-radius: 6px; transition: all 0.2s; flex-shrink: 0; }
+    .notif-mark-read:hover { background: rgba(16,185,129,0.1); color: #10b981; }
+    .notif-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .notif-header h2 { margin: 0; font-size: 1.15rem; }
+    .notif-header h2 i { color: var(--primary); margin-right: 0.5rem; }
   </style>
 </head>
 <body>
@@ -743,11 +762,11 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         
         <!-- ========= COLLAPSIBLE MY ACCOUNT ========= -->
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Account</div>
-        <div class="sidebar-menu-item sidebar-menu-toggle" id="accountToggle" onclick="toggleAccountMenu()">
+        <div class="sidebar-menu-item sidebar-menu-toggle open" id="accountToggle" onclick="toggleAccountMenu()">
           <i class="fas fa-user-circle"></i> My Account
           <i class="fas fa-chevron-down toggle-arrow"></i>
         </div>
-        <div class="sidebar-submenu" id="accountSubmenu">
+        <div class="sidebar-submenu open" id="accountSubmenu">
           <button class="sidebar-submenu-item active" data-section="orders" onclick="switchSection('orders')">
             <i class="fas fa-box"></i> My Orders
           </button>
@@ -763,7 +782,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             <i class="fas fa-file-invoice"></i> Order Forms
           </button>
           <button class="sidebar-submenu-item" data-section="notifications" onclick="switchSection('notifications')">
-            <i class="fas fa-bell"></i> Notifications
+            <i class="fas fa-bell"></i> Notifications <span class="badge" id="notif-badge" style="display:none;">0</span>
           </button>
         </div>
       </nav>
@@ -795,6 +814,10 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             <a href="../index.php" class="header-icon-btn" title="Home">
               <i class="fas fa-home"></i>
             </a>
+            <button class="header-icon-btn" id="header-notif-bell" onclick="switchSection('notifications')" title="Notifications" style="position:relative;">
+              <i class="fas fa-bell"></i>
+              <span class="notif-dot" id="header-notif-dot" style="display:none;"></span>
+            </button>
             <div class="header-profile-dropdown-wrapper">
               <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
                 <div class="header-profile-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
@@ -973,11 +996,20 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
 
             <!-- Section: Notifications -->
             <div id="section-notifications" class="content-section">
-              <div class="form-card" style="text-align:center;padding:3rem;">
-                <div style="font-size:3rem;color:rgba(233,30,142,0.15);margin-bottom:1rem;"><i class="fas fa-bell"></i></div>
-                <h2>Notifications</h2>
+              <div class="form-card">
+                <div class="notif-header">
+                  <h2><i class="fas fa-bell"></i> Notifications</h2>
+                  <button id="mark-all-read-btn" class="btn-order-action primary" style="display:none;" onclick="markAllRead()">
+                    <i class="fas fa-check-double"></i> Mark All Read
+                  </button>
+                </div>
                 <p class="subtitle">Stay updated on your orders.</p>
-                <p style="color:#64748b;">No new notifications at this time.</p>
+                <div id="notifications-list">
+                  <div style="text-align:center;padding:2rem;color:#64748b;">
+                    <i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;margin-bottom:1rem;display:block;"></i>
+                    Loading...
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1134,19 +1166,182 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // Override switchSection to also load order forms when switching to that section
+    // Override switchSection to also load order forms / notifications
     const origSwitchSection = switchSection;
     switchSection = function(section) {
       origSwitchSection(section);
       if (section === 'orderforms') {
         loadOrderForms();
+      } else if (section === 'notifications') {
+        loadNotifications();
       }
     };
 
-    // Also auto-load order forms if that section is active on page load (shouldn't be, but just in case)
+    // ===== NOTIFICATIONS =====
+    let notifications = [];
+
+    async function loadNotifications() {
+      const container = document.getElementById('notifications-list');
+      if (!container) return;
+      try {
+        const res = await fetch('../api/notifications.php?type=all&limit=50', { credentials: 'include' });
+        if (!res.ok) {
+          container.innerHTML = '<p style="text-align:center;padding:2rem;color:#dc2626;">Server error (' + res.status + '). Please try again.</p>';
+          return;
+        }
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (parseError) {
+          container.innerHTML = '<p style="text-align:center;padding:2rem;color:#dc2626;">Invalid response from server.</p><pre style="max-height:200px;overflow:auto;font-size:0.75rem;background:#f1f5f9;padding:0.75rem;border-radius:8px;margin-top:0.5rem;">' + escapeHtml(text.substring(0, 500)) + '</pre>';
+          return;
+        }
+        if (!data.success) {
+          container.innerHTML = '<p style="text-align:center;padding:2rem;color:#64748b;">' + escapeHtml(data.error || 'Could not load notifications.') + '</p>';
+          return;
+        }
+        notifications = data.notifications || [];
+        updateNotifBadge(data.unread_count || 0);
+        renderNotifications(notifications);
+      } catch (e) {
+        container.innerHTML = '<p style="text-align:center;padding:2rem;color:#dc2626;">Failed to load notifications: ' + escapeHtml(e.message) + '</p>';
+      }
+    }
+
+    function updateNotifBadge(count) {
+      const badge = document.getElementById('notif-badge');
+      if (!badge) return;
+      if (count > 0) {
+        badge.style.display = 'inline';
+        badge.textContent = count > 99 ? '99+' : count;
+      } else {
+        badge.style.display = 'none';
+      }
+      const markAllBtn = document.getElementById('mark-all-read-btn');
+      if (markAllBtn) markAllBtn.style.display = count > 0 ? 'inline-flex' : 'none';
+      updateHeaderNotifDot(count);
+    }
+
+    function updateHeaderNotifDot(count) {
+      const dot = document.getElementById('header-notif-dot');
+      if (!dot) return;
+      dot.style.display = count > 0 ? 'block' : 'none';
+    }
+
+    async function pollUnreadCount() {
+      try {
+        const res = await fetch('../api/notifications.php?type=unread&limit=1', { credentials: 'include' });
+        const data = await res.json();
+        if (data.success) {
+          updateHeaderNotifDot(data.unread_count || 0);
+          const badge = document.getElementById('notif-badge');
+          if (badge) {
+            const c = data.unread_count || 0;
+            badge.style.display = c > 0 ? 'inline' : 'none';
+            if (c > 0) badge.textContent = c > 99 ? '99+' : c;
+          }
+        }
+      } catch(e) {}
+    }
+
+    function renderNotifications(notifs) {
+      const container = document.getElementById('notifications-list');
+      if (!container) return;
+
+      if (notifs.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:2rem;"><div style="font-size:2.5rem;color:rgba(233,30,142,0.15);margin-bottom:0.75rem;"><i class="fas fa-bell"></i></div><p style="color:#64748b;">No notifications yet.</p></div>';
+        return;
+      }
+
+      container.innerHTML = notifs.map(n => {
+        const isUnread = !n.is_read;
+        return `
+          <div class="notif-item ${isUnread ? 'notif-unread' : ''}" data-id="${n.id}">
+            <div class="notif-icon">${getNotifIcon(n.type)}</div>
+            <div class="notif-content">
+              <div class="notif-title">${escapeHtml(n.title)}</div>
+              <div class="notif-body">${escapeHtml(n.body)}</div>
+              <div class="notif-time">${getTimeAgo(n.created_at)}</div>
+            </div>
+            ${isUnread ? `<button class="notif-mark-read" onclick="markRead(${n.id})" title="Mark as read"><i class="fas fa-check"></i></button>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getNotifIcon(type) {
+      const icons = {
+        'order_placed': '<i class="fas fa-shopping-cart"></i>',
+        'new_order': '<i class="fas fa-shopping-cart"></i>',
+        'order_updated': '<i class="fas fa-sync-alt"></i>',
+        'order_shipped': '<i class="fas fa-truck"></i>',
+        'order_preparing': '<i class="fas fa-cog"></i>',
+        'payment_updated': '<i class="fas fa-credit-card"></i>',
+        'chat_message': '<i class="fas fa-comment"></i>',
+        'custom_request': '<i class="fas fa-paint-brush"></i>',
+        'customization_request': '<i class="fas fa-paint-brush"></i>',
+        'proposal_sent': '<i class="fas fa-file-invoice"></i>',
+        'proposal_filled': '<i class="fas fa-file-invoice"></i>',
+        'order_approved': '<i class="fas fa-check-circle"></i>',
+        'proposal_rejected': '<i class="fas fa-times-circle"></i>',
+        'system': '<i class="fas fa-info-circle"></i>',
+      };
+      return icons[type] || '<i class="fas fa-bell"></i>';
+    }
+
+    function getTimeAgo(dateStr) {
+      if (!dateStr) return '';
+      const now = new Date();
+      const date = new Date(dateStr);
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return diffMins + 'm ago';
+      const diffHrs = Math.floor(diffMins / 60);
+      if (diffHrs < 24) return diffHrs + 'h ago';
+      const diffDays = Math.floor(diffHrs / 24);
+      if (diffDays < 7) return diffDays + 'd ago';
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    async function markRead(id) {
+      try {
+        const res = await fetch('../api/notifications.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'mark_read', notification_id: id }),
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (data.success) loadNotifications();
+      } catch(e) {}
+    }
+
+    async function markAllRead() {
+      try {
+        const res = await fetch('../api/notifications.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'mark_all_read' }),
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (data.success) loadNotifications();
+      } catch(e) {}
+    }
+
+    // Also auto-load order forms / notifications if that section is active on page load
     if (document.getElementById('section-orderforms')?.classList.contains('active')) {
       loadOrderForms();
     }
+    if (document.getElementById('section-notifications')?.classList.contains('active')) {
+      loadNotifications();
+    }
+
+    // Poll for unread notification count every 30s
+    pollUnreadCount();
+    setInterval(pollUnreadCount, 30000);
 
     // Search
     const searchInput = document.getElementById('product-search');

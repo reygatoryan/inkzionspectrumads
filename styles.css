@@ -645,14 +645,12 @@ textarea {
 }
 
 .hero-copy {
-  max-width: 500px;
+  flex: 1;
+  max-width: 650px;
   opacity: 0;
   transform: translateY(24px);
   animation: fadeUp 0.9s ease forwards;
   animation-delay: 0s;
-  position: absolute;
-  top: 50;
-  left: 50;
 }
 
 .hero-visual {
@@ -709,15 +707,23 @@ textarea {
 }
 
 .hero h1 {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Playfair Display', serif;
   font-size: clamp(3.5rem, 10vw, 8rem);
   line-height: 1.05;
   margin: 0;
   letter-spacing: -0.02em;
-  color: white;
-  -webkit-text-stroke: 1.2px rgba(218, 3, 189, 0.986);
-  text-shadow: 0 4px 30px rgba(233, 30, 142, 0.3);
-  font-weight: 700;
+  background: linear-gradient(90deg, #ffffff, #00e5ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 0;
+  text-shadow: 
+    -1.5px -1.5px 0 #ff0f7f,
+    1.5px -1.5px 0 #ffc107,
+    -1.5px 1.5px 0 #00bcd4,
+    1.5px 1.5px 0 #8bc34a,
+    0 4px 30px rgba(0, 229, 255, 0.4);
+  font-weight: 900;
 }
 
 .gradient-text {
@@ -778,6 +784,18 @@ textarea {
 .contact-section {
   min-height: auto;
   padding: 4rem 0;
+}
+
+.contact-section .section-overline {
+  font-size: 2rem;
+}
+
+.contact-section h2 {
+  font-size: 3.5rem;
+}
+
+.contact-section .contact-info p {
+  font-size: 1.2rem;
 }
 
 .section-header {
@@ -1224,15 +1242,14 @@ textarea {
 
 .about-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 2.5rem;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 3rem;
   align-items: center;
 }
 
 .about-images {
   display: grid;
   gap: 1rem;
-  max-width: 400px;
 }
 
 .image-large,
@@ -1254,7 +1271,7 @@ textarea {
 
 .image-large {
   animation-delay: 0.35s;
-  max-height: 300px;
+  aspect-ratio: 3/2;
 }
 .about-image-row { animation-delay: 0.45s; }
 .image-cta { animation-delay: 0.55s; }
@@ -1274,6 +1291,7 @@ textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 16px;
 }
 
 .about-image-row {
@@ -1541,6 +1559,17 @@ textarea {
 .contact-social-item:hover .contact-social-arrow {
   transform: translateX(4px);
   color: var(--text);
+}
+
+.connect-us-image {
+  margin-top: 1.5rem;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.connect-us-image img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .site-footer {

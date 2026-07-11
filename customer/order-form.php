@@ -53,7 +53,7 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; line-height: 1.6; min-height: 100vh; }
-    .container { max-width: 820px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; width: 100%; }
     .page-header { margin-bottom: 2rem; }
     .page-header h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.6rem; }
     .page-header h1 i { color: #e91e8c; }
