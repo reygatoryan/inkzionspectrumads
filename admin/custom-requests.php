@@ -48,6 +48,11 @@ $adminId = $userId;
     .cr-chat-input input { flex: 1; padding: 0.55rem 0.85rem; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; outline: none; }
     .cr-chat-input input:focus { border-color: #e91e8c; }
     .cr-chat-input button { padding: 0.55rem 1rem; border-radius: 8px; border: none; background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; font-weight: 600; cursor: pointer; font-size: 0.82rem; }
+    .ai-image-wrap { flex: 0 0 48px; width: 48px; height: 48px; flex-shrink: 0; position: relative; }
+    .ai-image-btn { width: 48px; height: 48px; border-radius: 6px; border: 1.5px dashed #d1d5db; background: white; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: border-color 0.2s, color 0.2s, background 0.2s; }
+    .ai-image-btn:hover { border-color: #e91e8c; color: #e91e8c; background: rgba(233,30,142,0.04); }
+    .ai-image-preview { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; cursor: pointer; border: 1px solid #e2e8f0; transition: border-color 0.2s; display: block; }
+    .ai-image-preview:hover { border-color: #e91e8c; box-shadow: 0 0 0 3px rgba(233,30,142,0.1); }
     @media (max-width: 768px) { .cr-detail-grid { grid-template-columns: 1fr; } .cr-form-row { grid-template-columns: 1fr; } }
 </style>
 
@@ -106,28 +111,8 @@ $adminId = $userId;
     <h3 style="margin: 1.5rem 0 0.75rem; font-size: 1rem; color: #0f172a;">Customization Details</h3>
     <div class="cr-form-row">
       <div class="cr-form-group">
-        <label>Size</label>
-        <input type="text" id="editSize" placeholder="e.g., A4, Letter, 12x18">
-      </div>
-      <div class="cr-form-group">
         <label>Material</label>
-        <input type="text" id="editMaterial" placeholder="e.g., Glossy Paper, Vinyl">
-      </div>
-    </div>
-    <div class="cr-form-row">
-      <div class="cr-form-group">
-        <label>Color</label>
-        <input type="text" id="editColor" placeholder="e.g., Full Color, Black & White">
-      </div>
-      <div class="cr-form-group">
-        <label>Finish</label>
-        <input type="text" id="editFinish" placeholder="e.g., Matte, Glossy, Laminated">
-      </div>
-    </div>
-    <div class="cr-form-row">
-      <div class="cr-form-group">
-        <label>Quantity</label>
-        <input type="number" id="editQty" min="1" value="1">
+        <input type="text" id="editMaterial" placeholder="e.g., Cotton, Polyester, Gildan 5000">
       </div>
       <div class="cr-form-group">
         <label>Preferred Deadline</label>
@@ -135,36 +120,28 @@ $adminId = $userId;
       </div>
     </div>
     <div class="cr-form-group">
+      <label>Order Items <span style="font-weight:400;color:#94a3b8;">(size, qty &amp; reference image)</span></label>
+      <div id="admin-items-container">
+        <div class="admin-item-row">
+          <input type="text" class="ai-size" placeholder="Size (e.g., Small, XL, 2XL)" style="flex:2;">
+          <input type="number" class="ai-qty" placeholder="Qty" min="1" value="1" style="flex:1;">
+          <div class="ai-image-wrap">
+            <input type="file" class="ai-image-input" accept="image/*" style="display:none;">
+            <div class="ai-image-btn" onclick="this.previousElementSibling.click()" title="Upload reference image">
+              <i class="fas fa-camera"></i>
+            </div>
+            <img class="ai-image-preview" style="display:none;" onclick="openItemPreview(this)">
+          </div>
+          <button type="button" class="ai-remove" onclick="adminRemoveItem(this)" style="display:none;" title="Remove">&times;</button>
+        </div>
+      </div>
+      <button type="button" onclick="adminAddItem()" style="margin-top:0.5rem;padding:0.4rem 0.8rem;border:1.5px dashed #d1d5db;border-radius:8px;background:none;color:#e91e8c;font-weight:600;font-size:0.82rem;cursor:pointer;width:100%;"><i class="fas fa-plus"></i> Add Item</button>
+    </div>
+    <div class="cr-form-group">
       <label>Special Requests</label>
       <textarea id="editSpecialReq" placeholder="Any special instructions..."></textarea>
     </div>
     <button class="btn btn-primary" onclick="saveCustomization()" style="margin-bottom:1.5rem;"><i class="fas fa-save"></i> Save Customization</button>
-
-    <!-- Order Proposal -->
-    <h3 style="margin: 1.5rem 0 0.75rem; font-size: 1rem; color: #0f172a;">Order Proposal</h3>
-    <div id="proposalStatus"></div>
-    <div id="proposalCustomerDetails" style="display:none;"></div>
-    <div id="proposalActions" style="display:none;"></div>
-
-    <!-- Admin Actions -->
-    <h3 style="margin: 1rem 0 0.75rem; font-size: 1rem; color: #0f172a;">Admin Actions</h3>
-    <div class="cr-form-row">
-      <div class="cr-form-group">
-        <label>Update Status</label>
-        <select id="editStatus">
-          <option value="pending">Pending</option>
-          <option value="in_review">In Review</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-          <option value="completed">Completed</option>
-        </select>
-      </div>
-      <div class="cr-form-group">
-        <label>Admin Notes</label>
-        <textarea id="editNotes" placeholder="Notes visible to customer..."></textarea>
-      </div>
-    </div>
-    <button class="btn btn-primary" onclick="updateStatus()" style="margin-bottom:1.5rem;"><i class="fas fa-save"></i> Save Status</button>
 
     <h3 style="margin: 0 0 0.75rem; font-size: 1rem; color: #0f172a;">Set Ready for Purchase</h3>
     <div class="cr-form-row">
@@ -192,6 +169,51 @@ $adminId = $userId;
     <h3 style="margin: 1.5rem 0 0.75rem; font-size: 1rem; color: #0f172a;">Send Order Form</h3>
     <p style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;">Create a formal order proposal for the customer to fill in their details.</p>
     <button class="btn btn-primary" onclick="openSendOrderForm()" style="background:linear-gradient(135deg,#3b82f6,#2563eb);"><i class="fas fa-file-invoice"></i> Send Order Form</button>
+
+    <!-- Order Proposal -->
+    <h3 style="margin: 1.5rem 0 0.75rem; font-size: 1rem; color: #0f172a;">Order Proposal</h3>
+    <div id="proposalStatus" style="display:none;margin-bottom:1rem;">
+      <div class="cr-detail-field"><label>Proposal Status</label><span id="proposalStatusText"></span></div>
+    </div>
+    <div id="proposalCustomerDetails" style="display:none;margin-bottom:1rem;">
+      <h4 style="margin: 1rem 0 0.5rem; font-size: 0.9rem; color: #334155;">Customer Details</h4>
+      <div class="cr-detail-grid">
+        <div class="cr-detail-field"><label>Full Name</label><span id="propName"></span></div>
+        <div class="cr-detail-field"><label>Email</label><span id="propEmail"></span></div>
+        <div class="cr-detail-field"><label>Phone</label><span id="propPhone"></span></div>
+        <div class="cr-detail-field"><label>Delivery Address</label><span id="propAddress"></span></div>
+        <div class="cr-detail-field"><label>City</label><span id="propCity"></span></div>
+        <div class="cr-detail-field"><label>Province</label><span id="propProvince"></span></div>
+        <div class="cr-detail-field"><label>ZIP</label><span id="propZip"></span></div>
+        <div class="cr-detail-field"><label>Payment Method</label><span id="propPayment"></span></div>
+        <div class="cr-detail-field"><label>Landmark</label><span id="propLandmark"></span></div>
+        <div class="cr-detail-field" style="grid-column:1/-1;"><label>Additional Notes</label><span id="propNotes"></span></div>
+      </div>
+    </div>
+    <div id="proposalActions" style="display:none;margin-top:0.75rem;margin-bottom:1.5rem;gap:0.75rem;"></div>
+
+    <!-- Admin Actions -->
+    <h3 style="margin: 1.5rem 0 0.75rem; font-size: 1rem; color: #0f172a;">Admin Actions</h3>
+    <div class="cr-form-row" style="margin-bottom:1rem;">
+      <div class="cr-form-group">
+        <label>Update Status</label>
+        <select id="editStatus">
+          <option value="pending">Pending</option>
+          <option value="in_review">In Review</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div class="cr-form-group">
+        <label>Admin Notes</label>
+        <textarea id="editNotes" placeholder="Notes visible to customer..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;">
+      <button class="btn btn-primary" onclick="updateStatus()"><i class="fas fa-save"></i> Save Status</button>
+      <button class="btn btn-danger" onclick="deleteRequest()" style="display:inline-flex;align-items:center;gap:0.4rem;"><i class="fas fa-trash-alt"></i> Delete Request</button>
+    </div>
   </div>
 </div>
 
@@ -304,40 +326,47 @@ async function openDetail(id) {
 
   // Fetch request details
   try {
-    const res = await fetch(`../api/custom-printing.php?action=all`, { credentials: 'include' });
+    const res = await fetch(`../api/custom-printing.php?action=get&id=${id}`, { credentials: 'include' });
     const data = await res.json();
-    const reqs = data.requests || [];
-    const req = reqs.find(r => r.id == id);
-    if (!req) { alert('Request not found'); return; }
+    if (!data.success || !data.request) { alert('Request not found'); return; }
+    const req = data.request;
+
+    const itemsHtml = function(){
+      try {
+        const parsed = typeof req.items === 'string' ? JSON.parse(req.items) : req.items;
+        if (Array.isArray(parsed) && parsed.length) {
+          let h = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><tr style="background:#f1f5f9;"><th style="padding:0.35rem 0.5rem;text-align:left;">Size</th><th style="padding:0.35rem 0.5rem;text-align:left;">Qty</th><th style="padding:0.35rem 0.5rem;text-align:left;">Reference</th></tr>';
+          parsed.forEach(function(it){
+            const hasImg = it.image && it.image.length > 100;
+            h += '<tr><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + escapeHtml(it.size||'') + '</td><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + (it.qty||1) + '</td><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + (hasImg ? '<img src="' + escapeHtml(it.image) + '" onclick="openItemPreview(this)" style="width:40px;height:40px;border-radius:4px;object-fit:cover;cursor:pointer;border:1px solid #e2e8f0;">' : '--') + '</td></tr>';
+          });
+          h += '</table>';
+          return h;
+        }
+      } catch(e) {}
+      return '<span>--</span>';
+    }();
 
     document.getElementById('detailFields').innerHTML = `
       <div class="cr-detail-field"><label>Customer</label><span>${escapeHtml(req.user_name)} (${escapeHtml(req.user_email)})</span></div>
       <div class="cr-detail-field"><label>Service Type</label><span>${escapeHtml(req.service_type)}</span></div>
-      <div class="cr-detail-field"><label>Size</label><span>${req.size || '--'}</span></div>
       <div class="cr-detail-field"><label>Material</label><span>${req.material || '--'}</span></div>
-      <div class="cr-detail-field"><label>Color</label><span>${req.color || '--'}</span></div>
-      <div class="cr-detail-field"><label>Finish</label><span>${req.finish || '--'}</span></div>
-      <div class="cr-detail-field"><label>Quantity</label><span>${req.quantity}</span></div>
       <div class="cr-detail-field"><label>Deadline</label><span>${req.preferred_deadline || '--'}</span></div>
+      <div class="cr-detail-field" style="grid-column:1/-1;"><label>Order Items</label><span>${itemsHtml}</span></div>
       <div class="cr-detail-field" style="grid-column:1/-1;"><label>Special Requests</label><span>${escapeHtml(req.special_requests || 'None')}</span></div>
       <div class="cr-detail-field" style="grid-column:1/-1;"><label>Admin Notes</label><span>${escapeHtml(req.admin_notes || 'None')}</span></div>
     `;
 
-    document.getElementById('editStatus').value = req.status;
-    document.getElementById('editNotes').value = req.admin_notes || '';
     document.getElementById('rfpName').value = req.ready_for_purchase_name || '';
     document.getElementById('rfpPrice').value = req.ready_for_purchase_price || '';
     document.getElementById('rfpQty').value = req.ready_for_purchase_qty || 1;
     document.getElementById('rfpImage').value = req.ready_for_purchase_image || '';
 
     // Customization details
-    document.getElementById('editSize').value = req.size || '';
     document.getElementById('editMaterial').value = req.material || '';
-    document.getElementById('editColor').value = req.color || '';
-    document.getElementById('editFinish').value = req.finish || '';
-    document.getElementById('editQty').value = req.quantity || 1;
     document.getElementById('editDeadline').value = req.preferred_deadline || '';
     document.getElementById('editSpecialReq').value = req.special_requests || '';
+    adminRenderItems(req.items);
 
     // Files
     const filesDiv = document.getElementById('detailFiles');
@@ -367,71 +396,51 @@ async function openDetail(id) {
       chatBox.style.display = 'none';
     }
 
-    // Order proposal
+    // Load proposal
     const propStatus = document.getElementById('proposalStatus');
-    const custDetails = document.getElementById('proposalCustomerDetails');
+    const propDetails = document.getElementById('proposalCustomerDetails');
     const propActions = document.getElementById('proposalActions');
-    propStatus.innerHTML = '';
-    custDetails.style.display = 'none';
+    propStatus.style.display = 'none';
+    propDetails.style.display = 'none';
     propActions.style.display = 'none';
+    propActions.innerHTML = '';
     try {
       const pRes = await fetch(`../api/order-proposals.php?action=list&request_id=${id}`, { credentials: 'include' });
       const pData = await pRes.json();
       const proposals = pData.proposals || [];
-      const proposal = proposals.length > 0 ? proposals[0] : null;
+      if (proposals.length) {
+        const prop = proposals[proposals.length - 1];
+        const statusEl = document.getElementById('proposalStatusText');
+        const labels = { sent: 'Sent (Pending Customer)', filled: 'Filled (Awaiting Approval)', converted: 'Approved & Converted', rejected: 'Rejected' };
+        statusEl.textContent = labels[prop.status] || prop.status;
+        propStatus.style.display = 'block';
 
-      if (proposal) {
-        const labels = { sent: 'Sent to Customer', filled: 'Filled by Customer', converted: 'Approved', rejected: 'Rejected' };
-        const colors = { sent: '#f59e0b', filled: '#3b82f6', converted: '#10b981', rejected: '#ef4444' };
-        const c = colors[proposal.status] || '#94a3b8';
-        let html = `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
-          <span style="font-weight:600;font-size:0.85rem;color:#334155;">Status:</span>
-          <span style="display:inline-flex;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.72rem;font-weight:700;background:${c}20;color:${c};">${labels[proposal.status] || proposal.status}</span>
-        </div>`;
-
-        if (proposal.status === 'filled') {
-          html += '<p style="font-size:0.85rem;color:#334155;margin-bottom:0.75rem;">Customer has submitted their order details. Review and approve to create the order.</p>';
-          custDetails.style.display = 'block';
-          custDetails.innerHTML = `
-            <div style="background:#f8fafc;border-radius:12px;padding:1rem;margin-bottom:1rem;">
-              <h4 style="margin:0 0 0.75rem;font-size:0.85rem;color:#0f172a;">Customer Details</h4>
-              <div class="cr-form-row">
-                <div class="cr-form-group"><label>Full Name</label><input type="text" value="${escapeHtml(proposal.full_name||'')}" readonly style="background:#f1f5f9;"></div>
-                <div class="cr-form-group"><label>Email</label><input type="text" value="${escapeHtml(proposal.email||'')}" readonly style="background:#f1f5f9;"></div>
-              </div>
-              <div class="cr-form-row">
-                <div class="cr-form-group"><label>Phone</label><input type="text" value="${escapeHtml(proposal.phone||'')}" readonly style="background:#f1f5f9;"></div>
-                <div class="cr-form-group"><label>Payment Method</label><input type="text" value="${escapeHtml(proposal.payment_method||'')}" readonly style="background:#f1f5f9;"></div>
-              </div>
-              <div class="cr-form-group"><label>Delivery Address</label><textarea readonly rows="2" style="background:#f1f5f9;">${escapeHtml(proposal.delivery_address||'')}</textarea></div>
-              <div class="cr-form-row">
-                <div class="cr-form-group"><label>City</label><input type="text" value="${escapeHtml(proposal.city||'')}" readonly style="background:#f1f5f9;"></div>
-                <div class="cr-form-group"><label>Province</label><input type="text" value="${escapeHtml(proposal.province||'')}" readonly style="background:#f1f5f9;"></div>
-                <div class="cr-form-group"><label>ZIP</label><input type="text" value="${escapeHtml(proposal.zip||'')}" readonly style="background:#f1f5f9;"></div>
-                <div class="cr-form-group"><label>Landmark</label><input type="text" value="${escapeHtml(proposal.landmark||'')}" readonly style="background:#f1f5f9;"></div>
-              </div>${proposal.additional_notes ? `<div class="cr-form-group"><label>Additional Notes</label><textarea readonly rows="2" style="background:#f1f5f9;">${escapeHtml(proposal.additional_notes)}</textarea></div>` : ''}
-            </div>`;
-          propActions.style.display = 'block';
-          propActions.innerHTML = `
-            <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;">
-              <button class="btn btn-primary" onclick="approveProposalFromCR(${proposal.id})" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-check"></i> Approve</button>
-              <button class="btn btn-danger" onclick="rejectProposalFromCR(${proposal.id})"><i class="fas fa-times"></i> Reject</button>
-            </div>`;
-        } else if (proposal.status === 'sent') {
-          html += '<p style="font-size:0.85rem;color:#64748b;margin-bottom:1.5rem;"><i class="fas fa-hourglass-half"></i> Waiting for customer to fill the order form...</p>';
-        } else if (proposal.status === 'converted') {
-          const ref = proposal.order_reference || ('#' + proposal.order_id);
-          html += `<p style="font-size:0.85rem;color:#10b981;margin-bottom:1.5rem;"><i class="fas fa-check-circle"></i> Order created: <strong>${escapeHtml(ref)}</strong></p>`;
-        } else if (proposal.status === 'rejected') {
-          html += '<p style="font-size:0.85rem;color:#ef4444;margin-bottom:1.5rem;"><i class="fas fa-times-circle"></i> Order form rejected. Customer can resubmit.</p>';
+        if (prop.status === 'filled' || prop.status === 'converted') {
+          document.getElementById('propName').textContent = prop.full_name || '--';
+          document.getElementById('propEmail').textContent = prop.email || '--';
+          document.getElementById('propPhone').textContent = prop.phone || '--';
+          document.getElementById('propAddress').textContent = prop.delivery_address || '--';
+          document.getElementById('propCity').textContent = prop.city || '--';
+          document.getElementById('propProvince').textContent = prop.province || '--';
+          document.getElementById('propZip').textContent = prop.zip || '--';
+          document.getElementById('propPayment').textContent = prop.payment_method || '--';
+          document.getElementById('propLandmark').textContent = prop.landmark || '--';
+          document.getElementById('propNotes').textContent = prop.additional_notes || '--';
+          propDetails.style.display = 'block';
         }
-        propStatus.innerHTML = html;
-      } else {
-        propStatus.innerHTML = '<p style="font-size:0.85rem;color:#94a3b8;margin-bottom:1.5rem;">No order proposal sent yet.</p>';
+
+        if (prop.status === 'filled') {
+          const pid = prop.id;
+          propActions.style.display = 'flex';
+          propActions.innerHTML =
+            `<button class="btn btn-success" onclick="approveProposalFromCR(${pid})"><i class="fas fa-check"></i> Approve & Create Order</button>` +
+            `<button class="btn btn-danger" onclick="rejectProposalFromCR(${pid})"><i class="fas fa-times"></i> Reject</button>`;
+        }
       }
-    } catch(e) {
-      propStatus.innerHTML = '<p style="font-size:0.85rem;color:#94a3b8;">Could not load proposal.</p>';
-    }
+    } catch(e) { /* proposal fetch failed silently */ }
+
+    document.getElementById('editStatus').value = req.status;
+    document.getElementById('editNotes').value = req.admin_notes || '';
   } catch (err) {
     alert('Failed to load details');
   }
@@ -446,14 +455,19 @@ function closeDetail() {
 
 async function saveCustomization() {
   if (!currentRequestId) return;
+  const items = [];
+  document.querySelectorAll('#admin-items-container .admin-item-row').forEach(function(row) {
+    const size = row.querySelector('.ai-size').value.trim();
+    const qty = parseInt(row.querySelector('.ai-qty').value) || 1;
+    const preview = row.querySelector('.ai-image-preview');
+    const image = (preview && preview.style.display !== 'none' && preview.src) ? preview.src : '';
+    if (size) items.push({size: size, qty: qty, image: image});
+  });
   const data = {
     action: 'admin_update_details',
     request_id: currentRequestId,
-    size: document.getElementById('editSize').value.trim(),
     material: document.getElementById('editMaterial').value.trim(),
-    color: document.getElementById('editColor').value.trim(),
-    finish: document.getElementById('editFinish').value.trim(),
-    quantity: parseInt(document.getElementById('editQty').value) || 1,
+    items: items,
     special_requests: document.getElementById('editSpecialReq').value.trim(),
     preferred_deadline: document.getElementById('editDeadline').value || ''
   };
@@ -777,6 +791,104 @@ async function setReadyForPurchase() {
   } catch(e) { alert('Error'); }
 }
 
+function openItemPreview(img) {
+  const overlay = document.getElementById('imgPreviewOverlay');
+  const fullImg = document.getElementById('imgPreviewFull');
+  if (overlay && fullImg) { fullImg.src = img.src; overlay.style.display = 'flex'; }
+}
+
+function closeImgPreview() {
+  const overlay = document.getElementById('imgPreviewOverlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+async function deleteRequest() {
+  if (!currentRequestId) return;
+  if (!confirm('Are you sure you want to delete this request? This action cannot be undone.')) return;
+  try {
+    const res = await fetch('../api/custom-printing.php', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ action: 'delete', request_id: currentRequestId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeDetail();
+      loadRequests(document.querySelector('.tab.active')?.dataset?.status || 'all');
+      showToast('Request deleted successfully', 'success');
+    } else { alert(data.error || 'Failed to delete'); }
+  } catch(e) { alert('Error deleting request'); }
+}
+
+function adminRenderItems(items) {
+  const container = document.getElementById('admin-items-container');
+  container.innerHTML = '';
+  let parsed = [];
+  try { parsed = typeof items === 'string' ? JSON.parse(items) : (items || []); } catch(e) {}
+  if (!Array.isArray(parsed) || !parsed.length) parsed = [{size: '', qty: 1, image: ''}];
+  parsed.forEach(function(it, i) {
+    const row = document.createElement('div');
+    row.className = 'admin-item-row';
+    const hasImg = it.image && it.image.length > 100;
+    row.innerHTML =
+      '<input type="text" class="ai-size" placeholder="Size (e.g., Small, XL, 2XL)" style="flex:2;" value="' + escapeHtml(it.size||'') + '">' +
+      '<input type="number" class="ai-qty" placeholder="Qty" min="1" value="' + (it.qty||1) + '" style="flex:1;">' +
+      '<div class="ai-image-wrap">' +
+        '<input type="file" class="ai-image-input" accept="image/*" style="display:none;">' +
+        '<div class="ai-image-btn" onclick="this.previousElementSibling.click()" title="Upload reference image"' + (hasImg ? ' style="display:none;"' : '') + '><i class="fas fa-camera"></i></div>' +
+        '<img class="ai-image-preview"' + (hasImg ? ' src="' + escapeHtml(it.image) + '" onclick="openItemPreview(this)" style="display:block;"' : ' style="display:none;"') + '>' +
+      '</div>' +
+      '<button type="button" class="ai-remove" onclick="adminRemoveItem(this)" title="Remove"' + (parsed.length < 2 ? ' style="display:none;"' : '') + '>&times;</button>';
+    container.appendChild(row);
+    if (!hasImg) attachAdminImageHandler(row.querySelector('.ai-image-input'));
+  });
+}
+
+function adminAddItem() {
+  const container = document.getElementById('admin-items-container');
+  const first = container.querySelector('.admin-item-row');
+  const clone = first.cloneNode(true);
+  clone.querySelector('.ai-size').value = '';
+  clone.querySelector('.ai-qty').value = '1';
+  clone.querySelector('.ai-image-input').value = '';
+  const btn = clone.querySelector('.ai-image-btn');
+  if (btn) btn.style.display = 'flex';
+  const preview = clone.querySelector('.ai-image-preview');
+  if (preview) { preview.style.display = 'none'; preview.removeAttribute('src'); }
+  const removeBtn = clone.querySelector('.ai-remove');
+  removeBtn.style.display = 'inline-flex';
+  container.appendChild(clone);
+  attachAdminImageHandler(clone.querySelector('.ai-image-input'));
+}
+
+function adminRemoveItem(btn) {
+  const container = document.getElementById('admin-items-container');
+  if (container.querySelectorAll('.admin-item-row').length > 1) {
+    btn.closest('.admin-item-row').remove();
+  }
+}
+
+function attachAdminImageHandler(input) {
+  if (!input) return;
+  input.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) { alert('Image must be less than 20MB'); return; }
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const row = input.closest('.admin-item-row');
+      row.querySelector('.ai-image-btn').style.display = 'none';
+      const preview = row.querySelector('.ai-image-preview');
+      preview.src = ev.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeImgPreview();
+});
+
 function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -806,4 +918,12 @@ function showToast(message, type) {
 // Init
 loadRequests();
 </script>
+
+<!-- Image Preview Modal -->
+<div class="modal-overlay" id="imgPreviewOverlay" onclick="if(event.target===this)closeImgPreview()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(4px);z-index:10000;align-items:center;justify-content:center;">
+  <div style="position:relative;max-width:90vw;max-height:90vh;">
+    <button onclick="closeImgPreview()" style="position:absolute;top:-2.5rem;right:0;background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;z-index:10;"><i class="fas fa-times"></i></button>
+    <img id="imgPreviewFull" style="max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 24px 80px rgba(0,0,0,0.5);display:block;">
+  </div>
+</div>
 <?php require_once __DIR__ . '/includes/admin-footer.php'; ?>

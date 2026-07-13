@@ -95,6 +95,8 @@ let emptyPollsAdmin = 0;
 let pollIntervalAdmin = 2000;
 let isTabVisibleAdmin = true;
 let adminSending = false;
+let adminLoadedMsgIds = new Set();
+let isLoadingAdminConv = false;
 
 function escapeHtml(t) { if(!t)return''; var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
 
@@ -192,10 +194,13 @@ function adminAppendMessages(msgs) {
   var dateEls=div.querySelectorAll('[data-date-label]');
   if(dateEls.length>0)lastDt=dateEls[dateEls.length-1].getAttribute('data-date-label');
   msgs.forEach(function(m){
+    if(adminLoadedMsgIds.has(m.id))return;
     var dt=getDateLabel(m.created_at);
     if(dt!==lastDt){html+='<div style="text-align:center;padding:0.35rem 0;font-size:0.7rem;color:#94a3b8;font-weight:500;" data-date-label="'+dt+'">'+dt+'</div>';lastDt=dt;}
     html+=adminRenderMsg(m);
+    adminLoadedMsgIds.add(m.id);
   });
+  if(!html)return;
   div.insertAdjacentHTML('beforeend',html);
   lastMsgLen+=msgs.length;
   if(autoScrollAdmin)div.scrollTop=div.scrollHeight;
@@ -208,10 +213,16 @@ function adminAppendMessages(msgs) {
 }
 
 async function adminSelectConversation(convId) {
-  currentConvId=convId; msgOffset=0; hasMoreMsgs=false; isLoadingMore=false; lastMsgLen=0; autoScrollAdmin=true; lastMsgId=0;
-  document.querySelectorAll('.conv-item').forEach(function(el){el.classList.toggle('active',parseInt(el.dataset.id)===convId);});
-  await adminLoadChat(convId);
-  adminStartPolling();
+  if(isLoadingAdminConv)return;
+  isLoadingAdminConv=true;
+  if(pollTimer){clearTimeout(pollTimer);pollTimer=null;}
+  try{
+    currentConvId=convId; msgOffset=0; hasMoreMsgs=false; isLoadingMore=false; lastMsgLen=0; autoScrollAdmin=true; lastMsgId=0; adminLoadedMsgIds=new Set();
+    document.querySelectorAll('.conv-item').forEach(function(el){el.classList.toggle('active',parseInt(el.dataset.id)===convId);});
+    await adminLoadChat(convId);
+    adminStartPolling();
+  }catch(e){console.error('Failed to load conversation:',e);}
+  finally{isLoadingAdminConv=false;}
 }
 
 function parseMsgContent(str) { try{return JSON.parse(str);}catch(e){return null;} }
@@ -262,6 +273,7 @@ async function adminLoadChat(convId, silent) {
     var d=await r.json();if(!d.success)throw new Error(d.error);
     var msgs=d.messages||[]; hasMoreMsgs=d.has_more||false;
     lastMsgLen=msgs.length;
+    adminLoadedMsgIds=new Set(msgs.map(function(m){return m.id;}));
     if(msgs.length>0)lastMsgId=msgs[msgs.length-1].id;
     
     var prodBar='';
@@ -279,7 +291,7 @@ async function adminLoadChat(convId, silent) {
     
     var msgsHtml='';
     if(msgs.length){msgsHtml='';var lastDt=null;msgs.forEach(function(m){var dt=getDateLabel(m.created_at);if(dt!==lastDt){msgsHtml+='<div style="text-align:center;padding:0.35rem 0;font-size:0.7rem;color:#94a3b8;font-weight:500;">'+dt+'</div>';lastDt=dt;}msgsHtml+=adminRenderMsg(m);});if(hasMoreMsgs){msgsHtml='<div style="text-align:center;padding:0.4rem;"><button onclick="adminLoadMoreMsgs()" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.8rem;color:#e91e8c;font-size:0.72rem;font-weight:500;cursor:pointer;"><i class="fas fa-chevron-up"></i> Load older</button></div>'+msgsHtml;}}
-    else{msgsHtml='<p style="text-align:center;color:#94a3b8;padding:1.5rem;">No messages yet.</p>';}
+    else{msgsHtml='<p style="text-align:center;color:#94a3b8;padding:1.5rem;">No messages yet.</p>';adminLoadedMsgIds=new Set();}
     
     main.innerHTML=prodBar+'<div class="chat-header" id="chatHdr"><h4><i class="fas fa-user" style="color:#e91e8c;margin-right:0.35rem;"></i>'+escapeHtml(customerName)+'</h4><div class="chat-header-actions">'+hdrActions+'</div></div>'+
       '<div class="typing-indicator" id="admin-typing-indicator" style="display:none;padding:0.3rem 1.25rem;font-size:0.78rem;color:#94a3b8;font-style:italic;"></div>'+
@@ -382,7 +394,13 @@ document.addEventListener('keydown',function(e){
 // Tab visibility for admin
 document.addEventListener('visibilitychange',function(){
   isTabVisibleAdmin=!document.hidden;
-  if(!document.hidden){emptyPollsAdmin=0;pollIntervalAdmin=2000;if(currentConvId)adminLoadChat(currentConvId,true);}
+  if(!document.hidden){
+    emptyPollsAdmin=0;pollIntervalAdmin=2000;
+    if(currentConvId){
+      if(pollTimer){clearTimeout(pollTimer);pollTimer=null;}
+      adminLoadChat(currentConvId,true).then(function(){adminStartPolling();}).catch(function(){});
+    }
+  }
 });
 
 // Notification permission

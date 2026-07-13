@@ -215,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'submit_details') {
         $proposalId = isset($data['proposal_id']) ? (int)$data['proposal_id'] : 0;
 
-        $stmt = $conn->prepare("SELECT id, user_id, status FROM order_proposals WHERE id = ? AND user_id = ?");
+        $stmt = $conn->prepare("SELECT id, user_id, request_id, status FROM order_proposals WHERE id = ? AND user_id = ?");
         $stmt->bind_param('ii', $proposalId, $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -283,6 +283,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $notifStmt->bind_param('ii', $adminRow['admin_id'], $proposalId);
             $notifStmt->execute();
             $notifStmt->close();
+
+            // Auto-approve the custom request
+            if (!empty($proposal['request_id'])) {
+                $crStmt = $conn->prepare("UPDATE custom_printing_requests SET status = 'approved', updated_at = NOW() WHERE id = ?");
+                $crStmt->bind_param('i', $proposal['request_id']);
+                $crStmt->execute();
+                $crStmt->close();
+            }
 
             echo json_encode(['success' => true, 'message' => 'Your details have been submitted! The admin will review your order.']);
         } else {

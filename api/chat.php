@@ -323,6 +323,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $conn->query("UPDATE chat_conversations SET request_id = $newReqId WHERE id = $conversationId");
             }
 
+            // Auto-response
+            $arStmt = $conn->prepare("SELECT settings FROM shipping_settings WHERE section_key = 'shipping' LIMIT 1");
+            $arStmt->execute();
+            $arRow = $arStmt->get_result()->fetch_assoc();
+            $arStmt->close();
+            if ($arRow) {
+                $shipSet = json_decode($arRow['settings'], true);
+                if (!empty($shipSet['chat']['auto_response']['enabled']) && !empty($shipSet['chat']['auto_response']['message'])) {
+                    $welcomeMsg = $shipSet['chat']['auto_response']['message'];
+                    $ams = $conn->prepare("INSERT INTO chat_messages (conversation_id, sender_id, message_type, content) VALUES (?, ?, 'text', ?)");
+                    $ams->bind_param('iis', $conversationId, $sellerId, $welcomeMsg);
+                    $ams->execute();
+                    $ams->close();
+                }
+            }
+
             echo json_encode(['success' => true, 'conversation_id' => $conversationId]);
         } else {
             http_response_code(500);

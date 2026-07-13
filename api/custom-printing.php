@@ -133,17 +133,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         $requestId = (int)$data['request_id'];
-        $size = trim($data['size'] ?? '');
         $material = trim($data['material'] ?? '');
-        $color = trim($data['color'] ?? '');
-        $finish = trim($data['finish'] ?? '');
-        $quantity = max(1, (int)($data['quantity'] ?? 1));
+        $items = isset($data['items']) ? json_encode($data['items']) : '[]';
         $specialRequests = trim($data['special_requests'] ?? '');
         $preferredDeadline = trim($data['preferred_deadline'] ?? '');
 
-        $stmt = $conn->prepare("UPDATE custom_printing_requests SET size = ?, material = ?, color = ?, finish = ?, quantity = ?, special_requests = ?, preferred_deadline = ?, status = 'in_review' WHERE id = ?");
-        $stmt->bind_param('ssssissi', $size, $material, $color, $finish, $quantity, $specialRequests, $preferredDeadline, $requestId);
-        $stmt->execute();
+        $stmt = $conn->prepare("UPDATE custom_printing_requests SET material = ?, items = ?, special_requests = ?, preferred_deadline = ?, status = 'in_review' WHERE id = ?");
+        $stmt->bind_param('ssssi', $material, $items, $specialRequests, $preferredDeadline, $requestId);
+        if (!$stmt->execute()) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Database error: ' . $stmt->error]);
+            $stmt->close();
+            $conn->close();
+            exit;
+        }
         $stmt->close();
 
         echo json_encode(['success' => true, 'message' => 'Customization details saved']);
@@ -163,16 +166,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         $check->close();
-        $size = isset($data['size']) ? trim($data['size']) : '';
         $material = isset($data['material']) ? trim($data['material']) : '';
-        $color = isset($data['color']) ? trim($data['color']) : '';
-        $finish = isset($data['finish']) ? trim($data['finish']) : '';
-        $quantity = isset($data['quantity']) ? (int)$data['quantity'] : 1;
+        $items = isset($data['items']) ? json_encode($data['items']) : '[]';
         $specialRequests = isset($data['special_requests']) ? trim($data['special_requests']) : '';
         $preferredDeadline = isset($data['preferred_deadline']) ? trim($data['preferred_deadline']) : null;
-        $stmt = $conn->prepare("UPDATE custom_printing_requests SET size = ?, material = ?, color = ?, finish = ?, quantity = ?, special_requests = ?, preferred_deadline = ?, status = 'in_review' WHERE id = ?");
-        $stmt->bind_param('ssssisssi', $size, $material, $color, $finish, $quantity, $specialRequests, $preferredDeadline, $requestId);
-        $stmt->execute();
+        $stmt = $conn->prepare("UPDATE custom_printing_requests SET material = ?, items = ?, special_requests = ?, preferred_deadline = ?, status = 'in_review' WHERE id = ?");
+        $stmt->bind_param('ssssi', $material, $items, $specialRequests, $preferredDeadline, $requestId);
+        if (!$stmt->execute()) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Database error: ' . $stmt->error]);
+            $stmt->close();
+            $conn->close();
+            exit;
+        }
         $stmt->close();
         echo json_encode(['success' => true, 'message' => 'Request details submitted']);
         $conn->close();
@@ -181,11 +187,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // === SUBMIT new custom printing request ===
     $serviceType = isset($data['service_type']) ? trim($data['service_type']) : '';
-    $size = isset($data['size']) ? trim($data['size']) : '';
     $material = isset($data['material']) ? trim($data['material']) : '';
-    $color = isset($data['color']) ? trim($data['color']) : '';
-    $finish = isset($data['finish']) ? trim($data['finish']) : '';
-    $quantity = isset($data['quantity']) ? (int)$data['quantity'] : 1;
+    $items = isset($data['items']) ? json_encode($data['items']) : '[]';
     $specialRequests = isset($data['special_requests']) ? trim($data['special_requests']) : '';
     $needDesignAssistance = isset($data['need_design_assistance']) ? (int)$data['need_design_assistance'] : 0;
     $preferredDeadline = isset($data['preferred_deadline']) ? trim($data['preferred_deadline']) : null;
@@ -204,14 +207,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Insert custom printing request
         $stmt = $conn->prepare("
             INSERT INTO custom_printing_requests 
-            (user_id, service_type, size, material, color, finish, quantity, special_requests, need_design_assistance, preferred_deadline, reference_images)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (user_id, service_type, material, items, special_requests, need_design_assistance, preferred_deadline, reference_images)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         $referenceImagesJson = json_encode($referenceImages);
-        $stmt->bind_param('isssssisiss', 
-            $userId, $serviceType, $size, $material, $color, $finish, 
-            $quantity, $specialRequests, $needDesignAssistance, 
+        $stmt->bind_param('issssiss', 
+            $userId, $serviceType, $material, $items, 
+            $specialRequests, $needDesignAssistance, 
             $preferredDeadline, $referenceImagesJson
         );
 
@@ -368,7 +371,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
 
         $sql = "
-            SELECT cpr.*, u.name as user_name, u.email as user_email,
+            SELECT cpr.id, cpr.user_id, cpr.service_type, cpr.material, cpr.quantity, cpr.need_design_assistance, cpr.preferred_deadline, cpr.`status`, cpr.chat_conversation_id, cpr.ready_for_purchase_price, cpr.ready_for_purchase_name, cpr.ready_for_purchase_qty, cpr.ready_for_purchase_image, cpr.created_at, cpr.updated_at,
+                   u.name as user_name, u.email as user_email,
                    (SELECT COUNT(*) FROM custom_request_files WHERE request_id = cpr.id) as file_count
             FROM custom_printing_requests cpr
             JOIN users u ON cpr.user_id = u.id
@@ -397,7 +401,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'get' && isset($_GET['id'])) {
         $requestId = (int)$_GET['id'];
         $checkStmt = $conn->prepare("
-            SELECT cpr.*, u.name as user_name, u.email as user_email
+            SELECT cpr.*, u.name as user_name, u.email as user_email,
+                   (SELECT COUNT(*) FROM custom_request_files WHERE request_id = cpr.id) as file_count
             FROM custom_printing_requests cpr
             JOIN users u ON cpr.user_id = u.id
             WHERE cpr.id = ? AND (cpr.user_id = ? OR ? IN ('admin', 'admin'))

@@ -98,9 +98,9 @@ echo '<changefreq>monthly</changefreq>' . "\n";
 echo '<priority>0.6</priority>' . "\n";
 echo '</url>' . "\n";
 
-// Custom printing page
+// My Requests page
 echo '<url>' . "\n";
-echo '<loc>' . htmlspecialchars($baseUrl . '/customer/custom-printing.php') . '</loc>' . "\n";
+echo '<loc>' . htmlspecialchars($baseUrl . '/customer/my-requests.php') . '</loc>' . "\n";
 echo '<lastmod>' . $lastMod . '</lastmod>' . "\n";
 echo '<changefreq>weekly</changefreq>' . "\n";
 echo '<priority>0.7</priority>' . "\n";

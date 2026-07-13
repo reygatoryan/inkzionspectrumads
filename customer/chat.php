@@ -105,6 +105,7 @@ $isSeller = $userRole === 'admin';
     .top-header-right { display: flex; align-items: center; gap: 0.5rem; }
     .header-icon-btn { width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border-color); background: white; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: var(--transition); position: relative; text-decoration: none; }
     .header-icon-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); transform: translateY(-1px); }
+    .header-icon-btn .notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); border: 2px solid white; }
     
     .header-profile-btn { display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem 0.75rem 0.35rem 0.35rem; border-radius: 50px; border: 1px solid var(--border-color); background: white; cursor: pointer; transition: var(--transition); text-decoration: none; color: inherit; }
     .header-profile-btn:hover { border-color: var(--primary); background: var(--primary-bg); }
@@ -204,6 +205,88 @@ $isSeller = $userRole === 'admin';
       .chat-sidebar { display: none; }
       .chat-sidebar.mobile-show { display: flex; position: fixed; inset: 0; z-index: 1000; }
     }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 1.5rem; }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
+    .modal-box { background: white; border-radius: 24px; max-width: 640px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); animation: scaleIn 0.25s ease; }
+    .modal-header { position: sticky; top: 0; background: white; display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f5f9; }
+    .modal-header h2 { font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; }
+    .modal-header h2 i { color: var(--primary); }
+    .modal-close { width: 36px; height: 36px; border-radius: 50%; border: none; background: #f1f5f9; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.2s; }
+    .modal-close:hover { background: #e2e8f0; color: #0f172a; }
+    .modal-body { padding: 1.5rem; }
+    .modal-body p { font-size: 0.92rem; color: #475569; line-height: 1.7; }
+    .modal-contact-item { display: flex; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 14px; margin-bottom: 0.75rem; align-items: flex-start; }
+    .modal-contact-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #9c27b0); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .modal-contact-label { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.15rem; }
+    .modal-contact-value { font-size: 0.92rem; font-weight: 500; color: #0f172a; }
+    .modal-faq { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 0.6rem; overflow: hidden; }
+    .modal-faq summary { padding: 1rem 1.25rem; font-size: 0.9rem; font-weight: 600; color: #0f172a; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .modal-faq summary i { font-size: 0.75rem; color: #94a3b8; transition: transform 0.2s; }
+    .modal-faq[open] summary { background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .modal-faq[open] summary i { transform: rotate(180deg); }
+    .modal-faq-answer { padding: 1rem 1.25rem; font-size: 0.88rem; color: #475569; line-height: 1.7; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .sidebar-submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+      opacity: 0;
+    }
+    .sidebar-submenu.open {
+      max-height: 400px;
+      opacity: 1;
+    }
+    .sidebar-submenu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 1.25rem 0.5rem 2.8rem;
+      margin: 0 0.6rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: #5a5a6a;
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: calc(100% - 1.2rem);
+      text-align: left;
+      font-family: var(--font);
+    }
+    .sidebar-submenu-item i {
+      width: 16px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #b06ab3;
+      transition: var(--transition);
+    }
+    .sidebar-submenu-item:hover {
+      background: var(--sidebar-hover);
+      color: var(--primary);
+    }
+    .sidebar-submenu-item:hover i { color: var(--primary); }
+    .sidebar-submenu-item.active {
+      background: var(--sidebar-active-bg);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .sidebar-submenu-item.active i { color: var(--primary); }
+    .sidebar-menu-toggle {
+      cursor: pointer;
+      user-select: none;
+    }
+    .sidebar-menu-toggle .toggle-arrow {
+      float: right;
+      font-size: 0.75rem;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-menu-toggle.open .toggle-arrow {
+      transform: rotate(180deg);
+    }
   </style>
 </head>
 <body>
@@ -226,13 +309,24 @@ $isSeller = $userRole === 'admin';
       <nav class="sidebar-menu">
         <div class="sidebar-section-title">Shop</div>
         <a href="store-product.php" class="sidebar-menu-item"><i class="fas fa-box"></i> All Products</a>
-
+        <a href="notifications.php" class="sidebar-menu-item"><i class="fas fa-bell"></i> Notifications</a>
         <a href="chat.php" class="sidebar-menu-item active"><i class="fas fa-comments"></i> Messages</a>
+        <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
+        <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders</a>
+        <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests</a>
+        <a href="my-order-forms.php" class="sidebar-menu-item"><i class="fas fa-file-invoice"></i> Order Forms</a>
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Account</div>
-        <a href="profile.php" class="sidebar-menu-item"><i class="fas fa-user"></i> My Profile</a>
+        <div class="sidebar-menu-item sidebar-menu-toggle open" id="accountToggle" onclick="toggleAccountMenu()">
+          <i class="fas fa-user-circle"></i> My Profile
+          <i class="fas fa-chevron-down toggle-arrow"></i>
+        </div>
+        <div class="sidebar-submenu open" id="accountSubmenu">
+          <a href="profile.php?section=profile" class="sidebar-submenu-item"><i class="fas fa-user-edit"></i> Edit Profile</a>
+          <a href="profile.php?section=addresses" class="sidebar-submenu-item"><i class="fas fa-map-marker-alt"></i> My Addresses</a>
+        </div>
       </nav>
       <div class="sidebar-footer">
-        <a href="help-center.php" class="sidebar-footer-item"><i class="fas fa-question-circle"></i> Help Center</a>
+        <button class="sidebar-footer-item" onclick="openModal('help')"><i class="fas fa-question-circle"></i> Help Center</button>
       </div>
     </aside>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -249,6 +343,9 @@ $isSeller = $userRole === 'admin';
           </div>
           <div class="top-header-right">
             <a href="../index.php" class="header-icon-btn" title="Home"><i class="fas fa-home"></i></a>
+            <a href="notifications.php" class="header-icon-btn" title="Notifications" style="position:relative;">
+              <i class="fas fa-bell"></i>
+            </a>
             <div class="header-profile-dropdown-wrapper">
               <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
                 <div class="header-profile-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
@@ -320,6 +417,8 @@ $isSeller = $userRole === 'admin';
     let pollInterval = 2000;
     let isTabVisible = true;
     let isSending = false;
+    let loadedMessageIds = new Set();
+    let isLoadingConversation = false;
 
     function escapeHtml(text) {
       if (!text) return '';
@@ -567,14 +666,17 @@ $isSeller = $userRole === 'admin';
 
       let html = '';
       newMsgs.forEach(msg => {
+        if (loadedMessageIds.has(msg.id)) return;
         const msgDate = getDateLabel(msg.created_at);
         if (msgDate !== lastDate) {
           html += `<div style="text-align:center;padding:0.5rem 0;font-size:0.75rem;color:#94a3b8;font-weight:500;" data-date-label="${msgDate}">${msgDate}</div>`;
           lastDate = msgDate;
         }
         html += renderMessage(msg);
+        loadedMessageIds.add(msg.id);
       });
 
+      if (!html) return;
       messagesDiv.insertAdjacentHTML('beforeend', html);
       lastMessageCount += newMsgs.length;
 
@@ -615,33 +717,43 @@ $isSeller = $userRole === 'admin';
     }
 
     async function selectConversation(convId) {
-      currentConversation = convId;
-      currentConvData = null;
-      messageOffset = 0;
-      hasMoreMessages = false;
-      lastMessageCount = 0;
-      autoScrollEnabled = true;
-      lastMessageId = 0;
-      
-      // Update active state
-      document.querySelectorAll('.conversation-item').forEach(item => {
-        item.classList.toggle('active', parseInt(item.dataset.id) === convId);
-      });
-      
-      // Fetch fresh conversation data
+      if (isLoadingConversation) return;
+      isLoadingConversation = true;
+      stopPolling();
       try {
-        const r = await fetch('../api/chat.php?action=conversations', { credentials: 'include' });
-        const d = await r.json();
-        if (d.success) {
-          currentConvData = (d.conversations || []).find(c => c.id == convId) || null;
-        }
-      } catch(e) {}
-      
-      // Load messages
-      await loadMessages(convId);
-      
-      // Start adaptive polling
-      startPolling();
+        currentConversation = convId;
+        currentConvData = null;
+        messageOffset = 0;
+        hasMoreMessages = false;
+        lastMessageCount = 0;
+        autoScrollEnabled = true;
+        lastMessageId = 0;
+        loadedMessageIds = new Set();
+        
+        // Update active state
+        document.querySelectorAll('.conversation-item').forEach(item => {
+          item.classList.toggle('active', parseInt(item.dataset.id) === convId);
+        });
+        
+        // Fetch fresh conversation data
+        try {
+          const r = await fetch('../api/chat.php?action=conversations', { credentials: 'include' });
+          const d = await r.json();
+          if (d.success) {
+            currentConvData = (d.conversations || []).find(c => c.id == convId) || null;
+          }
+        } catch(e) {}
+        
+        // Load messages
+        await loadMessages(convId);
+        
+        // Start adaptive polling
+        startPolling();
+      } catch(e) {
+        console.error('Failed to load conversation:', e);
+      } finally {
+        isLoadingConversation = false;
+      }
     }
 
     function parseMsgContent(str) {
@@ -810,6 +922,7 @@ $isSeller = $userRole === 'admin';
         if (messages.length === 0) {
           messagesDiv.innerHTML = '<p style="text-align:center; color:#64748b; padding:2rem;">No messages yet. Start the conversation!</p>';
           lastMessageCount = 0;
+          loadedMessageIds = new Set();
         } else {
           let html = '';
           let lastDate = null;
@@ -830,6 +943,7 @@ $isSeller = $userRole === 'admin';
           messagesDiv.innerHTML = html;
           messagesDiv.scrollTop = messagesDiv.scrollHeight;
           lastMessageCount = messages.length;
+          loadedMessageIds = new Set(messages.map(m => m.id));
           if (messages.length > 0) {
             lastMessageId = messages[messages.length - 1].id;
           }
@@ -875,6 +989,7 @@ $isSeller = $userRole === 'admin';
         if (!silent) {
           document.getElementById('chat-messages').innerHTML = '<p style="text-align:center; color:#dc2626; padding:2rem;">Failed to load messages.</p>';
         }
+        throw err;
       }
     }
 
@@ -1148,7 +1263,8 @@ $isSeller = $userRole === 'admin';
         emptyPolls = 0;
         pollInterval = 2000;
         if (currentConversation) {
-          loadMessages(currentConversation, true);
+          stopPolling();
+          loadMessages(currentConversation, true).then(() => startPolling()).catch(() => {});
         }
       }
     });
@@ -1171,6 +1287,70 @@ $isSeller = $userRole === 'admin';
         dd.classList.remove('active');
       }
     });
+
+    function openModal(type) {
+      const overlay = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      overlay.classList.add('open');
+      body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#e91e8c;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
+      fetch('../api/get-content.php?section=' + (type === 'contact' ? 'contact_info' : 'help_center'))
+        .then(r => r.json())
+        .then(json => {
+          if (!json.success) { body.innerHTML = '<p style="color:#ef4444;">Failed to load content.</p>'; return; }
+          const d = json.data;
+          if (type === 'contact') {
+            const meta = d.meta || {};
+            title.innerHTML = '<i class="fas fa-envelope"></i> ' + (d.title || 'Contact Us');
+            body.innerHTML =
+              '<p>' + (d.content || '') + '</p>' +
+              '<div class="modal-contact-item"><div class="modal-contact-icon"><i class="fas fa-map-marker-alt"></i></div><div><div class="modal-contact-label">Address</div><div class="modal-contact-value">' + (meta.address || 'N/A') + '</div></div></div>' +
+              '<div class="modal-contact-item"><div class="modal-contact-icon"><i class="fas fa-phone"></i></div><div><div class="modal-contact-label">Phone</div><div class="modal-contact-value">' + (meta.phone || 'N/A') + '</div></div></div>' +
+              '<div class="modal-contact-item"><div class="modal-contact-icon"><i class="fas fa-envelope"></i></div><div><div class="modal-contact-label">Email</div><div class="modal-contact-value">' + (meta.email || 'N/A') + '</div></div></div>';
+          } else {
+            const faqs = d.meta && d.meta.faqs ? d.meta.faqs : [];
+            title.innerHTML = '<i class="fas fa-question-circle"></i> ' + (d.title || 'Help Center');
+            let html = d.subtitle ? '<p style="margin-bottom:1.25rem;">' + esc(d.subtitle) + '</p>' : '';
+            if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(233,30,140,0.04);border-radius:12px;border:1px solid rgba(233,30,140,0.08);"><p style="font-size:0.88rem;color:#475569;">' + esc(d.content) + '</p></div>';
+            if (faqs.length) {
+              faqs.forEach((f, i) => {
+                html += '<details class="modal-faq"' + (i === 0 ? ' open' : '') + '><summary>' + esc(f.question || '') + ' <i class="fas fa-chevron-down"></i></summary><div class="modal-faq-answer">' + esc(f.answer || '') + '</div></details>';
+              });
+            } else {
+              html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(233,30,140,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
+            }
+            body.innerHTML = html;
+          }
+        })
+        .catch(() => { body.innerHTML = '<p style="color:#ef4444;">Failed to load. Please try again.</p>'; });
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+      function toggleAccountMenu() {
+      const toggle = document.getElementById('accountToggle');
+      const submenu = document.getElementById('accountSubmenu');
+      if (toggle && submenu) {
+        toggle.classList.toggle('open');
+        submenu.classList.toggle('open');
+      }
+    }
   </script>
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modalTitle"></h2>
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
 </body>
 </html>

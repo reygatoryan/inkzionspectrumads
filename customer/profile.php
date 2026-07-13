@@ -19,6 +19,8 @@ if ($userInitials === '') { $userInitials = 'U'; }
 
 $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
 
+$activeSection = isset($_GET['section']) && in_array($_GET['section'], ['profile','addresses']) ? $_GET['section'] : 'profile';
+
 $profile_saved = false;
 $profile_error = null;
 
@@ -75,76 +77,7 @@ if ($result && $result->num_rows > 0) {
   exit();
 }
 $stmt->close();
-
-// Fetch user's orders with items
-$orders = [];
-$orderStmt = $conn->prepare("
-  SELECT o.id, o.total_amount, o.status, o.created_at, o.updated_at,
-         o.total_weight, o.shipping_fee,
-         oi.quantity, oi.unit_price, oi.product_id,
-         p.name as product_name, p.image_url
-  FROM orders o
-  LEFT JOIN order_items oi ON o.id = oi.order_id
-  LEFT JOIN products p ON oi.product_id = p.id
-  WHERE o.user_id = ?
-  ORDER BY o.created_at DESC
-");
-$orderStmt->bind_param('i', $user_id);
-$orderStmt->execute();
-$orderResult = $orderStmt->get_result();
-if ($orderResult) {
-  while ($row = $orderResult->fetch_assoc()) {
-    $orders[] = $row;
-  }
-}
-$orderStmt->close();
 $conn->close();
-
-// Group orders by ID
-$groupedOrders = [];
-foreach ($orders as $row) {
-  $orderId = $row['id'];
-  if (!isset($groupedOrders[$orderId])) {
-    $groupedOrders[$orderId] = [
-      'id' => $orderId,
-      'total_amount' => $row['total_amount'],
-      'total_weight' => $row['total_weight'],
-      'shipping_fee' => $row['shipping_fee'],
-      'status' => $row['status'],
-      'created_at' => $row['created_at'],
-      'updated_at' => $row['updated_at'],
-      'items' => [],
-    ];
-  }
-  if ($row['product_name'] !== null) {
-    $groupedOrders[$orderId]['items'][] = [
-      'product_name' => $row['product_name'],
-      'image_url' => $row['image_url'] ?: 'assets/products-demo.jpg',
-      'quantity' => $row['quantity'],
-      'unit_price' => $row['unit_price'],
-      'product_id' => $row['product_id'],
-    ];
-  }
-}
-
-// Count orders per status tab
-$statusCounts = [
-  'all' => count($groupedOrders),
-  'pending' => 0, 'production' => 0, 'shipping' => 0, 'completed' => 0, 'issues' => 0,
-];
-foreach ($groupedOrders as $o) {
-  switch ($o['status']) {
-    case 'pending': case 'confirmed':
-      $statusCounts['pending']++; break;
-    case 'shipped':
-      $statusCounts['shipping']++; break;
-    case 'delivered':
-    case 'completed':
-      $statusCounts['completed']++; break;
-    case 'returned': case 'cancelled':
-      $statusCounts['issues']++; break;
-  }
-}
 
 $user_name_esc = htmlspecialchars($user_name ?? 'Customer', ENT_QUOTES, 'UTF-8');
 $user_email_esc = htmlspecialchars($user_email ?? '', ENT_QUOTES, 'UTF-8');
@@ -396,6 +329,32 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     }
     .sidebar-footer-item:hover { color: var(--primary); }
     .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #b06ab3; }
+    button.sidebar-footer-item { background: none; border: none; cursor: pointer; width: 100%; text-align: left; font: inherit; color: var(--text-muted); display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0; font-size: 0.78rem; text-decoration: none; transition: var(--transition); }
+    button.sidebar-footer-item:hover { color: var(--primary); }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(4px); }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.2); animation: modalIn 0.25s ease; }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; }
+    .modal-header h2 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; display: flex; align-items: center; gap: 0.5rem; }
+    .modal-header h2 i { color: #e91e8c; }
+    .modal-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: all 0.15s ease; }
+    .modal-close:hover { border-color: #ef4444; color: #ef4444; }
+    .modal-body { padding: 1.5rem; }
+    .modal-body p { font-size: 0.9rem; color: #475569; line-height: 1.7; margin-bottom: 0.75rem; }
+    .modal-body p:last-child { margin-bottom: 0; }
+    .modal-contact-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; }
+    .modal-contact-item:last-child { border-bottom: none; }
+    .modal-contact-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(233,30,140,0.08); color: #e91e8c; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; }
+    .modal-contact-label { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; }
+    .modal-contact-value { font-size: 0.9rem; font-weight: 600; color: #1a1a2e; margin-top: 0.1rem; }
+    .modal-faq { border: 1px solid #e8ecf1; border-radius: 12px; margin-bottom: 0.75rem; overflow: hidden; }
+    .modal-faq summary { padding: 1rem 1.25rem; font-weight: 600; font-size: 0.88rem; color: #1a1a2e; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; }
+    .modal-faq summary::-webkit-details-marker { display: none; }
+    .modal-faq summary i { color: #64748b; font-size: 0.75rem; transition: transform 0.2s; }
+    .modal-faq[open] summary i { transform: rotate(180deg); }
+    .modal-faq-answer { padding: 0 1.25rem 1rem; font-size: 0.85rem; color: #475569; line-height: 1.7; border-top: 1px solid #f1f5f9; padding-top: 0.75rem; }
 
     /* ========= MAIN CONTENT ========= */
     .products-main {
@@ -554,102 +513,9 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     }
     .account-header-left h1 i { color: var(--primary); font-size: 1.2rem; }
     .account-header-left p { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
-    .btn-header {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.6rem 1.2rem; border-radius: 10px;
-      font-size: 0.88rem; font-weight: 600; text-decoration: none;
-      transition: all 0.2s ease; border: none; cursor: pointer;
-    }
-    .btn-header-primary { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; }
-    .btn-header-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(233,30,142,0.3); }
-    .btn-header-ghost { background: white; color: #475569; border: 1px solid #e2e8f0; }
-    .btn-header-ghost:hover { background: #f1f5f9; }
-
     .account-content { min-width: 0; }
     .content-section { display: none; }
     .content-section.active { display: block; }
-
-    /* Order Tabs */
-    .order-tabs {
-      display: flex; gap: 0.4rem; background: white;
-      border: 1px solid var(--border-color); border-radius: 14px;
-      padding: 0.4rem; margin-bottom: 1.5rem; overflow-x: auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .order-tab {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
-      gap: 0.2rem; padding: 0.65rem 0.5rem; border-radius: 10px;
-      border: none; background: transparent; cursor: pointer;
-      font-size: 0.72rem; font-weight: 600; color: #64748b;
-      transition: all 0.2s ease; white-space: nowrap; font-family: var(--font);
-    }
-    .order-tab:hover { background: rgba(233,30,142,0.04); }
-    .order-tab.active { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; }
-    .order-tab .tab-count { font-size: 0.6rem; background: rgba(0,0,0,0.08); padding: 0.1rem 0.45rem; border-radius: 999px; font-weight: 700; }
-    .order-tab.active .tab-count { background: rgba(255,255,255,0.25); }
-
-    /* Order Card */
-    .order-card {
-      background: white; border: 1px solid var(--border-color); border-radius: 16px;
-      padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      transition: box-shadow 0.2s ease;
-    }
-    .order-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
-    .order-header {
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;
-      padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);
-    }
-    .order-header-left { display: flex; align-items: center; gap: 1rem; }
-    .order-id { font-weight: 700; font-size: 1rem; color: #111827; }
-    .order-date { font-size: 0.82rem; color: #64748b; }
-    .order-status-badge {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      padding: 0.3rem 0.85rem; border-radius: 999px;
-      font-size: 0.78rem; font-weight: 700; text-transform: capitalize;
-    }
-    .badge-pending { background: rgba(255,193,7,0.12); color: #b8860b; border: 1px solid rgba(255,193,7,0.3); }
-    .badge-shipped { background: rgba(59,130,246,0.12); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.3); }
-    .badge-completed { background: rgba(5,150,105,0.12); color: #047857; border: 1px solid rgba(5,150,105,0.3); }
-    .badge-returned { background: rgba(249,115,22,0.12); color: #c2410c; border: 1px solid rgba(249,115,22,0.3); }
-    .badge-cancelled { background: rgba(239,68,68,0.12); color: #dc2626; border: 1px solid rgba(239,68,68,0.3); }
-
-    /* Progress */
-    .progress-tracker { display: flex; align-items: center; justify-content: space-between; margin: 1.25rem 0; padding: 0 0.5rem; position: relative; }
-    .progress-tracker::before { content: ''; position: absolute; top: 18px; left: 40px; right: 40px; height: 3px; background: #e2e8f0; z-index: 0; }
-    .progress-step { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; position: relative; z-index: 1; }
-    .step-circle { width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; color: #94a3b8; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; transition: all 0.3s ease; }
-    .step-circle i { font-size: 0.85rem; }
-    .step-label { font-size: 0.7rem; font-weight: 600; color: #94a3b8; text-align: center; white-space: nowrap; }
-    .progress-step.completed .step-circle { background: linear-gradient(135deg, #047857, #10b981); color: white; }
-    .progress-step.completed .step-label { color: #047857; }
-    .progress-step.active .step-circle { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; box-shadow: 0 0 0 4px rgba(233,30,142,0.15); }
-    .progress-step.active .step-label { color: #e91e8c; font-weight: 700; }
-    .progress-step.cancelled .step-circle { background: rgba(239,68,68,0.12); color: #dc2626; }
-    .progress-step.cancelled .step-label { color: #dc2626; }
-
-    .order-items { display: flex; flex-direction: column; gap: 0.6rem; }
-    .order-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem; background: #f8fafc; border-radius: 12px; }
-    .order-item:hover { background: #f1f5f9; }
-    .order-item-img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; background: white; border: 1px solid var(--border-light); flex-shrink: 0; }
-    .order-item-info { flex: 1; min-width: 0; }
-    .order-item-name { font-size: 0.88rem; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .order-item-meta { font-size: 0.78rem; color: #64748b; margin-top: 0.15rem; }
-    .order-item-price { font-size: 0.9rem; font-weight: 700; color: #e91e8c; white-space: nowrap; }
-    .order-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-light); }
-    .order-total { font-size: 1rem; color: #111827; }
-    .order-total strong { color: #e91e8c; font-size: 1.15rem; }
-    .order-actions { display: flex; gap: 0.5rem; }
-    .btn-order-action { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.82rem; font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: all 0.2s ease; }
-    .btn-order-action.primary { background: rgba(233,30,142,0.08); color: #e91e8c; border: 1px solid rgba(233,30,142,0.2); }
-    .btn-order-action.primary:hover { background: rgba(233,30,142,0.15); }
-    .btn-order-action.danger { background: rgba(239,68,68,0.08); color: #dc2626; border: 1px solid rgba(239,68,68,0.2); }
-    .btn-order-action.danger:hover { background: rgba(239,68,68,0.15); }
-
-    .orders-empty { text-align: center; padding: 3rem 2rem; background: white; border: 2px dashed var(--border-color); border-radius: 20px; }
-    .orders-empty-icon { font-size: 3rem; color: rgba(233,30,142,0.15); margin-bottom: 1rem; }
-    .orders-empty h3 { color: #111827; margin: 0 0 0.5rem; font-size: 1.2rem; }
-    .orders-empty p { color: #64748b; margin: 0 0 1.5rem; font-size: 0.92rem; }
 
     /* Forms */
     .form-card { background: white; border: 1px solid var(--border-color); border-radius: 20px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
@@ -701,7 +567,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .header-profile-arrow { display: none; }
       .form-grid { grid-template-columns: 1fr; }
       .form-grid .full-width { grid-column: 1; }
-      .order-tabs { overflow-x: auto; }
       .sidebar-card { flex-direction: row; }
       .sidebar-user { border-bottom: none; border-right: 1px solid var(--border-light); padding: 1rem; min-width: 120px; }
       .sidebar-user-avatar { margin: 0 auto 0.5rem; width: 48px; height: 48px; font-size: 1rem; }
@@ -716,24 +581,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .top-header-center { display: none; }
     }
 
-    .notif-item {
-      display: flex; gap: 0.85rem; padding: 1rem;
-      border-radius: 12px; margin-bottom: 0.5rem;
-      border: 1px solid var(--border-light);
-      transition: background 0.2s; align-items: flex-start;
-    }
-    .notif-item:hover { background: #f8fafc; }
-    .notif-item.notif-unread { background: var(--primary-bg); border-color: rgba(233,30,142,0.15); }
-    .notif-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(233,30,142,0.08); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; }
-    .notif-content { flex: 1; min-width: 0; }
-    .notif-title { font-size: 0.85rem; font-weight: 600; color: #0f172a; }
-    .notif-body { font-size: 0.78rem; color: #64748b; margin-top: 0.15rem; }
-    .notif-time { font-size: 0.7rem; color: #94a3b8; margin-top: 0.3rem; }
-    .notif-mark-read { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0.35rem; border-radius: 6px; transition: all 0.2s; flex-shrink: 0; }
-    .notif-mark-read:hover { background: rgba(16,185,129,0.1); color: #10b981; }
-    .notif-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
-    .notif-header h2 { margin: 0; font-size: 1.15rem; }
-    .notif-header h2 i { color: var(--primary); margin-right: 0.5rem; }
+
   </style>
 </head>
 <body>
@@ -757,38 +605,29 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       <nav class="sidebar-menu">
         <div class="sidebar-section-title">Shop</div>
         <a href="store-product.php" class="sidebar-menu-item"><i class="fas fa-box"></i> All Products</a>
+        <a href="notifications.php" class="sidebar-menu-item"><i class="fas fa-bell"></i> Notifications</a>
         <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages</a>
-
-        
-        <!-- ========= COLLAPSIBLE MY ACCOUNT ========= -->
+        <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
+        <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders</a>
+        <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests</a>
+        <a href="my-order-forms.php" class="sidebar-menu-item"><i class="fas fa-file-invoice"></i> Order Forms</a>
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Account</div>
         <div class="sidebar-menu-item sidebar-menu-toggle open" id="accountToggle" onclick="toggleAccountMenu()">
-          <i class="fas fa-user-circle"></i> My Account
+          <i class="fas fa-user-circle"></i> My Profile
           <i class="fas fa-chevron-down toggle-arrow"></i>
         </div>
         <div class="sidebar-submenu open" id="accountSubmenu">
-          <button class="sidebar-submenu-item active" data-section="orders" onclick="switchSection('orders')">
-            <i class="fas fa-box"></i> My Orders
-          </button>
-          <button class="sidebar-submenu-item" data-section="profile" onclick="switchSection('profile')">
+          <a href="?section=profile" class="sidebar-submenu-item <?= $activeSection === 'profile' ? 'active' : '' ?>" data-section="profile">
             <i class="fas fa-user-edit"></i> Edit Profile
-          </button>
-
-          <button class="sidebar-submenu-item" data-section="addresses" onclick="switchSection('addresses')">
+          </a>
+          <a href="?section=addresses" class="sidebar-submenu-item <?= $activeSection === 'addresses' ? 'active' : '' ?>" data-section="addresses">
             <i class="fas fa-map-marker-alt"></i> My Addresses
-          </button>
-
-          <button class="sidebar-submenu-item" data-section="orderforms" onclick="switchSection('orderforms')">
-            <i class="fas fa-file-invoice"></i> Order Forms
-          </button>
-          <button class="sidebar-submenu-item" data-section="notifications" onclick="switchSection('notifications')">
-            <i class="fas fa-bell"></i> Notifications <span class="badge" id="notif-badge" style="display:none;">0</span>
-          </button>
+          </a>
         </div>
       </nav>
       <div class="sidebar-footer">
-        <a href="contact.php" class="sidebar-footer-item"><i class="fas fa-envelope"></i> Contact</a>
-        <a href="help-center.php" class="sidebar-footer-item"><i class="fas fa-question-circle"></i> Help Center</a>
+        <button class="sidebar-footer-item" onclick="openModal('contact')"><i class="fas fa-envelope"></i> Contact</button>
+        <button class="sidebar-footer-item" onclick="openModal('help')"><i class="fas fa-question-circle"></i> Help Center</button>
       </div>
     </aside>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -814,10 +653,9 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             <a href="../index.php" class="header-icon-btn" title="Home">
               <i class="fas fa-home"></i>
             </a>
-            <button class="header-icon-btn" id="header-notif-bell" onclick="switchSection('notifications')" title="Notifications" style="position:relative;">
+            <a href="notifications.php" class="header-icon-btn" title="Notifications" style="position:relative;">
               <i class="fas fa-bell"></i>
-              <span class="notif-dot" id="header-notif-dot" style="display:none;"></span>
-            </button>
+            </a>
             <div class="header-profile-dropdown-wrapper">
               <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
                 <div class="header-profile-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
@@ -841,100 +679,9 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         <?php endif; ?>
 
         <div class="account-content">
-          <!-- Section: My Orders -->
-            <div id="section-orders" class="content-section active">
-              <div class="order-tabs" id="order-tabs">
-                <button class="order-tab active" data-filter="all">All<span class="tab-count"><?= $statusCounts['all'] ?></span></button>
-                <button class="order-tab" data-filter="pending">Pending<span class="tab-count"><?= $statusCounts['pending'] ?></span></button>
-                <button class="order-tab" data-filter="production">Production<span class="tab-count"><?= $statusCounts['production'] ?></span></button>
-                <button class="order-tab" data-filter="shipping">Shipping<span class="tab-count"><?= $statusCounts['shipping'] ?></span></button>
-                <button class="order-tab" data-filter="completed">Completed<span class="tab-count"><?= $statusCounts['completed'] ?></span></button>
-                <button class="order-tab" data-filter="issues">Issues<span class="tab-count"><?= $statusCounts['issues'] ?></span></button>
-              </div>
-              <div id="orders-list">
-                <?php if (empty($groupedOrders)): ?>
-                  <div class="orders-empty">
-                    <div class="orders-empty-icon"><i class="fas fa-box-open"></i></div>
-                    <h3>No orders yet</h3>
-                    <p>Start shopping to see your orders here!</p>
-                    <a href="store-product.php" class="btn-header btn-header-primary" style="display:inline-flex;"><i class="fas fa-shopping-bag"></i> Browse Products</a>
-                  </div>
-                <?php else: ?>
-                  <?php foreach ($groupedOrders as $order):
-                    $tabCategory = 'all';
-                    switch ($order['status']) {
-                      case 'pending': case 'confirmed': $tabCategory = 'pending'; break;
-                      case 'shipped': $tabCategory = 'shipping'; break;
-                      case 'delivered': $tabCategory = 'shipping'; break;
-                      case 'completed': $tabCategory = 'completed'; break;
-                      case 'returned': case 'cancelled': $tabCategory = 'issues'; break;
-                    }
-                    $progressClass = function($step) use ($order) {
-                      $statusMap = ['pending'=>1,'confirmed'=>2,'shipped'=>3,'delivered'=>4,'completed'=>5];
-                      $currentStep = $statusMap[$order['status']] ?? 0;
-                      if ($order['status'] === 'cancelled' || $order['status'] === 'returned') return 'cancelled';
-                      if ($step < $currentStep) return 'completed';
-                      if ($step === $currentStep) return 'active';
-                      return '';
-                    };
-                    $statusLabels = ['pending'=>'Pending','confirmed'=>'Confirmed','shipped'=>'Shipped','delivered'=>'Delivered','completed'=>'Completed','returned'=>'Returned','cancelled'=>'Cancelled'];
-                    $statusLabel = $statusLabels[$order['status']] ?? ucfirst($order['status']);
-                  ?>
-                  <div class="order-card" data-tab="<?= $tabCategory ?>">
-                    <div class="order-header">
-                      <div class="order-header-left">
-                        <span class="order-id">Order #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?></span>
-                        <span class="order-date"><i class="fas fa-calendar-alt" style="margin-right:4px;"></i> <?= date('M d, Y \a\t h:i A', strtotime($order['created_at'])) ?></span>
-                      </div>
-                      <span class="order-status-badge badge-<?= $order['status'] ?>">
-                        <i class="fas fa-<?= $order['status']==='completed'?'check-circle':($order['status']==='cancelled'?'times-circle':($order['status']==='shipped'?'truck':($order['status']==='returned'?'undo':'clock'))) ?>"></i>
-                        <?= $statusLabel ?>
-                      </span>
-                    </div>
-                    <?php if ($order['status'] !== 'cancelled' && $order['status'] !== 'returned'): ?>
-                    <div class="progress-tracker">
-                      <div class="progress-step <?= $progressClass(1) ?>"><div class="step-circle"><i class="fas fa-check"></i></div><span class="step-label">Pending</span></div>
-                      <div class="progress-step <?= $progressClass(2) ?>"><div class="step-circle"><i class="fas fa-check-double"></i></div><span class="step-label">Confirmed</span></div>
-                      <div class="progress-step <?= $progressClass(3) ?>"><div class="step-circle"><i class="fas fa-truck"></i></div><span class="step-label">Shipped</span></div>
-                      <div class="progress-step <?= $progressClass(4) ?>"><div class="step-circle"><i class="fas fa-check-circle"></i></div><span class="step-label">Delivered</span></div>
-                      <div class="progress-step <?= $progressClass(5) ?>"><div class="step-circle"><i class="fas fa-check-double"></i></div><span class="step-label">Completed</span></div>
-                    </div>
-                    <?php endif; ?>
-                    <div class="order-items">
-                      <?php foreach ($order['items'] as $item): ?>
-                      <div class="order-item">
-                        <img src="<?= htmlspecialchars($item['image_url'] ?? 'assets/products-demo.jpg', ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($item['product_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" class="order-item-img">
-                        <div class="order-item-info">
-                          <div class="order-item-name"><?= htmlspecialchars($item['product_name'] ?? 'Product', ENT_QUOTES, 'UTF-8') ?></div>
-                          <div class="order-item-meta">Qty: <?= (int)$item['quantity'] ?> × ₱<?= number_format((float)$item['unit_price'], 2) ?></div>
-                        </div>
-                        <div class="order-item-price">₱<?= number_format((float)$item['unit_price'] * (int)$item['quantity'], 2) ?></div>
-                      </div>
-                      <?php endforeach; ?>
-                    </div>
-                    <div class="order-footer">
-                      <?php if ($order['total_weight']): ?>
-                      <div class="order-total" style="font-size:0.78rem;">Weight: <?= number_format((float)$order['total_weight'], 3) ?> kg</div>
-                      <?php endif; ?>
-                      <?php if ($order['shipping_fee']): ?>
-                      <div class="order-total" style="font-size:0.78rem;">Shipping: <strong>₱<?= number_format((float)$order['shipping_fee'], 2) ?></strong></div>
-                      <?php endif; ?>
-                      <div class="order-total">Total: <strong>₱<?= number_format((float)$order['total_amount'], 2) ?></strong></div>
-                      <div class="order-actions">
-                        <a href="order-tracking.php?order_id=<?= $order['id'] ?>" class="btn-order-action primary"><i class="fas fa-eye"></i> View</a>
-                        <?php if ($order['status'] === 'pending' || $order['status'] === 'confirmed'): ?>
-                        <a href="../api/update-order-status.php?action=cancel&order_id=<?= $order['id'] ?>" class="btn-order-action danger" onclick="return confirm('Cancel this order?')"><i class="fas fa-times"></i> Cancel</a>
-                        <?php endif; ?>
-                      </div>
-                    </div>
-                  </div>
-                  <?php endforeach; ?>
-                <?php endif; ?>
-              </div>
-            </div>
 
             <!-- Section: Edit Profile -->
-            <div id="section-profile" class="content-section">
+            <div id="section-profile" class="content-section <?= $activeSection === 'profile' ? 'active' : '' ?>">
               <div class="form-card">
                 <h2>Edit Profile</h2>
                 <p class="subtitle">Update your personal information and contact details.</p>
@@ -967,7 +714,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
 
 
             <!-- Section: My Addresses -->
-            <div id="section-addresses" class="content-section">
+            <div id="section-addresses" class="content-section <?= $activeSection === 'addresses' ? 'active' : '' ?>">
               <div class="form-card">
                 <h2>My Addresses</h2>
                 <p class="subtitle">Manage your delivery addresses.</p>
@@ -978,40 +725,11 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
                     <div><strong><?= $user_name_esc ?></strong><br><span style="font-size:0.85rem;color:#64748b;"><?= $user_address_esc ?: 'No address set' ?></span></div>
                   </div>
                 </div>
-                <p style="margin-top:1rem;font-size:0.85rem;color:#64748b;">To update your address, use the <a href="#" onclick="switchSection('profile');return false;" style="color:var(--primary);">Edit Profile</a> section.</p>
+                <p style="margin-top:1rem;font-size:0.85rem;color:#64748b;">To update your address, use the <a href="?section=profile" style="color:var(--primary);">Edit Profile</a> section.</p>
               </div>
             </div>
 
 
-            <!-- Section: Order Forms -->
-            <div id="section-orderforms" class="content-section">
-              <div class="form-card">
-                <h2>Order Forms</h2>
-                <p class="subtitle">View and fill out order forms sent by the admin.</p>
-                <div id="order-forms-list">
-                  <p style="color:#64748b;text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse"></i> Loading...</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Section: Notifications -->
-            <div id="section-notifications" class="content-section">
-              <div class="form-card">
-                <div class="notif-header">
-                  <h2><i class="fas fa-bell"></i> Notifications</h2>
-                  <button id="mark-all-read-btn" class="btn-order-action primary" style="display:none;" onclick="markAllRead()">
-                    <i class="fas fa-check-double"></i> Mark All Read
-                  </button>
-                </div>
-                <p class="subtitle">Stay updated on your orders.</p>
-                <div id="notifications-list">
-                  <div style="text-align:center;padding:2rem;color:#64748b;">
-                    <i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;margin-bottom:1rem;display:block;"></i>
-                    Loading...
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -1033,45 +751,44 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     }
 
     // ========= SECTION SWITCHING =========
-    let currentSection = 'orders';
+    let currentSection = '<?= $activeSection ?>';
 
     function switchSection(section) {
       currentSection = section;
-      
-      // Update main sidebar submenu items
       document.querySelectorAll('#accountSubmenu .sidebar-submenu-item').forEach(el => {
         el.classList.toggle('active', el.dataset.section === section);
       });
-      
-      // Update account sidebar items
-      document.querySelectorAll('.side-nav .side-nav-item').forEach(el => {
-        el.classList.toggle('active', el.dataset.section === section);
-      });
-      
-      // Show/hide content sections
       document.querySelectorAll('.content-section').forEach(el => {
         el.classList.toggle('active', el.id === 'section-' + section);
       });
-
-      // Open the account submenu in main sidebar if not already open
       const submenu = document.getElementById('accountSubmenu');
       if (!submenu.classList.contains('open')) {
         document.getElementById('accountToggle').classList.add('open');
         submenu.classList.add('open');
       }
+      // Update URL without reload
+      var url = new URL(window.location);
+      url.searchParams.set('section', section);
+      window.history.replaceState({}, '', url);
     }
 
-    // ========= ORDER TABS =========
-    document.querySelectorAll('.order-tab').forEach(tab => {
-      tab.addEventListener('click', function() {
-        document.querySelectorAll('.order-tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        const filter = this.dataset.filter;
-        document.querySelectorAll('.order-card').forEach(card => {
-          card.style.display = (filter === 'all' || card.dataset.tab === filter) ? '' : 'none';
-        });
-      });
+    // Intercept sidebar submenu clicks for smooth internal switching
+    document.getElementById('accountSubmenu').addEventListener('click', function(e) {
+      var link = e.target.closest('.sidebar-submenu-item');
+      if (link && link.dataset.section) {
+        e.preventDefault();
+        switchSection(link.dataset.section);
+      }
     });
+
+    // On load, switch to section from URL if present
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var section = params.get('section');
+      if (section === 'profile' || section === 'addresses') {
+        switchSection(section);
+      }
+    })();
 
     function toggleProfileDropdown() {
       const dropdown = document.getElementById('profileDropdown');
@@ -1088,260 +805,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       }
     });
 
-    // ========= ORDER FORMS =========
-    async function loadOrderForms() {
-      const container = document.getElementById('order-forms-list');
-      if (!container) return;
-      try {
-        const res = await fetch('../api/order-proposals.php?action=list', { credentials: 'include' });
-        const data = await res.json();
-        if (!data.success || !data.proposals) {
-          container.innerHTML = '<p style="color:#64748b;text-align:center;padding:2rem;">Could not load order forms.</p>';
-          return;
-        }
 
-        const proposals = data.proposals;
-
-        // Filter: show only sent, filled, rejected (not yet approved/converted)
-        const active = proposals.filter(p => p.status === 'sent' || p.status === 'filled' || p.status === 'rejected');
-        const converted = proposals.filter(p => p.status === 'converted' || p.status === 'approved');
-
-        if (active.length === 0 && converted.length === 0) {
-          container.innerHTML = '<div style="text-align:center;padding:2rem;"><div style="font-size:2.5rem;color:rgba(233,30,142,0.15);margin-bottom:0.75rem;"><i class="fas fa-file-invoice"></i></div><p style="color:#64748b;">No order forms from admin yet.</p></div>';
-          return;
-        }
-
-        let html = '';
-
-        if (active.length > 0) {
-          html += '<h3 style="font-size:1rem;margin-bottom:0.75rem;color:#0f172a;">Pending Forms</h3>';
-          html += active.map(p => {
-            const items = p.items || [];
-            const itemSummary = items.map(i => i.name).join(', ');
-            const statusColor = p.status === 'filled' ? '#047857' : (p.status === 'rejected' ? '#dc2626' : '#1d4ed8');
-            const statusBg = p.status === 'filled' ? 'rgba(5,150,105,0.1)' : (p.status === 'rejected' ? 'rgba(239,68,68,0.1)' : 'rgba(59,130,246,0.1)');
-
-            return `
-              <div style="padding:1rem;background:#f8fafc;border-radius:12px;margin-bottom:0.75rem;border:1px solid #e2e8f0;">
-                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">
-                  <strong style="font-size:0.9rem;">Form #${p.id}</strong>
-                  <span style="padding:0.2rem 0.6rem;border-radius:999px;font-size:0.72rem;font-weight:700;background:${statusBg};color:${statusColor};text-transform:capitalize;">${p.status}</span>
-                </div>
-                <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.5rem;">${itemSummary || 'No items'} — Total: <strong>₱${parseFloat(p.total_amount).toFixed(2)}</strong></div>
-                ${p.rejection_reason ? `<div style="font-size:0.78rem;color:#dc2626;margin-bottom:0.5rem;"><i class="fas fa-exclamation-circle"></i> ${escapeHtml(p.rejection_reason)}</div>` : ''}
-                <div style="display:flex;gap:0.5rem;">
-                  ${p.status === 'sent' || p.status === 'rejected' ? `<a href="order-form.php?id=${p.id}" class="btn-order-action primary"><i class="fas fa-pen"></i> Fill Out Form</a>` : ''}
-                  ${p.status === 'filled' ? `<span style="font-size:0.82rem;color:#047857;"><i class="fas fa-check-circle"></i> Awaiting admin approval</span>` : ''}
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-
-        if (converted.length > 0) {
-          html += '<h3 style="font-size:1rem;margin:1.5rem 0 0.75rem 2;color:#0f172a;">Approved Forms</h3>';
-          html += converted.map(p => {
-            const orderRef = p.order_reference || `#${p.order_id}`;
-            return `
-              <div style="padding:1rem;background:#f8fafc;border-radius:12px;margin-bottom:0.75rem;border:1px solid #e2e8f0;">
-                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">
-                  <strong style="font-size:0.9rem;">Form #${p.id}</strong>
-                  <span style="padding:0.2rem 0.6rem;border-radius:999px;font-size:0.72rem;font-weight:700;background:rgba(5,150,105,0.1);color:#047857;">Approved</span>
-                </div>
-                <div style="font-size:0.82rem;color:#64748b;">Converted to order ${orderRef}</div>
-                ${p.order_id ? `<a href="order-tracking.php?id=${p.order_id}" class="btn-order-action primary" style="display:inline-flex;margin-top:0.5rem;"><i class="fas fa-eye"></i> Track Order</a>` : ''}
-              </div>
-            `;
-          }).join('');
-        }
-
-        container.innerHTML = html;
-      } catch (e) {
-        container.innerHTML = '<p style="color:#dc2626;text-align:center;padding:2rem;">Failed to load order forms.</p>';
-      }
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // Override switchSection to also load order forms / notifications
-    const origSwitchSection = switchSection;
-    switchSection = function(section) {
-      origSwitchSection(section);
-      if (section === 'orderforms') {
-        loadOrderForms();
-      } else if (section === 'notifications') {
-        loadNotifications();
-      }
-    };
-
-    // ===== NOTIFICATIONS =====
-    let notifications = [];
-
-    async function loadNotifications() {
-      const container = document.getElementById('notifications-list');
-      if (!container) return;
-      try {
-        const res = await fetch('../api/notifications.php?type=all&limit=50', { credentials: 'include' });
-        if (!res.ok) {
-          container.innerHTML = '<p style="text-align:center;padding:2rem;color:#dc2626;">Server error (' + res.status + '). Please try again.</p>';
-          return;
-        }
-        const text = await res.text();
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (parseError) {
-          container.innerHTML = '<p style="text-align:center;padding:2rem;color:#dc2626;">Invalid response from server.</p><pre style="max-height:200px;overflow:auto;font-size:0.75rem;background:#f1f5f9;padding:0.75rem;border-radius:8px;margin-top:0.5rem;">' + escapeHtml(text.substring(0, 500)) + '</pre>';
-          return;
-        }
-        if (!data.success) {
-          container.innerHTML = '<p style="text-align:center;padding:2rem;color:#64748b;">' + escapeHtml(data.error || 'Could not load notifications.') + '</p>';
-          return;
-        }
-        notifications = data.notifications || [];
-        updateNotifBadge(data.unread_count || 0);
-        renderNotifications(notifications);
-      } catch (e) {
-        container.innerHTML = '<p style="text-align:center;padding:2rem;color:#dc2626;">Failed to load notifications: ' + escapeHtml(e.message) + '</p>';
-      }
-    }
-
-    function updateNotifBadge(count) {
-      const badge = document.getElementById('notif-badge');
-      if (!badge) return;
-      if (count > 0) {
-        badge.style.display = 'inline';
-        badge.textContent = count > 99 ? '99+' : count;
-      } else {
-        badge.style.display = 'none';
-      }
-      const markAllBtn = document.getElementById('mark-all-read-btn');
-      if (markAllBtn) markAllBtn.style.display = count > 0 ? 'inline-flex' : 'none';
-      updateHeaderNotifDot(count);
-    }
-
-    function updateHeaderNotifDot(count) {
-      const dot = document.getElementById('header-notif-dot');
-      if (!dot) return;
-      dot.style.display = count > 0 ? 'block' : 'none';
-    }
-
-    async function pollUnreadCount() {
-      try {
-        const res = await fetch('../api/notifications.php?type=unread&limit=1', { credentials: 'include' });
-        const data = await res.json();
-        if (data.success) {
-          updateHeaderNotifDot(data.unread_count || 0);
-          const badge = document.getElementById('notif-badge');
-          if (badge) {
-            const c = data.unread_count || 0;
-            badge.style.display = c > 0 ? 'inline' : 'none';
-            if (c > 0) badge.textContent = c > 99 ? '99+' : c;
-          }
-        }
-      } catch(e) {}
-    }
-
-    function renderNotifications(notifs) {
-      const container = document.getElementById('notifications-list');
-      if (!container) return;
-
-      if (notifs.length === 0) {
-        container.innerHTML = '<div style="text-align:center;padding:2rem;"><div style="font-size:2.5rem;color:rgba(233,30,142,0.15);margin-bottom:0.75rem;"><i class="fas fa-bell"></i></div><p style="color:#64748b;">No notifications yet.</p></div>';
-        return;
-      }
-
-      container.innerHTML = notifs.map(n => {
-        const isUnread = !n.is_read;
-        return `
-          <div class="notif-item ${isUnread ? 'notif-unread' : ''}" data-id="${n.id}">
-            <div class="notif-icon">${getNotifIcon(n.type)}</div>
-            <div class="notif-content">
-              <div class="notif-title">${escapeHtml(n.title)}</div>
-              <div class="notif-body">${escapeHtml(n.body)}</div>
-              <div class="notif-time">${getTimeAgo(n.created_at)}</div>
-            </div>
-            ${isUnread ? `<button class="notif-mark-read" onclick="markRead(${n.id})" title="Mark as read"><i class="fas fa-check"></i></button>` : ''}
-          </div>
-        `;
-      }).join('');
-    }
-
-    function getNotifIcon(type) {
-      const icons = {
-        'order_placed': '<i class="fas fa-shopping-cart"></i>',
-        'new_order': '<i class="fas fa-shopping-cart"></i>',
-        'order_updated': '<i class="fas fa-sync-alt"></i>',
-        'order_shipped': '<i class="fas fa-truck"></i>',
-        'order_preparing': '<i class="fas fa-cog"></i>',
-        'payment_updated': '<i class="fas fa-credit-card"></i>',
-        'chat_message': '<i class="fas fa-comment"></i>',
-        'custom_request': '<i class="fas fa-paint-brush"></i>',
-        'customization_request': '<i class="fas fa-paint-brush"></i>',
-        'proposal_sent': '<i class="fas fa-file-invoice"></i>',
-        'proposal_filled': '<i class="fas fa-file-invoice"></i>',
-        'order_approved': '<i class="fas fa-check-circle"></i>',
-        'proposal_rejected': '<i class="fas fa-times-circle"></i>',
-        'system': '<i class="fas fa-info-circle"></i>',
-      };
-      return icons[type] || '<i class="fas fa-bell"></i>';
-    }
-
-    function getTimeAgo(dateStr) {
-      if (!dateStr) return '';
-      const now = new Date();
-      const date = new Date(dateStr);
-      const diffMs = now - date;
-      const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return 'Just now';
-      if (diffMins < 60) return diffMins + 'm ago';
-      const diffHrs = Math.floor(diffMins / 60);
-      if (diffHrs < 24) return diffHrs + 'h ago';
-      const diffDays = Math.floor(diffHrs / 24);
-      if (diffDays < 7) return diffDays + 'd ago';
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-
-    async function markRead(id) {
-      try {
-        const res = await fetch('../api/notifications.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'mark_read', notification_id: id }),
-          credentials: 'include'
-        });
-        const data = await res.json();
-        if (data.success) loadNotifications();
-      } catch(e) {}
-    }
-
-    async function markAllRead() {
-      try {
-        const res = await fetch('../api/notifications.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'mark_all_read' }),
-          credentials: 'include'
-        });
-        const data = await res.json();
-        if (data.success) loadNotifications();
-      } catch(e) {}
-    }
-
-    // Also auto-load order forms / notifications if that section is active on page load
-    if (document.getElementById('section-orderforms')?.classList.contains('active')) {
-      loadOrderForms();
-    }
-    if (document.getElementById('section-notifications')?.classList.contains('active')) {
-      loadNotifications();
-    }
-
-    // Poll for unread notification count every 30s
-    pollUnreadCount();
-    setInterval(pollUnreadCount, 30000);
 
     // Search
     const searchInput = document.getElementById('product-search');
@@ -1352,7 +816,63 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         }
       });
     }
+
+    function openModal(type) {
+      const overlay = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      overlay.classList.add('open');
+      body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#e91e8c;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
+      fetch('../api/get-content.php?section=' + (type === 'contact' ? 'contact_info' : 'help_center'))
+        .then(r => r.json())
+        .then(json => {
+          if (!json.success) { body.innerHTML = '<p style="color:#ef4444;">Failed to load content.</p>'; return; }
+          const d = json.data;
+          if (type === 'contact') {
+            const meta = d.meta || {};
+            title.innerHTML = '<i class="fas fa-envelope"></i> ' + (d.title || 'Contact Us');
+            body.innerHTML =
+              '<p>' + (d.content || '') + '</p>' +
+              '<div class="modal-contact-item"><div class="modal-contact-icon"><i class="fas fa-map-marker-alt"></i></div><div><div class="modal-contact-label">Address</div><div class="modal-contact-value">' + (meta.address || 'N/A') + '</div></div></div>' +
+              '<div class="modal-contact-item"><div class="modal-contact-icon"><i class="fas fa-phone"></i></div><div><div class="modal-contact-label">Phone</div><div class="modal-contact-value">' + (meta.phone || 'N/A') + '</div></div></div>' +
+              '<div class="modal-contact-item"><div class="modal-contact-icon"><i class="fas fa-envelope"></i></div><div><div class="modal-contact-label">Email</div><div class="modal-contact-value">' + (meta.email || 'N/A') + '</div></div></div>';
+          } else {
+            const faqs = d.meta && d.meta.faqs ? d.meta.faqs : [];
+            title.innerHTML = '<i class="fas fa-question-circle"></i> ' + (d.title || 'Help Center');
+            let html = d.subtitle ? '<p style="margin-bottom:1.25rem;">' + esc(d.subtitle) + '</p>' : '';
+            if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(233,30,140,0.04);border-radius:12px;border:1px solid rgba(233,30,140,0.08);"><p style="font-size:0.88rem;color:#475569;">' + esc(d.content) + '</p></div>';
+            if (faqs.length) {
+              faqs.forEach((f, i) => {
+                html += '<details class="modal-faq"' + (i === 0 ? ' open' : '') + '><summary>' + esc(f.question || '') + ' <i class="fas fa-chevron-down"></i></summary><div class="modal-faq-answer">' + esc(f.answer || '') + '</div></details>';
+              });
+            } else {
+              html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(233,30,140,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
+            }
+            body.innerHTML = html;
+          }
+        })
+        .catch(() => { body.innerHTML = '<p style="color:#ef4444;">Failed to load. Please try again.</p>'; });
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   </script>
   <script>navigator.sendBeacon('../api/track-visit.php?url=' + encodeURIComponent(location.pathname + location.search) + '&_=' + Date.now());</script>
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modalTitle"></h2>
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
 </body>
 </html>

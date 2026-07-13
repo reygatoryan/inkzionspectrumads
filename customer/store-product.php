@@ -457,6 +457,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       background: var(--primary-bg);
       transform: translateY(-1px);
     }
+    .header-icon-btn .notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); border: 2px solid white; }
     .header-profile-btn {
       display: flex;
       align-items: center;
@@ -1464,6 +1465,65 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .modal-faq summary i { color: #64748b; font-size: 0.75rem; transition: transform 0.2s; }
     .modal-faq[open] summary i { transform: rotate(180deg); }
     .modal-faq-answer { padding: 0 1.25rem 1rem; font-size: 0.85rem; color: #475569; line-height: 1.7; border-top: 1px solid #f1f5f9; padding-top: 0.75rem; }
+    .sidebar-submenu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+      opacity: 0;
+    }
+    .sidebar-submenu.open {
+      max-height: 400px;
+      opacity: 1;
+    }
+    .sidebar-submenu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 1.25rem 0.5rem 2.8rem;
+      margin: 0 0.6rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: #5a5a6a;
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: calc(100% - 1.2rem);
+      text-align: left;
+      font-family: var(--font);
+    }
+    .sidebar-submenu-item i {
+      width: 16px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #b06ab3;
+      transition: var(--transition);
+    }
+    .sidebar-submenu-item:hover {
+      background: var(--sidebar-hover);
+      color: var(--primary);
+    }
+    .sidebar-submenu-item:hover i { color: var(--primary); }
+    .sidebar-submenu-item.active {
+      background: var(--sidebar-active-bg);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .sidebar-submenu-item.active i { color: var(--primary); }
+    .sidebar-menu-toggle {
+      cursor: pointer;
+      user-select: none;
+    }
+    .sidebar-menu-toggle .toggle-arrow {
+      float: right;
+      font-size: 0.75rem;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-menu-toggle.open .toggle-arrow {
+      transform: rotate(180deg);
+    }
   </style>
 </head>
 <body>
@@ -1489,11 +1549,22 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       <nav class="sidebar-menu">
         <div class="sidebar-section-title">Shop</div>
         <a href="store-product.php" class="sidebar-menu-item active"><i class="fas fa-box"></i> All Products</a>
-
         <?php if ($loggedIn): ?>
+        <a href="notifications.php" class="sidebar-menu-item"><i class="fas fa-bell"></i> Notifications</a>
         <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages</a>
+        <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
+        <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders</a>
+        <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests</a>
+        <a href="my-order-forms.php" class="sidebar-menu-item"><i class="fas fa-file-invoice"></i> Order Forms</a>
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Account</div>
-        <a href="profile.php" class="sidebar-menu-item"><i class="fas fa-user"></i> My Profile</a>
+        <div class="sidebar-menu-item sidebar-menu-toggle open" id="accountToggle" onclick="toggleAccountMenu()">
+          <i class="fas fa-user-circle"></i> My Profile
+          <i class="fas fa-chevron-down toggle-arrow"></i>
+        </div>
+        <div class="sidebar-submenu open" id="accountSubmenu">
+          <a href="profile.php?section=profile" class="sidebar-submenu-item"><i class="fas fa-user-edit"></i> Edit Profile</a>
+          <a href="profile.php?section=addresses" class="sidebar-submenu-item"><i class="fas fa-map-marker-alt"></i> My Addresses</a>
+        </div>
         <?php endif; ?>
       </nav>
       
@@ -1530,6 +1601,9 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
               <i class="fas fa-home"></i>
             </a>
             <?php if ($loggedIn): ?>
+            <a href="notifications.php" class="header-icon-btn" title="Notifications" style="position:relative;">
+              <i class="fas fa-bell"></i>
+            </a>
             <div class="header-profile-dropdown-wrapper">
               <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
                 <div class="header-profile-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
@@ -1574,7 +1648,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             <div class="dash-card-glow"></div>
           </div>
           <div class="dash-card dash-card-new">
-            <div class="dash-card-icon"><i class="fas fa-sparkles"></i></div>
+            <div class="dash-card-icon"><i class="fas fa-star"></i></div>
             <div class="dash-card-body">
               <h3>New Products</h3>
               <p>Fresh designs and latest printing innovations</p>
@@ -2151,8 +2225,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         }, remainingTime);
       }, 100);
       
-
-      
     });
 
     // ========= RELATED PRODUCTS SLIDER =========
@@ -2288,6 +2360,14 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         if (profileDropdown && profileDropdown.classList.contains('active')) {
           profileDropdown.classList.remove('active');
         }
+      }
+    }
+    function toggleAccountMenu() {
+      const toggle = document.getElementById('accountToggle');
+      const submenu = document.getElementById('accountSubmenu');
+      if (toggle && submenu) {
+        toggle.classList.toggle('open');
+        submenu.classList.toggle('open');
       }
     }
   </script>
