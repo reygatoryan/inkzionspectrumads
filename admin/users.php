@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Early AJAX handler — must run before any HTML output
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
     session_start();

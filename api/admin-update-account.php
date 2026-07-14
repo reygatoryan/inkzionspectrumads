@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 // Only sellers can access this

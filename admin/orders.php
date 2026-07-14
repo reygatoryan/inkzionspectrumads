@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle = 'Orders';
 $pageSubtitle = 'Manage and track all customer orders';
 require_once __DIR__ . '/includes/admin-header.php';

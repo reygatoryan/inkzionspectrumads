@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);

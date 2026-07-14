@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle = 'Dashboard';
 $pageSubtitle = 'Overview of orders, requests, and insights.';
 require 'includes/admin-header.php';

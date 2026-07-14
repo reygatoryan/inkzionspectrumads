@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle = 'Activity Logs';
 $pageSubtitle = 'Track all activities and changes made in the system';
 require_once __DIR__ . '/includes/admin-header.php';

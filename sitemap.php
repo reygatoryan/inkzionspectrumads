@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Dynamic Sitemap Generator
  * Generates XML sitemap for search engines

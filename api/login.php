@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 header('Content-Type: application/json');
 header('Access-Control-Allow-Credentials: true');
 if (isset($_SERVER['HTTP_ORIGIN'])) {
