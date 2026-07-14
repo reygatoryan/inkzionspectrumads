@@ -9,6 +9,9 @@ Thumbs.db
 # PHP / XAMPP
 *.log
 
+# Composer
+composer.lock
+
 # IDE
 .vscode/
 .idea/
