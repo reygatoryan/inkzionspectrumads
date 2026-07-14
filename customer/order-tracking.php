@@ -107,14 +107,14 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --sidebar-bg: #FFF5F8;
-            --sidebar-hover: rgba(233, 30, 140, 0.08);
-            --sidebar-active: #e91e8c;
-            --sidebar-active-bg: rgba(233, 30, 140, 0.12);
+            --sidebar-bg: #FAF7EE;
+            --sidebar-hover: rgba(43, 76, 82, 0.08);
+            --sidebar-active: #2B4C52;
+            --sidebar-active-bg: rgba(43, 76, 82, 0.12);
             --sidebar-width: 270px;
-            --primary: #e91e8c;
-            --primary-light: #9c27b0;
-            --primary-bg: rgba(233, 30, 140, 0.1);
+            --primary: #2B4C52;
+            --primary-light: #4A7C84;
+            --primary-bg: rgba(43, 76, 82, 0.1);
             --success: #10B981;
             --success-bg: rgba(16, 185, 129, 0.1);
             --warning: #F59E0B;
@@ -137,7 +137,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         .products-sidebar {
             width: var(--sidebar-width);
             background: var(--sidebar-bg);
-            border-right: 1px solid rgba(233, 30, 140, 0.1);
+            border-right: 1px solid rgba(43, 76, 82, 0.1);
             padding: 0;
             position: fixed;
             top: 0;
@@ -149,19 +149,19 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             flex-direction: column;
         }
         .products-sidebar::-webkit-scrollbar { width: 3px; }
-        .products-sidebar::-webkit-scrollbar-thumb { background: rgba(233, 30, 140, 0.2); border-radius: 4px; }
+        .products-sidebar::-webkit-scrollbar-thumb { background: rgba(43, 76, 82, 0.2); border-radius: 4px; }
         .sidebar-brand {
             display: flex;
             align-items: center;
             gap: 0.75rem;
             padding: 1.25rem 1.25rem 1rem;
-            border-bottom: 1px solid rgba(233, 30, 140, 0.12);
+            border-bottom: 1px solid rgba(43, 76, 82, 0.12);
             position: sticky;
             top: 0;
             background: var(--sidebar-bg);
             z-index: 2;
         }
-        .sidebar-brand-img { width: 38px; height: 38px; border-radius: 10px; object-fit: contain; background: white; padding: 4px; box-shadow: 0 2px 6px rgba(233, 30, 140, 0.15); }
+        .sidebar-brand-img { width: 38px; height: 38px; border-radius: 10px; object-fit: contain; background: white; padding: 4px; box-shadow: 0 2px 6px rgba(43, 76, 82, 0.15); }
         .sidebar-brand-text { line-height: 1.2; }
         .sidebar-brand-name { font-size: 0.85rem; font-weight: 800; color: #1a1a2e; letter-spacing: 0.03em; display: block; }
         .sidebar-brand-sub { font-size: 0.6rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
@@ -170,8 +170,8 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             display: flex;
             align-items: center;
             gap: 0.65rem;
-            border-bottom: 1px solid rgba(233, 30, 140, 0.08);
-            background: rgba(233, 30, 140, 0.03);
+            border-bottom: 1px solid rgba(43, 76, 82, 0.08);
+            background: rgba(43, 76, 82, 0.03);
         }
         .sidebar-avatar { width: 30px; height: 30px; border-radius: 8px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.65rem; flex-shrink: 0; }
         .sidebar-profile-info h4 { font-size: 0.75rem; font-weight: 600; color: var(--text-primary); }
@@ -193,10 +193,10 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             position: relative;
             border-left: 3px solid transparent;
         }
-        .sidebar-menu-item i { width: 20px; text-align: center; font-size: 0.85rem; color: #b06ab3; transition: var(--transition); }
+        .sidebar-menu-item i { width: 20px; text-align: center; font-size: 0.85rem; color: #4A7C84; transition: var(--transition); }
         .sidebar-menu-item:hover { background: var(--sidebar-hover); color: var(--primary); border-left-color: var(--primary); transform: translateX(4px); }
         .sidebar-menu-item:hover i { color: var(--primary); transform: scale(1.1); }
-        .sidebar-menu-item.active { background: var(--sidebar-active-bg); color: var(--primary); font-weight: 600; border-left-color: var(--primary); box-shadow: 0 2px 8px rgba(233, 30, 140, 0.08); }
+        .sidebar-menu-item.active { background: var(--sidebar-active-bg); color: var(--primary); font-weight: 600; border-left-color: var(--primary); box-shadow: 0 2px 8px rgba(43, 76, 82, 0.08); }
         .sidebar-menu-item.active i { color: var(--primary); }
         .sidebar-menu-item .badge { margin-left: auto; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.6rem; font-weight: 700; background: var(--primary-bg); color: var(--primary); }
         .sidebar-menu-item .badge.red { background: var(--danger-bg); color: var(--danger); }
@@ -226,7 +226,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             text-align: left;
             font-family: var(--font);
         }
-        .sidebar-submenu-item i { width: 16px; text-align: center; font-size: 0.75rem; color: #b06ab3; transition: var(--transition); }
+        .sidebar-submenu-item i { width: 16px; text-align: center; font-size: 0.75rem; color: #4A7C84; transition: var(--transition); }
         .sidebar-submenu-item:hover { background: var(--sidebar-hover); color: var(--primary); }
         .sidebar-submenu-item:hover i { color: var(--primary); }
         .sidebar-submenu-item.active { background: var(--sidebar-active-bg); color: var(--primary); font-weight: 600; }
@@ -234,10 +234,10 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         .sidebar-menu-toggle { cursor: pointer; }
         .sidebar-menu-toggle .toggle-arrow { margin-left: auto; font-size: 0.6rem; color: var(--text-muted); transition: transform 0.3s ease; }
         .sidebar-menu-toggle.open .toggle-arrow { transform: rotate(180deg); }
-        .sidebar-footer { padding: 0.75rem 1.25rem; border-top: 1px solid rgba(233, 30, 140, 0.1); }
+        .sidebar-footer { padding: 0.75rem 1.25rem; border-top: 1px solid rgba(43, 76, 82, 0.1); }
         .sidebar-footer-item { display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; transition: var(--transition); }
         .sidebar-footer-item:hover { color: var(--primary); }
-        .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #b06ab3; }
+        .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #4A7C84; }
         .sidebar-footer button.sidebar-footer-item { background: none; border: none; cursor: pointer; width: 100%; text-align: left; font: inherit; color: var(--text-muted); display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0; font-size: 0.78rem; text-decoration: none; transition: var(--transition); }
         .sidebar-footer button.sidebar-footer-item:hover { color: var(--primary); }
 
@@ -322,7 +322,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             text-decoration: none;
             transition: var(--transition);
         }
-        .header-profile-dropdown-item i { width: 18px; text-align: center; font-size: 0.8rem; color: #b06ab3; transition: var(--transition); }
+        .header-profile-dropdown-item i { width: 18px; text-align: center; font-size: 0.8rem; color: #4A7C84; transition: var(--transition); }
         .header-profile-dropdown-item:hover { background: var(--sidebar-hover); color: var(--primary); }
         .header-profile-dropdown-item:hover i { color: var(--primary); }
         .header-profile-dropdown-item.danger { color: var(--danger); }
@@ -469,7 +469,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         .modal-body { padding: 1.5rem; }
         .modal-body p { font-size: 0.92rem; color: #475569; line-height: 1.7; }
         .modal-contact-item { display: flex; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 14px; margin-bottom: 0.75rem; align-items: flex-start; }
-        .modal-contact-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #9c27b0); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+        .modal-contact-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #4A7C84); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
         .modal-contact-label { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.15rem; }
         .modal-contact-value { font-size: 0.92rem; font-weight: 500; color: #0f172a; }
         .modal-faq { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 0.6rem; overflow: hidden; }
@@ -648,7 +648,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                         <?php if ($order['shipping_fee']): ?>
                             <div class="info-item">
                                 <div class="info-label">Shipping Fee</div>
-                                <div class="info-value" style="color:#e91e8c;font-weight:700;">₱<?php echo number_format((float)$order['shipping_fee'], 2); ?></div>
+                                <div class="info-value" style="color:#2B4C52;font-weight:700;">₱<?php echo number_format((float)$order['shipping_fee'], 2); ?></div>
                             </div>
                         <?php endif; ?>
                         <?php if ($order['payment_method']): ?>
@@ -835,7 +835,7 @@ function openModal(type) {
   const title = document.getElementById('modalTitle');
   const body = document.getElementById('modalBody');
   overlay.classList.add('open');
-  body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#e91e8c;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
+  body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#2B4C52;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
   fetch('../api/get-content.php?section=' + (type === 'contact' ? 'contact_info' : 'help_center'))
     .then(r => r.json())
     .then(json => {
@@ -853,13 +853,13 @@ function openModal(type) {
         const faqs = d.meta && d.meta.faqs ? d.meta.faqs : [];
         title.innerHTML = '<i class="fas fa-question-circle"></i> ' + (d.title || 'Help Center');
         let html = d.subtitle ? '<p style="margin-bottom:1.25rem;">' + esc(d.subtitle) + '</p>' : '';
-        if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(233,30,140,0.04);border-radius:12px;border:1px solid rgba(233,30,140,0.08);"><p style="font-size:0.88rem;color:#475569;">' + esc(d.content) + '</p></div>';
+        if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(43, 76, 82,0.04);border-radius:12px;border:1px solid rgba(43, 76, 82,0.08);"><p style="font-size:0.88rem;color:#475569;">' + esc(d.content) + '</p></div>';
         if (faqs.length) {
           faqs.forEach((f, i) => {
             html += '<details class="modal-faq"' + (i === 0 ? ' open' : '') + '><summary>' + esc(f.question || '') + ' <i class="fas fa-chevron-down"></i></summary><div class="modal-faq-answer">' + esc(f.answer || '') + '</div></details>';
           });
         } else {
-          html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(233,30,140,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
+          html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(43, 76, 82,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
         }
         body.innerHTML = html;
       }

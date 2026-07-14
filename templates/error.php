@@ -39,19 +39,19 @@ $baseUrl = 'https://inkzion.com';
       width: 120px;
       height: 120px;
       margin: 0 auto 2rem;
-      background: linear-gradient(135deg, rgba(233, 30, 142, 0.1), rgba(0, 188, 212, 0.1));
+      background: linear-gradient(135deg, rgba(43, 76, 82, 0.1), rgba(43, 76, 82, 0.1));
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 3rem;
-      color: #e91e8c;
+      color: #2B4C52;
     }
     
     .error-code {
       font-size: 4rem;
       font-weight: 900;
-      background: linear-gradient(135deg, #e91e8c, #00bcd4);
+      background: linear-gradient(135deg, #2B4C52, #4A7C84);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -93,14 +93,14 @@ $baseUrl = 'https://inkzion.com';
     }
     
     .btn-primary {
-      background: linear-gradient(135deg, #e91e8c, #9c27b0);
+      background: linear-gradient(135deg, #2B4C52, #4A7C84);
       color: white;
-      box-shadow: 0 8px 24px rgba(233, 30, 142, 0.3);
+      box-shadow: 0 8px 24px rgba(43, 76, 82, 0.3);
     }
     
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(233, 30, 142, 0.4);
+      box-shadow: 0 12px 32px rgba(43, 76, 82, 0.4);
     }
     
     .btn-secondary {
@@ -126,7 +126,7 @@ $baseUrl = 'https://inkzion.com';
     }
     
     .error-help a {
-      color: #e91e8c;
+      color: #2B4C52;
       text-decoration: none;
       font-weight: 600;
     }

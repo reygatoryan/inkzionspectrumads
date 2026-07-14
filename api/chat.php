@@ -256,38 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $requestId = isset($data['request_id']) ? (int)$data['request_id'] : null;
         $productId = isset($data['product_id']) ? (int)$data['product_id'] : null;
         
-        // Check if conversation already exists
-        if ($requestId) {
-            $checkStmt = $conn->prepare("
-                SELECT id FROM chat_conversations 
-                WHERE user_id = ? AND request_id = ?
-            ");
-            $checkStmt->bind_param('ii', $userId, $requestId);
-        } elseif ($productId) {
-            $checkStmt = $conn->prepare("
-                SELECT id FROM chat_conversations 
-                WHERE user_id = ? AND admin_id = ? AND product_id = ?
-            ");
-            $checkStmt->bind_param('iii', $userId, $sellerId, $productId);
-        } else {
-            $checkStmt = $conn->prepare("
-                SELECT id FROM chat_conversations 
-                WHERE user_id = ? AND admin_id = ?
-            ");
-            $checkStmt->bind_param('ii', $userId, $sellerId);
-        }
-        $checkStmt->execute();
-        $result = $checkStmt->get_result();
-        $existing = $result->fetch_assoc();
-        $checkStmt->close();
-        
-        if ($existing) {
-            echo json_encode(['success' => true, 'conversation_id' => $existing['id']]);
-            $conn->close();
-            exit;
-        }
-        
-        // Create new conversation
+        // Create new conversation (always creates fresh chat)
         if ($requestId) {
             $stmt = $conn->prepare("
                 INSERT INTO chat_conversations (user_id, admin_id, request_id, product_id, last_message_at)

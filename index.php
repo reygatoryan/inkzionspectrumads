@@ -37,7 +37,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
   $seoKeywords = 'printing, advertising, business cards, marketing materials, signage, apparel, custom merchandise, promotional items';
   outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
   ?>
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=10">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,7 +93,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
         </a>
         <a href="logout.php" class="btn auth-btn">Logout</a>
         <?php else: ?>
-        <a href="customer/profile.php" class="btn auth-btn nav-icon-btn" title="My Profile">
+        <a href="customer/profile.php" class="btn auth-btn" title="My Profile">
           <i class="fas fa-user"></i>
           <span class="nav-icon-label">Profile</span>
         </a>
@@ -342,7 +342,6 @@ $contactContent = $siteContent['contact_info'] ?? [];
       <div class="container contact-grid">
         <div class="contact-info">
           <span class="section-overline">Contact Us</span>
-          <h2><?php echo htmlspecialchars($contactContent['title'] ?? "Let's bring your vision to life"); ?></h2>
           <p><?php echo htmlspecialchars($contactContent['subtitle'] ?? 'Ready to start your next printing project? Get in touch for a free consultation and quote.'); ?></p>
           <?php if (!empty($contactContent['content'])): ?>
           <p style="margin-top:0.75rem;"><?php echo htmlspecialchars($contactContent['content']); ?></p>

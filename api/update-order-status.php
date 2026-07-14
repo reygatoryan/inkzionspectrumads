@@ -16,7 +16,19 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
-if (!$input || empty($input['order_id']) || empty($input['status'])) {
+if (!is_array($input)) {
+    $input = [];
+}
+if (empty($input)) {
+    $input = $_POST;
+}
+if (empty($input)) {
+    $input = $_GET;
+}
+if (empty($input['status']) && !empty($input['action']) && $input['action'] === 'cancel') {
+    $input['status'] = 'cancelled';
+}
+if (empty($input['order_id']) || empty($input['status'])) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Missing required fields: order_id and status']);
     exit;

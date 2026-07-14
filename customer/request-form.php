@@ -14,6 +14,18 @@ if ($userName !== '') {
 if ($userInitials === '') $userInitials = 'U';
 $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
 
+require_once __DIR__ . '/../db-config.php';
+
+$serviceTypes = [];
+try {
+    $st = $conn->prepare("SELECT DISTINCT service_type FROM custom_printing_requests WHERE service_type IS NOT NULL AND service_type != '' ORDER BY service_type");
+    $st->execute();
+    $result = $st->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $serviceTypes[] = htmlspecialchars($row['service_type']);
+    }
+} catch (Exception $e) {}
+
 $requestId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $request = null;
 if ($requestId) {
@@ -35,10 +47,10 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --sidebar-bg: #FFF5F8; --sidebar-hover: rgba(233,30,140,0.08);
-      --sidebar-active: #e91e8c; --sidebar-active-bg: rgba(233,30,140,0.12);
-      --sidebar-width: 270px; --primary: #e91e8c; --primary-light: #9c27b0;
-      --primary-bg: rgba(233,30,140,0.1); --text-primary: #0F172A;
+      --sidebar-bg: #FAF7EE; --sidebar-hover: rgba(43, 76, 82, 0.08);
+      --sidebar-active: #2B4C52; --sidebar-active-bg: rgba(43, 76, 82, 0.12);
+      --sidebar-width: 270px; --primary: #2B4C52; --primary-light: #4A7C84;
+      --primary-bg: rgba(43, 76, 82, 0.1); --text-primary: #0F172A;
       --text-secondary: #475569; --text-muted: #64748B;
       --border-color: #E2E8F0; --border-light: #F1F5F9;
       --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -47,30 +59,30 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: var(--font); background: #F8FAFC; color: var(--text-primary); line-height: 1.6; overflow-x: hidden; }
     .dashboard-wrapper { display: flex; min-height: 100vh; }
-    .products-sidebar { width: var(--sidebar-width); background: var(--sidebar-bg); border-right: 1px solid rgba(233,30,140,0.1); padding: 0; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 100; display: flex; flex-direction: column; }
+    .products-sidebar { width: var(--sidebar-width); background: var(--sidebar-bg); border-right: 1px solid rgba(43, 76, 82,0.1); padding: 0; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 100; display: flex; flex-direction: column; }
     .products-sidebar::-webkit-scrollbar { width: 3px; }
-    .products-sidebar::-webkit-scrollbar-thumb { background: rgba(233,30,140,0.2); border-radius: 4px; }
-    .sidebar-brand { display: flex; align-items: center; gap: 0.75rem; padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid rgba(233,30,140,0.12); position: sticky; top: 0; background: var(--sidebar-bg); z-index: 2; }
-    .sidebar-brand-img { width: 38px; height: 38px; border-radius: 10px; object-fit: contain; background: white; padding: 4px; box-shadow: 0 2px 6px rgba(233,30,140,0.15); }
+    .products-sidebar::-webkit-scrollbar-thumb { background: rgba(43, 76, 82,0.2); border-radius: 4px; }
+    .sidebar-brand { display: flex; align-items: center; gap: 0.75rem; padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid rgba(43, 76, 82,0.12); position: sticky; top: 0; background: var(--sidebar-bg); z-index: 2; }
+    .sidebar-brand-img { width: 38px; height: 38px; border-radius: 10px; object-fit: contain; background: white; padding: 4px; box-shadow: 0 2px 6px rgba(43, 76, 82,0.15); }
     .sidebar-brand-text { line-height: 1.2; }
     .sidebar-brand-name { font-size: 0.85rem; font-weight: 800; color: #1a1a2e; display: block; }
     .sidebar-brand-sub { font-size: 0.6rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
-    .sidebar-profile { padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.65rem; border-bottom: 1px solid rgba(233,30,140,0.08); background: rgba(233,30,140,0.03); }
+    .sidebar-profile { padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.65rem; border-bottom: 1px solid rgba(43, 76, 82,0.08); background: rgba(43, 76, 82,0.03); }
     .sidebar-avatar { width: 30px; height: 30px; border-radius: 8px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.65rem; flex-shrink: 0; }
     .sidebar-profile-info h4 { font-size: 0.75rem; font-weight: 600; color: var(--text-primary); }
     .sidebar-profile-info p { font-size: 0.6rem; color: var(--text-muted); }
     .sidebar-menu { flex: 1; padding: 0.75rem 0; }
     .sidebar-section-title { font-size: 0.6rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; padding: 0.85rem 1.25rem 0.45rem; }
     .sidebar-menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1.25rem; margin: 0 0.6rem; border-radius: 8px; font-size: 0.82rem; font-weight: 500; color: #4a4a5a; text-decoration: none; transition: var(--transition); border-left: 3px solid transparent; }
-    .sidebar-menu-item i { width: 20px; text-align: center; font-size: 0.85rem; color: #b06ab3; transition: var(--transition); }
+    .sidebar-menu-item i { width: 20px; text-align: center; font-size: 0.85rem; color: #4A7C84; transition: var(--transition); }
     .sidebar-menu-item:hover { background: var(--sidebar-hover); color: var(--primary); border-left-color: var(--primary); transform: translateX(4px); }
     .sidebar-menu-item:hover i { color: var(--primary); transform: scale(1.1); }
     .sidebar-menu-item.active { background: var(--sidebar-active-bg); color: var(--primary); font-weight: 600; border-left-color: var(--primary); }
     .sidebar-menu-item.active i { color: var(--primary); }
-    .sidebar-footer { padding: 0.75rem 1.25rem; border-top: 1px solid rgba(233,30,140,0.1); }
+    .sidebar-footer { padding: 0.75rem 1.25rem; border-top: 1px solid rgba(43, 76, 82,0.1); }
     .sidebar-footer-item { display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0; font-size: 0.78rem; color: var(--text-muted); text-decoration: none; transition: var(--transition); }
     .sidebar-footer-item:hover { color: var(--primary); }
-    .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #b06ab3; }
+    .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #4A7C84; }
     .sidebar-footer button.sidebar-footer-item { background: none; border: none; cursor: pointer; width: 100%; text-align: left; font: inherit; color: var(--text-muted); display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0; font-size: 0.78rem; text-decoration: none; transition: var(--transition); }
     .sidebar-footer button.sidebar-footer-item:hover { color: var(--primary); }
     .products-main { flex: 1; margin-left: var(--sidebar-width); min-height: 100vh; }
@@ -93,7 +105,7 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
     .header-profile-dropdown-menu { position: absolute; top: calc(100% + 6px); right: 0; background: white; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 8px 24px rgba(0,0,0,0.1); padding: 0.5rem; width: 200px; z-index: 100; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s; }
     .header-profile-dropdown-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
     .header-profile-dropdown-item { display: flex; align-items: center; gap: 0.65rem; padding: 0.65rem 0.85rem; border-radius: 8px; font-size: 0.82rem; font-weight: 500; color: var(--text-primary); text-decoration: none; transition: var(--transition); cursor: pointer; border: none; background: none; width: 100%; font-family: var(--font); text-align: left; }
-    .header-profile-dropdown-item i { width: 18px; text-align: center; font-size: 0.8rem; color: #b06ab3; }
+    .header-profile-dropdown-item i { width: 18px; text-align: center; font-size: 0.8rem; color: #4A7C84; }
     .header-profile-dropdown-item:hover { background: var(--sidebar-hover); color: var(--primary); }
     .header-profile-dropdown-item.danger { color: var(--danger); }
     .header-profile-dropdown-item.danger:hover { background: var(--danger-bg); color: var(--danger); }
@@ -114,18 +126,25 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 0.9rem; font-family: inherit; color: var(--text-primary); background: white; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
     .form-group textarea { min-height: 100px; resize: vertical; }
-    .item-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: #f8fafc; border-radius: 10px; border: 1px solid var(--border-color); }
-    .item-row input { padding: 0.5rem 0.75rem; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; outline: none; font-family: inherit; }
-    .item-row input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
-    .item-row .item-remove { width: 32px; height: 32px; border-radius: 8px; border: none; background: rgba(239,68,68,0.1); color: #ef4444; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .item-row .item-remove:hover { background: #ef4444; color: white; }
+    .item-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; padding: 0.75rem; background: #f8fafc; border-radius: 12px; border: 1px solid var(--border-color); transition: border-color 0.2s; }
+    .item-row:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
+    .item-size { padding: 0.5rem 0.75rem; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; outline: none; font-family: inherit; background: white; cursor: pointer; min-width: 130px; flex:2; color: var(--text-primary); }
+    .item-size:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
+    .item-qty-stepper { display: inline-flex; align-items: center; gap: 0; flex:1; min-width: 100px; }
+    .item-qty-stepper .qty-btn { width: 34px; height: 34px; border: 1.5px solid var(--border-color); background: white; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 600; transition: all 0.15s; user-select: none; }
+    .item-qty-stepper .qty-btn:first-child { border-radius: 8px 0 0 8px; }
+    .item-qty-stepper .qty-btn:last-child { border-radius: 0 8px 8px 0; }
+    .item-qty-stepper .qty-btn:hover { background: var(--primary-bg); border-color: var(--primary); color: var(--primary); }
+    .item-qty-stepper .qty-value { width: 48px; height: 34px; border: 1.5px solid var(--border-color); border-left: none; border-right: none; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; color: var(--text-primary); background: white; }
+    .item-row .item-remove { padding: 0.3rem 0.75rem; border-radius: 999px; border: none; background: rgba(239,68,68,0.08); color: #ef4444; cursor: pointer; font-size: 0.78rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
+    .item-row .item-remove:hover { background: rgba(220,38,38,0.15); color: #dc2626; }
     .item-image-wrap { flex: 0 0 64px; width: 64px; height: 64px; position: relative; flex-shrink: 0; }
     .item-image-btn { width: 64px; height: 64px; border-radius: 8px; border: 1.5px dashed var(--border-color); background: white; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: var(--transition); }
     .item-image-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
     .item-image-preview { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; cursor: pointer; border: 1px solid var(--border-color); display: none; transition: var(--transition); }
     .item-image-preview:hover { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
-    .btn-submit { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 2rem; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; font-family: inherit; transition: all 0.2s ease; box-shadow: 0 6px 16px rgba(233,30,142,0.25); }
-    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(233,30,142,0.35); }
+    .btn-submit { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 2rem; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; font-family: inherit; transition: all 0.2s ease; box-shadow: 0 6px 16px rgba(43, 76, 82,0.25); }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(43, 76, 82,0.35); }
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .flash-msg { padding: 0.85rem 1.2rem; border-radius: 12px; font-weight: 600; font-size: 0.9rem; margin-bottom: 1rem; }
     .flash-success { background: rgba(5,150,105,0.1); color: #047857; border: 1px solid rgba(5,150,105,0.2); }
@@ -159,7 +178,7 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
     .modal-body { padding: 1.5rem; }
     .modal-body p { font-size: 0.92rem; color: #475569; line-height: 1.7; }
     .modal-contact-item { display: flex; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 14px; margin-bottom: 0.75rem; align-items: flex-start; }
-    .modal-contact-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #9c27b0); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .modal-contact-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #4A7C84); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
     .modal-contact-label { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.15rem; }
     .modal-contact-value { font-size: 0.92rem; font-weight: 500; color: #0f172a; }
     .modal-faq { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 0.6rem; overflow: hidden; }
@@ -203,7 +222,7 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
       width: 16px;
       text-align: center;
       font-size: 0.75rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: var(--transition);
     }
     .sidebar-submenu-item:hover {
@@ -313,18 +332,27 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
             <div class="form-grid">
               <div class="form-group full-width">
                 <label>Service Type</label>
-                <input type="text" value="<?php echo htmlspecialchars($request['service_type'] ?? $title); ?>" readonly style="background:#f8fafc;">
+                <input type="text" id="service_type" name="service_type" value="<?php echo htmlspecialchars($request['service_type'] ?? ''); ?>" list="svc-type-list" placeholder="e.g., T-shirt Printing, Business Cards, Certificate, etc.">
+                <datalist id="svc-type-list">
+                  <?php foreach ($serviceTypes as $st): ?>
+                  <option value="<?php echo $st; ?>">
+                  <?php endforeach; ?>
+                </datalist>
               </div>
               <div class="form-group">
-                <label for="material">Material <span style="font-weight:400;color:#94a3b8;">(fabric type)</span></label>
+                <label for="material">Material <span style="font-weight:400;color:#94a3b8;">(optional - fabric type)</span></label>
                 <input type="text" id="material" name="material" placeholder="e.g., Cotton, Polyester, Gildan 5000, etc.">
               </div>
               <div class="form-group full-width">
                 <label>Order Items <span style="font-weight:400;color:#94a3b8;">(size, quantity &amp; reference image per item)</span></label>
                 <div id="items-container">
                   <div class="item-row">
-                    <input type="text" class="item-size" placeholder="Size (e.g., Small, Large, XL, 2XL)" style="flex:2;">
-                    <input type="number" class="item-qty" placeholder="Qty" min="1" value="1" style="flex:1;">
+                    <input type="text" class="item-size" list="size-list" placeholder="e.g., M, A4, Letter, Small, 3x5ft, etc.">
+                    <div class="item-qty-stepper">
+                      <button type="button" class="qty-btn" data-action="dec">&minus;</button>
+                      <span class="qty-value">1</span>
+                      <button type="button" class="qty-btn" data-action="inc">+</button>
+                    </div>
                     <div class="item-image-wrap">
                       <input type="file" class="item-image-input" accept="image/*" style="display:none;">
                       <div class="item-image-btn" onclick="this.previousElementSibling.click()" title="Upload reference image">
@@ -332,10 +360,20 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
                       </div>
                       <img class="item-image-preview" style="display:none;" onclick="openItemPreview(this)">
                     </div>
-                    <button type="button" class="item-remove" onclick="removeItemRow(this)" style="display:none;" title="Remove">&times;</button>
+                    <button type="button" class="item-remove" onclick="removeItemRow(this)" style="display:none;" title="Remove"><i class="fas fa-times"></i> Remove</button>
                   </div>
                 </div>
                 <button type="button" onclick="addItemRow()" style="margin-top:0.5rem;padding:0.5rem 1rem;border:1.5px dashed var(--border-color);border-radius:10px;background:none;color:var(--primary);font-weight:600;font-size:0.85rem;cursor:pointer;width:100%;"><i class="fas fa-plus"></i> Add Another Size</button>
+                <datalist id="size-list">
+                  <option value="XS"><option value="S"><option value="M"><option value="L"><option value="XL">
+                  <option value="2XL"><option value="3XL"><option value="4XL"><option value="5XL">
+                  <option value="A4"><option value="A5"><option value="A3"><option value="Letter">
+                  <option value="Legal"><option value="Tabloid"><option value="Small">
+                  <option value="Medium"><option value="Large"><option value="X-Large">
+                  <option value="One Size"><option value="Standard"><option value="Square">
+                  <option value="Rounded"><option value="Mini"><option value="Oversized">
+                  <option value="Custom">
+                </datalist>
               </div>
               <div class="form-group">
                 <label for="deadline">Preferred Deadline</label>
@@ -368,7 +406,7 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
       const first = container.querySelector('.item-row');
       const clone = first.cloneNode(true);
       clone.querySelector('.item-size').value = '';
-      clone.querySelector('.item-qty').value = '1';
+      clone.querySelector('.qty-value').textContent = '1';
       clone.querySelector('.item-image-preview').style.display = 'none';
       clone.querySelector('.item-image-btn').style.display = 'flex';
       clone.querySelector('.item-image-input').value = '';
@@ -406,6 +444,21 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
       overlay.classList.add('open');
     }
 
+    // Qty stepper event delegation
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.qty-btn');
+      if (!btn) return;
+      var stepper = btn.closest('.item-qty-stepper');
+      if (!stepper) return;
+      var val = stepper.querySelector('.qty-value');
+      var qty = parseInt(val.textContent) || 1;
+      if (btn.getAttribute('data-action') === 'inc') {
+        val.textContent = qty + 1;
+      } else if (btn.getAttribute('data-action') === 'dec' && qty > 1) {
+        val.textContent = qty - 1;
+      }
+    });
+
     // Pre-populate from existing request data
     <?php if ($request && !empty($request['material']) || ($request && !empty($request['items']))): ?>
     (function() {
@@ -422,14 +475,18 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
           row.className = 'item-row';
           var hasImg = it.image && it.image.length > 100;
           row.innerHTML =
-            '<input type="text" class="item-size" placeholder="Size (e.g., Small, Large, XL, 2XL)" style="flex:2;" value="' + esc(it.size||'') + '">' +
-            '<input type="number" class="item-qty" placeholder="Qty" min="1" value="' + (it.qty||1) + '" style="flex:1;">' +
+            '<input type="text" class="item-size" list="size-list" placeholder="e.g., M, A4, Letter, Small, 3x5ft, etc." value="' + esc(it.size||'') + '">' +
+            '<div class="item-qty-stepper">' +
+              '<button type="button" class="qty-btn" data-action="dec">&minus;</button>' +
+              '<span class="qty-value">' + (it.qty||1) + '</span>' +
+              '<button type="button" class="qty-btn" data-action="inc">+</button>' +
+            '</div>' +
             '<div class="item-image-wrap">' +
               '<input type="file" class="item-image-input" accept="image/*" style="display:none;">' +
               '<div class="item-image-btn" onclick="this.previousElementSibling.click()" title="Upload reference image"' + (hasImg ? ' style="display:none;"' : '') + '><i class="fas fa-camera"></i></div>' +
               '<img class="item-image-preview" onclick="openItemPreview(this)"' + (hasImg ? ' style="display:block;" src="' + esc(it.image) + '"' : ' style="display:none;"') + '>' +
             '</div>' +
-            '<button type="button" class="item-remove" onclick="removeItemRow(this)" title="Remove"' + (existingItems.length < 2 ? ' style="display:none;"' : '') + '>&times;</button>';
+            '<button type="button" class="item-remove" onclick="removeItemRow(this)" title="Remove"' + (existingItems.length < 2 ? ' style="display:none;"' : '') + '><i class="fas fa-times"></i> Remove</button>';
           container.appendChild(row);
           var inp = row.querySelector('.item-image-input');
           if (!hasImg) attachItemImageHandler(inp);
@@ -474,7 +531,7 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
               const arr = [];
               rows.forEach(function(r){
                 const size = r.querySelector('.item-size').value.trim();
-                const qty = parseInt(r.querySelector('.item-qty').value) || 1;
+                const qty = parseInt(r.querySelector('.qty-value').textContent) || 1;
                 const preview = r.querySelector('.item-image-preview');
                 const image = (preview && preview.style.display !== 'none' && preview.src) ? preview.src : '';
                 if (size) arr.push({size: size, qty: qty, image: image});
@@ -510,7 +567,7 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
       const title = document.getElementById('modalTitle');
       const body = document.getElementById('modalBody');
       overlay.classList.add('open');
-      body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#e91e8c;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
+      body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#2B4C52;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
       fetch('../api/get-content.php?section=' + (type === 'contact' ? 'contact_info' : 'help_center'))
         .then(r => r.json())
         .then(json => {
@@ -528,13 +585,13 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
             const faqs = d.meta && d.meta.faqs ? d.meta.faqs : [];
             title.innerHTML = '<i class="fas fa-question-circle"></i> ' + (d.title || 'Help Center');
             let html = d.subtitle ? '<p style="margin-bottom:1.25rem;">' + esc(d.subtitle) + '</p>' : '';
-            if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(233,30,140,0.04);border-radius:12px;border:1px solid rgba(233,30,140,0.08);"><p style="font-size:0.88rem;color:#475569;">' + esc(d.content) + '</p></div>';
+            if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(43, 76, 82,0.04);border-radius:12px;border:1px solid rgba(43, 76, 82,0.08);"><p style="font-size:0.88rem;color:#475569;">' + esc(d.content) + '</p></div>';
             if (faqs.length) {
               faqs.forEach((f, i) => {
                 html += '<details class="modal-faq"' + (i === 0 ? ' open' : '') + '><summary>' + esc(f.question || '') + ' <i class="fas fa-chevron-down"></i></summary><div class="modal-faq-answer">' + esc(f.answer || '') + '</div></details>';
               });
             } else {
-              html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(233,30,140,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
+              html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(43, 76, 82,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
             }
             body.innerHTML = html;
           }

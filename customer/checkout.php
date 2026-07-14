@@ -76,14 +76,14 @@ unset($_SESSION['flash']);
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --sidebar-bg: #FFF5F8;
-      --sidebar-hover: rgba(233, 30, 140, 0.08);
-      --sidebar-active: #e91e8c;
-      --sidebar-active-bg: rgba(233, 30, 140, 0.12);
+      --sidebar-bg: #FAF7EE;
+      --sidebar-hover: rgba(43, 76, 82, 0.08);
+      --sidebar-active: #2B4C52;
+      --sidebar-active-bg: rgba(43, 76, 82, 0.12);
       --sidebar-width: 270px;
-      --primary: #e91e8c;
-      --primary-light: #9c27b0;
-      --primary-bg: rgba(233, 30, 140, 0.1);
+      --primary: #2B4C52;
+      --primary-light: #4A7C84;
+      --primary-bg: rgba(43, 76, 82, 0.1);
       --success: #10B981;
       --success-bg: rgba(16, 185, 129, 0.1);
       --warning: #F59E0B;
@@ -107,7 +107,7 @@ unset($_SESSION['flash']);
     .products-sidebar {
       width: var(--sidebar-width);
       background: var(--sidebar-bg);
-      border-right: 1px solid rgba(233, 30, 140, 0.1);
+      border-right: 1px solid rgba(43, 76, 82, 0.1);
       padding: 0;
       position: fixed;
       top: 0;
@@ -119,14 +119,14 @@ unset($_SESSION['flash']);
       flex-direction: column;
     }
     .products-sidebar::-webkit-scrollbar { width: 3px; }
-    .products-sidebar::-webkit-scrollbar-thumb { background: rgba(233, 30, 140, 0.2); border-radius: 4px; }
+    .products-sidebar::-webkit-scrollbar-thumb { background: rgba(43, 76, 82, 0.2); border-radius: 4px; }
     
     .sidebar-brand {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       padding: 1.25rem 1.25rem 1rem;
-      border-bottom: 1px solid rgba(233, 30, 140, 0.12);
+      border-bottom: 1px solid rgba(43, 76, 82, 0.12);
       position: sticky;
       top: 0;
       background: var(--sidebar-bg);
@@ -139,7 +139,7 @@ unset($_SESSION['flash']);
       object-fit: contain;
       background: white;
       padding: 4px;
-      box-shadow: 0 2px 6px rgba(233, 30, 140, 0.15);
+      box-shadow: 0 2px 6px rgba(43, 76, 82, 0.15);
     }
     .sidebar-brand-text { line-height: 1.2; }
     .sidebar-brand-name { font-size: 0.85rem; font-weight: 800; color: #1a1a2e; letter-spacing: 0.03em; display: block; }
@@ -150,8 +150,8 @@ unset($_SESSION['flash']);
       display: flex;
       align-items: center;
       gap: 0.65rem;
-      border-bottom: 1px solid rgba(233, 30, 140, 0.08);
-      background: rgba(233, 30, 140, 0.03);
+      border-bottom: 1px solid rgba(43, 76, 82, 0.08);
+      background: rgba(43, 76, 82, 0.03);
     }
     .sidebar-avatar {
       width: 30px;
@@ -198,7 +198,7 @@ unset($_SESSION['flash']);
       width: 20px;
       text-align: center;
       font-size: 0.85rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: var(--transition);
     }
     .sidebar-menu-item:hover {
@@ -213,7 +213,7 @@ unset($_SESSION['flash']);
       color: var(--primary);
       font-weight: 600;
       border-left-color: var(--primary);
-      box-shadow: 0 2px 8px rgba(233, 30, 140, 0.08);
+      box-shadow: 0 2px 8px rgba(43, 76, 82, 0.08);
     }
     .sidebar-menu-item.active i { color: var(--primary); }
     .sidebar-menu-item .badge {
@@ -229,7 +229,7 @@ unset($_SESSION['flash']);
     
     .sidebar-footer {
       padding: 0.75rem 1.25rem;
-      border-top: 1px solid rgba(233, 30, 140, 0.1);
+      border-top: 1px solid rgba(43, 76, 82, 0.1);
     }
     .sidebar-footer-item {
       display: flex;
@@ -242,7 +242,7 @@ unset($_SESSION['flash']);
       transition: var(--transition);
     }
     .sidebar-footer-item:hover { color: var(--primary); }
-    .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #b06ab3; }
+    .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #4A7C84; }
     .sidebar-footer button.sidebar-footer-item { background: none; border: none; cursor: pointer; width: 100%; text-align: left; font: inherit; color: var(--text-muted); display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0; font-size: 0.78rem; text-decoration: none; transition: var(--transition); }
     .sidebar-footer button.sidebar-footer-item:hover { color: var(--primary); }
 
@@ -443,7 +443,7 @@ unset($_SESSION['flash']);
       width: 18px;
       text-align: center;
       font-size: 0.8rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: var(--transition);
     }
 
@@ -495,7 +495,7 @@ unset($_SESSION['flash']);
     }
     .checkout-card:hover {
       box-shadow: 0 8px 28px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
-      border-color: rgba(233, 30, 140, 0.12);
+      border-color: rgba(43, 76, 82, 0.12);
     }
     .checkout-card-header { 
       display: flex; 
@@ -515,7 +515,7 @@ unset($_SESSION['flash']);
       font-size: 1rem; 
       flex-shrink: 0; 
     }
-    .checkout-card-header .card-header-icon.contact { background: rgba(233,30,140,0.1); color: var(--primary); }
+    .checkout-card-header .card-header-icon.contact { background: rgba(43, 76, 82,0.1); color: var(--primary); }
     .checkout-card-header .card-header-icon.delivery { background: rgba(16,185,129,0.1); color: var(--success); }
     .checkout-card-header .card-header-icon.payment { background: rgba(245,158,11,0.1); color: var(--warning); }
     .checkout-card-header .card-header-icon.notes { background: rgba(99,102,241,0.1); color: #6366f1; }
@@ -537,7 +537,7 @@ unset($_SESSION['flash']);
       width: 28px; 
       height: 28px; 
       border-radius: 50%; 
-      background: linear-gradient(135deg, #e91e8c, #9c27b0); 
+      background: linear-gradient(135deg, #2B4C52, #4A7C84); 
       color: white; 
       display: flex; 
       align-items: center; 
@@ -546,7 +546,7 @@ unset($_SESSION['flash']);
       font-size: 0.75rem; 
       flex-shrink: 0; 
       margin-left: auto;
-      box-shadow: 0 2px 6px rgba(233,30,140,0.2);
+      box-shadow: 0 2px 6px rgba(43, 76, 82,0.2);
     }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-grid .full-width { grid-column: 1 / -1; }
@@ -566,11 +566,11 @@ unset($_SESSION['flash']);
       box-sizing: border-box; 
       font-family: var(--font);
     }
-    .form-group input:hover, .form-group select:hover, .form-group textarea:hover { border-color: rgba(233,30,140,0.25); }
+    .form-group input:hover, .form-group select:hover, .form-group textarea:hover { border-color: rgba(43, 76, 82,0.25); }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
       border-color: var(--primary); 
-      box-shadow: 0 0 0 3px rgba(233, 30, 142, 0.1), 0 1px 2px rgba(0,0,0,0.02); 
-      background: #fef9fb;
+      box-shadow: 0 0 0 3px rgba(43, 76, 82, 0.1), 0 1px 2px rgba(0,0,0,0.02); 
+      background: #F0F5F0;
     }
     .form-group input::placeholder, .form-group textarea::placeholder { color: #94a3b8; font-weight: 400; }
     .form-group textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
@@ -612,18 +612,18 @@ unset($_SESSION['flash']);
       transition: all 0.3s ease;
     }
     .payment-method:hover { 
-      border-color: rgba(233, 30, 142, 0.35); 
-      background: rgba(233, 30, 142, 0.03); 
+      border-color: rgba(43, 76, 82, 0.35); 
+      background: rgba(43, 76, 82, 0.03); 
       transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(233, 30, 142, 0.08);
+      box-shadow: 0 8px 24px rgba(43, 76, 82, 0.08);
     }
     .payment-method:hover::before {
-      background: linear-gradient(90deg, rgba(233,30,140,0.3), rgba(233,30,140,0.1));
+      background: linear-gradient(90deg, rgba(43, 76, 82,0.3), rgba(43, 76, 82,0.1));
     }
     .payment-method.selected { 
       border-color: var(--primary); 
-      background: rgba(233, 30, 142, 0.05); 
-      box-shadow: 0 0 0 3px rgba(233, 30, 142, 0.1), 0 8px 24px rgba(233, 30, 142, 0.12);
+      background: rgba(43, 76, 82, 0.05); 
+      box-shadow: 0 0 0 3px rgba(43, 76, 82, 0.1), 0 8px 24px rgba(43, 76, 82, 0.12);
       transform: translateY(-3px);
     }
     .payment-method.selected::before {
@@ -643,7 +643,7 @@ unset($_SESSION['flash']);
     }
     .payment-method .payment-icon-wrapper.icon-gcash { background: rgba(0,125,254,0.1); color: #007dfe; }
     .payment-method .payment-icon-wrapper.icon-downpayment { background: rgba(139,92,246,0.1); color: #8b5cf6; }
-    .payment-method .payment-icon-wrapper.icon-card { background: rgba(233,30,140,0.1); color: var(--primary); }
+    .payment-method .payment-icon-wrapper.icon-card { background: rgba(43, 76, 82,0.1); color: var(--primary); }
     .payment-method:hover .payment-icon-wrapper { transform: scale(1.08) translateY(-1px); }
     .payment-method.selected .payment-icon-wrapper { transform: scale(1.08) translateY(-1px); }
     .payment-method .payment-name { font-weight: 700; font-size: 0.85rem; color: var(--text-primary); }
@@ -670,12 +670,12 @@ unset($_SESSION['flash']);
       opacity: 1;
       transform: scale(1);
       background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      box-shadow: 0 2px 8px rgba(233,30,140,0.3);
+      box-shadow: 0 2px 8px rgba(43, 76, 82,0.3);
     }
-    .cc-fields { margin-top: 1.25rem; padding: 1.25rem; background: rgba(233, 30, 140, 0.03); border: 1px solid rgba(233, 30, 142, 0.15); border-radius: 14px; display: none; }
+    .cc-fields { margin-top: 1.25rem; padding: 1.25rem; background: rgba(43, 76, 82, 0.03); border: 1px solid rgba(43, 76, 82, 0.15); border-radius: 14px; display: none; }
     .cc-fields.visible { display: block; animation: fadeIn 0.3s ease; }
     .cc-fields h3 { margin: 0 0 1rem; font-size: 0.95rem; color: #111827; display: flex; align-items: center; gap: 0.5rem; }
-    .cc-fields h3 i { color: #e91e8c; }
+    .cc-fields h3 i { color: #2B4C52; }
     .ewallet-info { margin-top: 1.25rem; padding: 1.25rem; background: rgba(0, 125, 254, 0.04); border: 1px solid rgba(0, 125, 254, 0.15); border-radius: 14px; display: none; }
     .ewallet-info.visible { display: block; animation: fadeIn 0.3s ease; }
     .ewallet-info h3 { margin: 0 0 0.75rem; font-size: 0.95rem; color: #111827; display: flex; align-items: center; gap: 0.5rem; }
@@ -711,7 +711,7 @@ unset($_SESSION['flash']);
     }
     .checkout-summary-card .summary-header .summary-header-icon {
       width: 36px; height: 36px; border-radius: 10px;
-      background: rgba(233,30,140,0.1); color: var(--primary);
+      background: rgba(43, 76, 82,0.1); color: var(--primary);
       display: flex; align-items: center; justify-content: center;
       font-size: 0.9rem; flex-shrink: 0;
     }
@@ -726,7 +726,7 @@ unset($_SESSION['flash']);
     .summary-items-list { max-height: 240px; overflow-y: auto; margin-bottom: 0.75rem; padding-right: 0.25rem; }
     .summary-items-list::-webkit-scrollbar { width: 3px; }
     .summary-items-list::-webkit-scrollbar-track { background: transparent; }
-    .summary-items-list::-webkit-scrollbar-thumb { background: rgba(233, 30, 142, 0.2); border-radius: 4px; }
+    .summary-items-list::-webkit-scrollbar-thumb { background: rgba(43, 76, 82, 0.2); border-radius: 4px; }
     .summary-item { 
       display: flex; gap: 0.65rem; padding: 0.6rem 0; 
       border-bottom: 1px solid var(--border-light); 
@@ -770,14 +770,14 @@ unset($_SESSION['flash']);
     .summary-delivery strong { color: var(--text-primary); }
     .place-order-btn { 
       width: 100%; padding: 0.9rem; margin-top: 0.75rem; 
-      background: linear-gradient(135deg, #e91e8c, #9c27b0); 
+      background: linear-gradient(135deg, #2B4C52, #4A7C84); 
       color: white; border: none; border-radius: 12px; 
       font-size: 1rem; font-weight: 700; cursor: pointer; 
       display: flex; align-items: center; justify-content: center; gap: 0.5rem; 
       transition: all 0.3s ease; 
-      box-shadow: 0 6px 20px rgba(233, 30, 142, 0.25); 
+      box-shadow: 0 6px 20px rgba(43, 76, 82, 0.25); 
     }
-    .place-order-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(233, 30, 142, 0.35); }
+    .place-order-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(43, 76, 82, 0.35); }
     .place-order-btn:active { transform: translateY(0); }
     .place-order-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
     .place-order-btn i { font-size: 0.9rem; }
@@ -790,7 +790,7 @@ unset($_SESSION['flash']);
     .terms-text a { color: var(--primary); text-decoration: none; font-weight: 600; }
     .terms-text a:hover { text-decoration: underline; }
     .checkout-empty { text-align: center; padding: 4rem 2rem; background: #ffffff; border: 2px dashed rgba(226, 232, 240, 0.8); border-radius: 24px; box-shadow: 0 12px 34px rgba(15, 23, 42, 0.04); grid-column: 1 / -1; }
-    .checkout-empty-icon { font-size: 4rem; color: rgba(233, 30, 142, 0.2); margin-bottom: 1.5rem; }
+    .checkout-empty-icon { font-size: 4rem; color: rgba(43, 76, 82, 0.2); margin-bottom: 1.5rem; }
     .checkout-empty h2 { color: #111827; font-size: 1.5rem; margin-bottom: 0.75rem; }
     .checkout-empty p { color: #64748b; margin-bottom: 2rem; max-width: 400px; margin-left: auto; margin-right: auto; }
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(6px); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
@@ -799,11 +799,11 @@ unset($_SESSION['flash']);
     .modal-success-icon { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #047857, #10b981); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.5rem; }
     .modal-content h2 { color: #111827; font-size: 1.5rem; margin: 0 0 0.75rem; }
     .modal-content p { color: #64748b; font-size: 0.95rem; line-height: 1.6; margin: 0 0 0.5rem; }
-    .modal-order-id { display: inline-block; background: rgba(233, 30, 142, 0.08); color: #e91e8c; font-weight: 700; font-size: 1rem; padding: 0.5rem 1.2rem; border-radius: 10px; margin: 1rem 0; }
+    .modal-order-id { display: inline-block; background: rgba(43, 76, 82, 0.08); color: #2B4C52; font-weight: 700; font-size: 1rem; padding: 0.5rem 1.2rem; border-radius: 10px; margin: 1rem 0; }
     .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
     .modal-actions a { flex: 1; padding: 0.85rem 1rem; border-radius: 12px; font-weight: 700; text-decoration: none; text-align: center; transition: all 0.2s ease; }
-    .modal-actions .btn-primary-modal { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; }
-    .modal-actions .btn-primary-modal:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(233, 30, 142, 0.3); }
+    .modal-actions .btn-primary-modal { background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; }
+    .modal-actions .btn-primary-modal:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(43, 76, 82, 0.3); }
     .modal-actions .btn-ghost-modal { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
     .modal-actions .btn-ghost-modal:hover { background: #e2e8f0; }
     .btn-spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
@@ -822,12 +822,12 @@ unset($_SESSION['flash']);
     .toast-checkout-info { background: rgba(59, 130, 246, 0.9); color: white; border: 1px solid rgba(59, 130, 246, 0.4); }
     @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
     .required-note { font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem; }
-    .required-note .required { color: #e91e8c; }
+    .required-note .required { color: #2B4C52; }
     .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(6px); z-index: 2000; align-items: center; justify-content: center; padding: 1rem; }
     .confirm-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
     .confirm-content { background: white; border-radius: 24px; padding: 2rem; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); animation: scaleIn 0.3s ease; }
     .confirm-content h2 { color: #111827; font-size: 1.3rem; margin: 0 0 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
-    .confirm-content h2 i { color: #e91e8c; }
+    .confirm-content h2 i { color: #2B4C52; }
     .confirm-section { margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
     .confirm-section:last-of-type { border-bottom: none; margin-bottom: 0; }
     .confirm-section h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 0.5rem; font-weight: 700; }
@@ -838,17 +838,17 @@ unset($_SESSION['flash']);
     .confirm-items-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
     .confirm-items-list li:last-child { border-bottom: none; }
     .confirm-total-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0 0; margin-top: 0.5rem; border-top: 2px solid #e2e8f0; font-size: 1.05rem; font-weight: 700; }
-    .confirm-total-row .total-amount { color: #e91e8c; font-size: 1.3rem; }
+    .confirm-total-row .total-amount { color: #2B4C52; font-size: 1.3rem; }
     .confirm-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
     .confirm-actions button { flex: 1; padding: 0.85rem 1rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease; border: none; }
-    .btn-confirm-yes { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; box-shadow: 0 4px 12px rgba(233, 30, 140, 0.3); }
-    .btn-confirm-yes:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(233, 30, 140, 0.4); }
+    .btn-confirm-yes { background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; box-shadow: 0 4px 12px rgba(43, 76, 82, 0.3); }
+    .btn-confirm-yes:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(43, 76, 82, 0.4); }
     .btn-confirm-no { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
     .btn-confirm-no:hover { background: #e2e8f0; }
     .field-error { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important; }
     .field-error-msg { font-size: 0.78rem; color: #ef4444; margin-top: 0.2rem; display: none; }
     .field-error-msg.visible { display: block; }
-    .confirm-edit-input { padding: 0.4rem 0.6rem; border: 1.5px solid #e91e8c; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #111827; background: white; outline: none; width: 100%; box-sizing: border-box; }
+    .confirm-edit-input { padding: 0.4rem 0.6rem; border: 1.5px solid #2B4C52; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #111827; background: white; outline: none; width: 100%; box-sizing: border-box; }
     .address-preview { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1rem; margin-top: 1rem; display: none; }
     .address-preview.visible { display: block; }
     .address-preview h4 { margin: 0 0 0.5rem; font-size: 0.85rem; color: #166534; }
@@ -884,7 +884,7 @@ unset($_SESSION['flash']);
     .help-modal-body { padding: 1.5rem; }
     .help-modal-body p { font-size: 0.92rem; color: #475569; line-height: 1.7; }
     .help-contact-item { display: flex; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 14px; margin-bottom: 0.75rem; align-items: flex-start; }
-    .help-contact-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #9c27b0); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .help-contact-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #4A7C84); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
     .help-contact-label { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.15rem; }
     .help-contact-value { font-size: 0.92rem; font-weight: 500; color: #0f172a; }
     .help-faq { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 0.6rem; overflow: hidden; }
@@ -926,7 +926,7 @@ unset($_SESSION['flash']);
       width: 16px;
       text-align: center;
       font-size: 0.75rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: var(--transition);
     }
     .sidebar-submenu-item:hover {
@@ -1032,7 +1032,7 @@ unset($_SESSION['flash']);
           <div style="flex:1; max-width:400px; margin:0 auto;">
             <div style="display:flex; align-items:center; justify-content:center; gap:0.25rem;">
               <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem;">
-                <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, #e91e8c, #9c27b0); color:white; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:800; box-shadow:0 2px 8px rgba(233,30,140,0.3);"><i class="fas fa-shopping-cart"></i></div>
+                <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, #2B4C52, #4A7C84); color:white; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:800; box-shadow:0 2px 8px rgba(43, 76, 82,0.3);"><i class="fas fa-shopping-cart"></i></div>
                 <span style="font-size:0.55rem; font-weight:700; color:var(--primary); white-space:nowrap;">Checkout</span>
               </div>
               <div style="flex:1; max-width:50px; height:2px; background:var(--border-color);"></div>
@@ -1127,7 +1127,7 @@ unset($_SESSION['flash']);
             <div id="saved-addresses-section" style="margin-bottom:1.25rem; display:none;">
               <label style="font-size:0.88rem; font-weight:600; color:#334155; display:block; margin-bottom:0.5rem;">Select a saved address</label>
               <div id="saved-addresses-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
-              <button type="button" onclick="showAddressForm()" style="margin-top:0.75rem; font-size:0.85rem; color:#e91e8c; background:none; border:none; cursor:pointer; font-weight:600; padding:0;"><i class="fas fa-plus"></i> Use a different address</button>
+              <button type="button" onclick="showAddressForm()" style="margin-top:0.75rem; font-size:0.85rem; color:#2B4C52; background:none; border:none; cursor:pointer; font-weight:600; padding:0;"><i class="fas fa-plus"></i> Use a different address</button>
             </div>
             <div id="address-form-section">
               <div class="form-grid">
@@ -1235,7 +1235,7 @@ unset($_SESSION['flash']);
               <h3><i class="fas fa-percentage"></i> Downpayment (50% Upfront + Balance)</h3>
               <p style="font-size:0.88rem; color:#475569; margin:0 0 0.75rem; line-height:1.5;">Pay 50% upfront to start production. Choose how you'll pay the upfront and the remaining 50% balance.</p>
 
-              <div style="padding:1rem; background:rgba(233,30,140,0.04); border:1px solid rgba(233,30,142,0.15); border-radius:10px;">
+              <div style="padding:1rem; background:rgba(43, 76, 82,0.04); border:1px solid rgba(43, 76, 82,0.15); border-radius:10px;">
                 <h4 style="margin:0 0 0.75rem; font-size:0.85rem; color:#111827;"><i class="fas fa-lock" style="color:var(--primary);"></i> Upfront Payment (50%)</h4>
 
                 <div style="display:flex; gap:1rem; margin-bottom:1rem;">
@@ -1757,7 +1757,7 @@ unset($_SESSION['flash']);
                  data-addr='${JSON.stringify(addr).replace(/'/g, "&#39;")}'>
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
                 <strong style="font-size:0.88rem; color:#111827;">${escapeHtml(addr.label)}</strong>
-                ${addr.is_default ? '<span style="font-size:0.65rem; background:rgba(233,30,142,0.1); color:#e91e8c; padding:0.1rem 0.4rem; border-radius:999px; font-weight:700;">DEFAULT</span>' : ''}
+                ${addr.is_default ? '<span style="font-size:0.65rem; background:rgba(43, 76, 82,0.1); color:#2B4C52; padding:0.1rem 0.4rem; border-radius:999px; font-weight:700;">DEFAULT</span>' : ''}
               </div>
               <div style="font-size:0.82rem; color:#475569; line-height:1.4;">${escapeHtml(addr.first_name + ' ' + addr.last_name)} &bull; ${escapeHtml(addr.phone)}<br>${escapeHtml(addr.street + ', ' + addr.city + ', ' + addr.province + ' ' + addr.zip_code)}</div>
             </div>
@@ -1772,8 +1772,8 @@ unset($_SESSION['flash']);
 
     function selectSavedAddress(el, id) {
       document.querySelectorAll('#saved-addresses-list > div').forEach(d => d.style.borderColor = '#e2e8f0');
-      el.style.borderColor = '#e91e8c';
-      el.style.background = 'rgba(233,30,142,0.03)';
+      el.style.borderColor = '#2B4C52';
+      el.style.background = 'rgba(43, 76, 82,0.03)';
       const addr = JSON.parse(el.dataset.addr);
       document.getElementById('address').value = addr.street;
       document.getElementById('city').value = addr.city;
@@ -1825,7 +1825,7 @@ unset($_SESSION['flash']);
     const title = document.getElementById('helpModalTitle');
     const body = document.getElementById('helpModalBody');
     overlay.classList.add('open');
-    body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#e91e8c;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
+    body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#2B4C52;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
     fetch('../api/get-content.php?section=' + (type === 'contact' ? 'contact_info' : 'help_center'))
       .then(r => r.json())
       .then(json => {
@@ -1843,13 +1843,13 @@ unset($_SESSION['flash']);
           const faqs = d.meta && d.meta.faqs ? d.meta.faqs : [];
           title.innerHTML = '<i class="fas fa-question-circle"></i> ' + (d.title || 'Help Center');
           let html = d.subtitle ? '<p style="margin-bottom:1.25rem;">' + helpEsc(d.subtitle) + '</p>' : '';
-          if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(233,30,140,0.04);border-radius:12px;border:1px solid rgba(233,30,140,0.08);"><p style="font-size:0.88rem;color:#475569;">' + helpEsc(d.content) + '</p></div>';
+          if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(43, 76, 82,0.04);border-radius:12px;border:1px solid rgba(43, 76, 82,0.08);"><p style="font-size:0.88rem;color:#475569;">' + helpEsc(d.content) + '</p></div>';
           if (faqs.length) {
             faqs.forEach((f, i) => {
               html += '<details class="help-faq"' + (i === 0 ? ' open' : '') + '><summary>' + helpEsc(f.question || '') + ' <i class="fas fa-chevron-down"></i></summary><div class="help-faq-answer">' + helpEsc(f.answer || '') + '</div></details>';
             });
           } else {
-            html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(233,30,140,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
+            html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(43, 76, 82,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
           }
           body.innerHTML = html;
         }

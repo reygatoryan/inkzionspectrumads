@@ -148,7 +148,7 @@ if (is_numeric($displayPrice)) {
 
     .product-category {
       display: inline-block;
-      background: linear-gradient(135deg, #e91e8c 0%, #00bcd4 100%);
+      background: linear-gradient(135deg, #2B4C52 0%, #4A7C84 100%);
       color: white;
       padding: 8px 18px;
       border-radius: 999px;
@@ -169,9 +169,9 @@ if (is_numeric($displayPrice)) {
     .product-price {
       font-size: 2.2rem;
       font-weight: 800;
-      color: #e91e8c;
+      color: #2B4C52;
       margin-bottom: 30px;
-      background: rgba(233, 30, 140, 0.08);
+      background: rgba(43, 76, 82, 0.08);
       padding: 16px 18px;
       border-radius: 18px;
       display: inline-flex;
@@ -266,8 +266,8 @@ if (is_numeric($displayPrice)) {
       flex: 1;
       padding: 15px 25px;
       background: white;
-      color: #e91e8c;
-      border: 2px solid #e91e8c;
+      color: #2B4C52;
+      border: 2px solid #2B4C52;
       border-radius: 8px;
       font-weight: 600;
       font-size: 1rem;
@@ -280,7 +280,7 @@ if (is_numeric($displayPrice)) {
     }
 
     .btn-customize-page:hover {
-      background: #e91e8c;
+      background: #2B4C52;
       color: white;
     }
 
@@ -288,7 +288,7 @@ if (is_numeric($displayPrice)) {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      color: #e91e8c;
+      color: #2B4C52;
       text-decoration: none;
       margin-bottom: 30px;
       font-weight: 600;
@@ -332,7 +332,7 @@ if (is_numeric($displayPrice)) {
 
     .related-product-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(233, 30, 140, 0.15);
+      box-shadow: 0 8px 20px rgba(43, 76, 82, 0.15);
     }
 
     .related-product-image {
@@ -371,14 +371,14 @@ if (is_numeric($displayPrice)) {
     .related-product-price {
       font-size: 1.3rem;
       font-weight: 700;
-      color: #e91e8c;
+      color: #2B4C52;
       margin-top: auto;
     }
 
     .testimonials-section {
       margin-top: 80px;
       padding: 50px;
-      background: linear-gradient(135deg, rgba(233, 30, 140, 0.08) 0%, rgba(0, 188, 212, 0.08) 100%);
+      background: linear-gradient(135deg, rgba(43, 76, 82, 0.08) 0%, rgba(43, 76, 82, 0.08) 100%);
       border-radius: 12px;
       text-align: center;
     }
@@ -407,7 +407,7 @@ if (is_numeric($displayPrice)) {
 
     .testimonial-author {
       font-weight: 600;
-      color: #e91e8c;
+      color: #2B4C52;
     }
 
     @media (max-width: 768px) {
@@ -542,25 +542,25 @@ if (is_numeric($displayPrice)) {
               <button type="button" class="btn-customize-page" id="customize-page">
                 <i class="fas fa-paint-brush"></i> Request Customization
               </button>
-              <a href="chat.php<?= !empty($product['id']) ? '?product_id='.$product['id'] : ''; ?>" class="btn" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:12px;background:linear-gradient(135deg,#e91e8c,#9c27b0);color:white;text-decoration:none;font-weight:600;font-size:0.9rem;border:none;cursor:pointer;transition:all 0.2s ease;">
+              <a href="chat.php<?= !empty($product['id']) ? '?product_id='.$product['id'] : ''; ?>" class="btn" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:12px;background:linear-gradient(135deg,#2B4C52,#4A7C84);color:white;text-decoration:none;font-weight:600;font-size:0.9rem;border:none;cursor:pointer;transition:all 0.2s ease;">
                 <i class="fas fa-comments"></i> Chat with Admin
               </a>
               <button type="button" class="btn" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:12px;background:white;color:#0f172a;text-decoration:none;font-weight:600;font-size:0.9rem;border:1px solid #e2e8f0;cursor:pointer;transition:all 0.2s ease;" onclick="showContactInfo()">
-                <i class="fas fa-headset" style="color:#e91e8c;"></i> Contact Admin
+                <i class="fas fa-headset" style="color:#2B4C52;"></i> Contact Admin
               </button>
               <div id="contactOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:99999;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)document.getElementById('contactOverlay').style.display='none'">
                 <div style="background:white;border-radius:16px;padding:2rem;max-width:360px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.2);animation:modalIn 0.2s ease;">
-                  <div style="width:56px;height:56px;border-radius:50%;background:rgba(233,30,140,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#e91e8c;margin:0 auto 1rem;">
+                  <div style="width:56px;height:56px;border-radius:50%;background:rgba(43, 76, 82,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#2B4C52;margin:0 auto 1rem;">
                     <i class="fas fa-headset"></i>
                   </div>
                   <div style="font-size:1rem;font-weight:700;color:#0f172a;margin-bottom:0.3rem;">Contact Admin</div>
                   <div style="font-size:0.82rem;color:#64748b;margin-bottom:1.25rem;">Reach us directly through these channels:</div>
                   <div style="display:flex;flex-direction:column;gap:0.65rem;">
                     <a href="tel:+63912456789" style="display:flex;align-items:center;gap:0.65rem;padding:0.75rem 1rem;background:#f8fafc;border-radius:10px;text-decoration:none;color:#0f172a;font-size:0.85rem;font-weight:500;">
-                      <i class="fas fa-phone" style="color:#e91e8c;width:18px;"></i> +63 912 345 6789
+                      <i class="fas fa-phone" style="color:#2B4C52;width:18px;"></i> +63 912 345 6789
                     </a>
                     <a href="mailto:info@inkzionspectrum.com" style="display:flex;align-items:center;gap:0.65rem;padding:0.75rem 1rem;background:#f8fafc;border-radius:10px;text-decoration:none;color:#0f172a;font-size:0.85rem;font-weight:500;">
-                      <i class="fas fa-envelope" style="color:#e91e8c;width:18px;"></i> info@inkzionspectrum.com
+                      <i class="fas fa-envelope" style="color:#2B4C52;width:18px;"></i> info@inkzionspectrum.com
                     </a>
                     <a href="https://facebook.com/inkzionspectrumads" target="_blank" style="display:flex;align-items:center;gap:0.65rem;padding:0.75rem 1rem;background:#f8fafc;border-radius:10px;text-decoration:none;color:#0f172a;font-size:0.85rem;font-weight:500;">
                       <i class="fab fa-facebook" style="color:#1877F2;width:18px;"></i> Inkzion Spectrum Ads

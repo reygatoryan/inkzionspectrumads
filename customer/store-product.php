@@ -156,14 +156,14 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --sidebar-bg: #FFF5F8;
-      --sidebar-hover: rgba(233, 30, 140, 0.08);
-      --sidebar-active: #e91e8c;
-      --sidebar-active-bg: rgba(233, 30, 140, 0.12);
+      --sidebar-bg: #FAF7EE;
+      --sidebar-hover: rgba(43, 76, 82, 0.08);
+      --sidebar-active: #2B4C52;
+      --sidebar-active-bg: rgba(43, 76, 82, 0.12);
       --sidebar-width: 270px;
-      --primary: #e91e8c;
-      --primary-light: #9c27b0;
-      --primary-bg: rgba(233, 30, 140, 0.1);
+      --primary: #2B4C52;
+      --primary-light: #4A7C84;
+      --primary-bg: rgba(43, 76, 82, 0.1);
       --success: #10B981;
       --success-bg: rgba(16, 185, 129, 0.1);
       --warning: #F59E0B;
@@ -187,7 +187,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .products-sidebar {
       width: var(--sidebar-width);
       background: var(--sidebar-bg);
-      border-right: 1px solid rgba(233, 30, 140, 0.1);
+      border-right: 1px solid rgba(43, 76, 82, 0.1);
       padding: 0;
       position: fixed;
       top: 0;
@@ -199,14 +199,14 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       flex-direction: column;
     }
     .products-sidebar::-webkit-scrollbar { width: 3px; }
-    .products-sidebar::-webkit-scrollbar-thumb { background: rgba(233, 30, 140, 0.2); border-radius: 4px; }
+    .products-sidebar::-webkit-scrollbar-thumb { background: rgba(43, 76, 82, 0.2); border-radius: 4px; }
     
     .sidebar-brand {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       padding: 1.25rem 1.25rem 1rem;
-      border-bottom: 1px solid rgba(233, 30, 140, 0.12);
+      border-bottom: 1px solid rgba(43, 76, 82, 0.12);
       position: sticky;
       top: 0;
       background: var(--sidebar-bg);
@@ -219,7 +219,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       object-fit: contain;
       background: white;
       padding: 4px;
-      box-shadow: 0 2px 6px rgba(233, 30, 140, 0.15);
+      box-shadow: 0 2px 6px rgba(43, 76, 82, 0.15);
     }
     .sidebar-brand-text { line-height: 1.2; }
     .sidebar-brand-name { font-size: 0.85rem; font-weight: 800; color: #1a1a2e; letter-spacing: 0.03em; display: block; }
@@ -230,8 +230,8 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       display: flex;
       align-items: center;
       gap: 0.65rem;
-      border-bottom: 1px solid rgba(233, 30, 140, 0.08);
-      background: rgba(233, 30, 140, 0.03);
+      border-bottom: 1px solid rgba(43, 76, 82, 0.08);
+      background: rgba(43, 76, 82, 0.03);
     }
     .sidebar-avatar {
       width: 30px;
@@ -278,7 +278,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       width: 20px;
       text-align: center;
       font-size: 0.85rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: var(--transition);
     }
     .sidebar-menu-item:hover {
@@ -293,7 +293,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       color: var(--primary);
       font-weight: 600;
       border-left-color: var(--primary);
-      box-shadow: 0 2px 8px rgba(233, 30, 140, 0.08);
+      box-shadow: 0 2px 8px rgba(43, 76, 82, 0.08);
     }
     .sidebar-menu-item.active i { color: var(--primary); }
     .sidebar-menu-item .badge {
@@ -309,7 +309,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     
     .sidebar-footer {
       padding: 0.75rem 1.25rem;
-      border-top: 1px solid rgba(233, 30, 140, 0.1);
+      border-top: 1px solid rgba(43, 76, 82, 0.1);
     }
     .sidebar-footer-item {
       display: flex;
@@ -322,7 +322,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       transition: var(--transition);
     }
     .sidebar-footer-item:hover { color: var(--primary); }
-    .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #b06ab3; }
+    .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #4A7C84; }
     .sidebar-footer button.sidebar-footer-item { background: none; border: none; cursor: pointer; width: 100%; text-align: left; font: inherit; color: var(--text-muted); display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0; font-size: 0.78rem; text-decoration: none; transition: var(--transition); }
     .sidebar-footer button.sidebar-footer-item:hover { color: var(--primary); }
 
@@ -522,7 +522,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       width: 18px;
       text-align: center;
       font-size: 0.8rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: var(--transition);
     }
 
@@ -595,130 +595,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       padding: 1.5rem 2rem 2rem;
     }
     
-    /* DASHBOARD CARDS */
-    .dash-cards {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .dash-card {
-      position: relative;
-      padding: 1.25rem 1.25rem 1.25rem 1rem;
-      border-radius: 14px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      cursor: default;
-      transition: var(--transition);
-    }
-    
-    .dash-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
-    }
-    
-    .dash-card .dash-card-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      flex-shrink: 0;
-      position: relative;
-      z-index: 1;
-    }
-    
-    .dash-card-body {
-      position: relative;
-      z-index: 1;
-      flex: 1;
-    }
-    
-    .dash-card-body h3 {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 0.2rem;
-    }
-    
-    .dash-card-body p {
-      font-size: 0.7rem;
-      color: rgba(255,255,255,0.8);
-      line-height: 1.3;
-    }
-    
-    .dash-card-glow {
-      position: absolute;
-      top: -50%;
-      right: -30%;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      opacity: 0.15;
-      transition: var(--transition);
-    }
-    
-    .dash-card:hover .dash-card-glow {
-      transform: scale(1.5);
-      opacity: 0.25;
-    }
-    
-    .dash-card-best {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-    .dash-card-best .dash-card-icon {
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-    }
-    .dash-card-best .dash-card-glow {
-      background: #f5576c;
-    }
-    
-    .dash-card-new {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    }
-    .dash-card-new .dash-card-icon {
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-    }
-    .dash-card-new .dash-card-glow {
-      background: #00f2fe;
-    }
-    
-    .dash-card-custom {
-      background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-    }
-    .dash-card-custom .dash-card-icon {
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-    }
-    .dash-card-custom .dash-card-glow {
-      background: #fbc2eb;
-    }
-    
-    .dash-card-fast {
-      background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%);
-    }
-    .dash-card-fast .dash-card-icon {
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-    }
-    .dash-card-fast .dash-card-glow {
-      background: #d57eeb;
-    }
-    
-    @media (max-width: 1024px) {
-      .dash-cards { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 600px) {
-      .dash-cards { grid-template-columns: 1fr; }
-    }
-
     .products-toolbar {
       display: flex;
       gap: 1rem;
@@ -748,17 +624,17 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       box-shadow: 0 1px 2px rgba(0,0,0,0.04);
     }
     .filter-chip:hover {
-      border-color: #e91e8c;
-      color: #e91e8c;
-      background: rgba(233, 30, 140, 0.06);
+      border-color: #2B4C52;
+      color: #2B4C52;
+      background: rgba(43, 76, 82, 0.06);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(233, 30, 140, 0.15);
+      box-shadow: 0 4px 12px rgba(43, 76, 82, 0.15);
     }
     .filter-chip.active {
-      background: linear-gradient(135deg, #e91e8c 0%, #9c27b0 100%);
+      background: linear-gradient(135deg, #2B4C52 0%, #4A7C84 100%);
       color: white;
       border-color: transparent;
-      box-shadow: 0 4px 14px rgba(233, 30, 140, 0.3);
+      box-shadow: 0 4px 14px rgba(43, 76, 82, 0.3);
       transform: translateY(-1px);
     }
     .filter-chip.active i {
@@ -766,11 +642,11 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     }
     .filter-chip i {
       font-size: 0.75rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: all 0.3s ease;
     }
     .filter-chip:hover i {
-      color: #e91e8c;
+      color: #2B4C52;
     }
     
     /* SKELETON LOADING */
@@ -843,9 +719,9 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       position: relative;
     }
     .product-card:hover {
-      box-shadow: 0 12px 32px rgba(233, 30, 140, 0.12), 0 4px 8px rgba(0,0,0,0.04);
+      box-shadow: 0 12px 32px rgba(43, 76, 82, 0.12), 0 4px 8px rgba(0,0,0,0.04);
       transform: translateY(-4px);
-      border-color: rgba(233, 30, 140, 0.15);
+      border-color: rgba(43, 76, 82, 0.15);
     }
     
     /* IMAGE SECTION */
@@ -1063,18 +939,18 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       white-space: nowrap;
     }
     .btn-primary {
-      background: linear-gradient(135deg, #e91e8c 0%, #9c27b0 100%);
+      background: linear-gradient(135deg, #2B4C52 0%, #4A7C84 100%);
       color: white;
-      box-shadow: 0 3px 10px rgba(233, 30, 140, 0.2);
+      box-shadow: 0 3px 10px rgba(43, 76, 82, 0.2);
     }
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(233, 30, 140, 0.3);
+      box-shadow: 0 6px 18px rgba(43, 76, 82, 0.3);
     }
     .btn-outline {
       background: white;
       color: var(--primary);
-      border: 1.5px solid rgba(233, 30, 140, 0.2);
+      border: 1.5px solid rgba(43, 76, 82, 0.2);
     }
     .btn-outline:hover {
       background: var(--primary-bg);
@@ -1107,13 +983,13 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .qty-popup-close:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
     .qty-popup-img { width: 100px; height: 100px; border-radius: 14px; object-fit: cover; margin: 0 auto 1rem; display: block; border: 2px solid #f0f0f0; }
     .qty-popup h3 { margin: 0 0 0.5rem; font-size: 1.05rem; color: #111827; }
-    .qty-popup-price { font-size: 1.2rem; font-weight: 900; background: linear-gradient(135deg, #e91e8c, #00bcd4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1.25rem; }
+    .qty-popup-price { font-size: 1.2rem; font-weight: 900; background: linear-gradient(135deg, #2B4C52, #4A7C84); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1.25rem; }
     .qty-popup-controls { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; }
     .qty-popup-btn { width: 44px; height: 44px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-size: 1.3rem; font-weight: 700; color: #334155; display: flex; align-items: center; justify-content: center; }
-    .qty-popup-btn:hover { border-color: #e91e8c; color: #e91e8c; background: rgba(233,30,142,0.04); }
+    .qty-popup-btn:hover { border-color: #2B4C52; color: #2B4C52; background: rgba(43, 76, 82,0.04); }
     .qty-popup-value { font-size: 1.6rem; font-weight: 800; color: #111827; min-width: 48px; text-align: center; }
-    .qty-popup-add-btn { width: 100%; padding: 0.85rem; background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 6px 16px rgba(233,30,142,0.25); }
-    .qty-popup-add-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(233,30,142,0.35); }
+    .qty-popup-add-btn { width: 100%; padding: 0.85rem; background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 6px 16px rgba(43, 76, 82,0.25); }
+    .qty-popup-add-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(43, 76, 82,0.35); }
     @keyframes popupFadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes popupScaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -1278,7 +1154,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     }
     .qv-related-item:hover {
       border-color: var(--primary); transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(233,30,140,0.1);
+      box-shadow: 0 6px 16px rgba(43, 76, 82,0.1);
     }
     .qv-related-item img {
       width: 100%; height: 110px; object-fit: cover; display: block;
@@ -1304,7 +1180,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .float-panel-close:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
     .float-panel-items { display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; }
     .float-panel-items::-webkit-scrollbar { width: 3px; }
-    .float-panel-items::-webkit-scrollbar-thumb { background: rgba(233,30,140,0.2); border-radius: 4px; }
+    .float-panel-items::-webkit-scrollbar-thumb { background: rgba(43, 76, 82,0.2); border-radius: 4px; }
     .float-panel-item {
       display: flex; gap: 0.5rem; align-items: center;
       padding: 0.4rem; background: rgba(255,255,255,0.6);
@@ -1324,13 +1200,13 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .float-panel-subtotal span:last-child { font-size: 0.95rem; font-weight: 800; color: var(--text-primary); }
     .float-panel-checkout {
       width: 100%; padding: 0.7rem; border: none; border-radius: 10px;
-      background: linear-gradient(135deg, #e91e8c, #9c27b0);
+      background: linear-gradient(135deg, #2B4C52, #4A7C84);
       color: white; font-weight: 700; font-size: 0.82rem;
       cursor: pointer; transition: var(--transition);
       display: flex; align-items: center; justify-content: center; gap: 0.4rem;
-      box-shadow: 0 4px 14px rgba(233,30,140,0.25);
+      box-shadow: 0 4px 14px rgba(43, 76, 82,0.25);
     }
-    .float-panel-checkout:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(233,30,140,0.35); }
+    .float-panel-checkout:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(43, 76, 82,0.35); }
     .float-panel-empty { text-align: center; padding: 1rem; font-size: 0.75rem; color: var(--text-muted); }
 
     /* BOTTOM SECTIONS */
@@ -1339,25 +1215,13 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .section-header h2 { font-size: 1.15rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
     .section-header p { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem; }
 
-    /* FEATURED COLLECTIONS */
-    .collections-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
-    .collection-card {
-      border-radius: 14px; padding: 1.25rem; color: white; cursor: pointer;
-      transition: var(--transition); position: relative; overflow: hidden;
-    }
-    .collection-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.15); }
-    .collection-icon { width: 44px; height: 44px; border-radius: 10px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 0.75rem; }
-    .collection-card h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; }
-    .collection-card p { font-size: 0.72rem; opacity: 0.85; }
-    .collection-count { display: inline-block; margin-top: 0.5rem; font-size: 0.65rem; font-weight: 700; background: rgba(255,255,255,0.2); padding: 0.15rem 0.55rem; border-radius: 20px; }
-
     /* WHY CHOOSE US */
     .why-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
     .why-card {
       background: white; border-radius: 12px; padding: 1.25rem;
       border: 1px solid var(--border-color); transition: var(--transition);
     }
-    .why-card:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(233,30,140,0.08); transform: translateY(-2px); }
+    .why-card:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(43, 76, 82,0.08); transform: translateY(-2px); }
     .why-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; margin-bottom: 0.65rem; }
     .why-card h3 { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
     .why-card p { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.5; }
@@ -1369,7 +1233,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       background: white; border-radius: 12px; border: 1px solid var(--border-color);
       transition: var(--transition); position: relative;
     }
-    .process-step:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(233,30,140,0.08); }
+    .process-step:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(43, 76, 82,0.08); }
     .process-number {
       width: 30px; height: 30px; border-radius: 50%; margin: 0 auto 0.65rem;
       background: var(--primary); color: white; font-size: 0.72rem; font-weight: 800;
@@ -1382,20 +1246,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       width: 100%; max-width: 40px; height: 2px; background: var(--border-color);
       margin-top: 2.8rem; flex-shrink: 0;
     }
-
-    /* TESTIMONIALS */
-    .testimonials-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
-    .testimonial-card {
-      background: white; border-radius: 12px; padding: 1.25rem;
-      border: 1px solid var(--border-color); transition: var(--transition);
-    }
-    .testimonial-card:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(233,30,140,0.08); }
-    .testimonial-stars { font-size: 0.75rem; color: #f59e0b; margin-bottom: 0.5rem; letter-spacing: 0.1em; }
-    .testimonial-text { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 0.75rem; font-style: italic; }
-    .testimonial-author { display: flex; align-items: center; gap: 0.6rem; }
-    .testimonial-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.6rem; color: white; flex-shrink: 0; }
-    .testimonial-author strong { display: block; font-size: 0.75rem; color: var(--text-primary); }
-    .testimonial-author span { font-size: 0.62rem; color: var(--text-muted); }
 
     /* FAQ */
     .faq-grid { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -1422,17 +1272,13 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
 
     /* BOTTOM SECTIONS RESPONSIVE */
     @media (max-width: 1024px) {
-      .collections-grid { grid-template-columns: repeat(2,1fr); }
       .why-grid { grid-template-columns: repeat(2,1fr); }
-      .testimonials-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 768px) {
-      .collections-grid { grid-template-columns: 1fr; }
       .why-grid { grid-template-columns: 1fr; }
       .process-steps { flex-direction: column; gap: 0.75rem; }
       .process-connector { display: none; }
       .process-step { max-width: 100%; }
-      .testimonials-grid { grid-template-columns: 1fr; }
 
       
       .qv-layout { grid-template-columns: 1fr; }
@@ -1448,7 +1294,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; }
     .modal-header h2 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; display: flex; align-items: center; gap: 0.5rem; }
-    .modal-header h2 i { color: #e91e8c; }
+    .modal-header h2 i { color: #2B4C52; }
     .modal-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: all 0.15s ease; }
     .modal-close:hover { border-color: #ef4444; color: #ef4444; }
     .modal-body { padding: 1.5rem; }
@@ -1456,7 +1302,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .modal-body p:last-child { margin-bottom: 0; }
     .modal-contact-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; }
     .modal-contact-item:last-child { border-bottom: none; }
-    .modal-contact-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(233,30,140,0.08); color: #e91e8c; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; }
+    .modal-contact-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(43, 76, 82,0.08); color: #2B4C52; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; }
     .modal-contact-label { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; }
     .modal-contact-value { font-size: 0.9rem; font-weight: 600; color: #1a1a2e; margin-top: 0.1rem; }
     .modal-faq { border: 1px solid #e8ecf1; border-radius: 12px; margin-bottom: 0.75rem; overflow: hidden; }
@@ -1498,7 +1344,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       width: 16px;
       text-align: center;
       font-size: 0.75rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: var(--transition);
     }
     .sidebar-submenu-item:hover {
@@ -1637,42 +1483,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       
       <!-- === CONTENT AREA === -->
       <div class="content-area">
-        <!-- DASHBOARD CARDS -->
-        <div class="dash-cards">
-          <div class="dash-card dash-card-best">
-            <div class="dash-card-icon"><i class="fas fa-crown"></i></div>
-            <div class="dash-card-body">
-              <h3>Best Seller</h3>
-              <p>Top-rated printing products loved by customers</p>
-            </div>
-            <div class="dash-card-glow"></div>
-          </div>
-          <div class="dash-card dash-card-new">
-            <div class="dash-card-icon"><i class="fas fa-star"></i></div>
-            <div class="dash-card-body">
-              <h3>New Products</h3>
-              <p>Fresh designs and latest printing innovations</p>
-            </div>
-            <div class="dash-card-glow"></div>
-          </div>
-          <div class="dash-card dash-card-custom">
-            <div class="dash-card-icon"><i class="fas fa-palette"></i></div>
-            <div class="dash-card-body">
-              <h3>Custom Printing</h3>
-              <p>Personalized designs tailored to your brand</p>
-            </div>
-            <div class="dash-card-glow"></div>
-          </div>
-          <div class="dash-card dash-card-fast">
-            <div class="dash-card-icon"><i class="fas fa-bolt"></i></div>
-            <div class="dash-card-body">
-              <h3>Fast Turnaround</h3>
-              <p>Quick delivery without compromising quality</p>
-            </div>
-            <div class="dash-card-glow"></div>
-          </div>
-        </div>
-        
         <!-- Printing Services Banner -->
         <?php if ($isPrintingServices): ?>
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; color: white; position: relative; overflow: hidden;">
@@ -1780,40 +1590,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
           <?php endforeach; ?>
         </div>
 
-        <!-- ==================== FEATURED COLLECTIONS ==================== -->
-        <section class="bottom-section">
-          <div class="section-header">
-            <h2><i class="fas fa-star" style="color:var(--primary);"></i> Featured Collections</h2>
-            <p>Curated printing solutions for every need</p>
-          </div>
-          <div class="collections-grid">
-            <div class="collection-card" style="background:linear-gradient(135deg,#667eea,#764ba2);">
-              <div class="collection-icon"><i class="fas fa-briefcase"></i></div>
-              <h3>Business Essentials</h3>
-              <p>Cards, letterheads, folders & more</p>
-              <span class="collection-count">24 products</span>
-            </div>
-            <div class="collection-card" style="background:linear-gradient(135deg,#f093fb,#f5576c);">
-              <div class="collection-icon"><i class="fas fa-tshirt"></i></div>
-              <h3>Apparel Collection</h3>
-              <p>Custom shirts, jackets & uniforms</p>
-              <span class="collection-count">18 products</span>
-            </div>
-            <div class="collection-card" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">
-              <div class="collection-icon"><i class="fas fa-paint-roller"></i></div>
-              <h3>Large Format</h3>
-              <p>Banners, signage & tarpaulins</p>
-              <span class="collection-count">12 products</span>
-            </div>
-            <div class="collection-card" style="background:linear-gradient(135deg,#43e97b,#38f9d7);">
-              <div class="collection-icon"><i class="fas fa-gift"></i></div>
-              <h3>Promo Items</h3>
-              <p>Giveaways, mugs & merchandise</p>
-              <span class="collection-count">30 products</span>
-            </div>
-          </div>
-        </section>
-
         <!-- ==================== WHY CHOOSE INKZION ==================== -->
         <section class="bottom-section">
           <div class="section-header">
@@ -1822,7 +1598,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
           </div>
           <div class="why-grid">
             <div class="why-card">
-              <div class="why-icon" style="background:rgba(233,30,140,0.12);color:var(--primary);"><i class="fas fa-medal"></i></div>
+              <div class="why-icon" style="background:rgba(43, 76, 82,0.12);color:var(--primary);"><i class="fas fa-medal"></i></div>
               <h3>Premium Quality</h3>
               <p>Industry-leading print quality with state-of-the-art equipment and premium materials guaranteed to impress.</p>
             </div>
@@ -1887,49 +1663,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
               <div class="process-icon"><i class="fas fa-truck"></i></div>
               <h3>Delivery</h3>
               <p>Carefully packaged and shipped to your door</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- ==================== CUSTOMER TESTIMONIALS ==================== -->
-        <section class="bottom-section">
-          <div class="section-header">
-            <h2><i class="fas fa-quote-right" style="color:var(--primary);"></i> What Our Customers Say</h2>
-            <p>Trusted by thousands of businesses nationwide</p>
-          </div>
-          <div class="testimonials-grid">
-            <div class="testimonial-card">
-              <div class="testimonial-stars">â˜…â˜…â˜…â˜…â˜…</div>
-              <p class="testimonial-text">"Inkzion delivered our business cards faster than expected. The quality is outstanding and the customer service was exceptional throughout."</p>
-              <div class="testimonial-author">
-                <div class="testimonial-avatar" style="background:#4facfe;">MC</div>
-                <div>
-                  <strong>Maria Cruz</strong>
-                  <span>Small Business Owner</span>
-                </div>
-              </div>
-            </div>
-            <div class="testimonial-card">
-              <div class="testimonial-stars">â˜…â˜…â˜…â˜…â˜…</div>
-              <p class="testimonial-text">"We've been using Inkzion for all our corporate printing needs. Consistent quality, on-time delivery, and great pricing for bulk orders."</p>
-              <div class="testimonial-author">
-                <div class="testimonial-avatar" style="background:#e91e8c;">JR</div>
-                <div>
-                  <strong>Juan Reyes</strong>
-                  <span>Marketing Director</span>
-                </div>
-              </div>
-            </div>
-            <div class="testimonial-card">
-              <div class="testimonial-stars">â˜…â˜…â˜…â˜…â˜…</div>
-              <p class="testimonial-text">"The custom design team helped us create beautiful merchandise for our event. Highly recommend their sublimation printing service!"</p>
-              <div class="testimonial-author">
-                <div class="testimonial-avatar" style="background:#10B981;">AT</div>
-                <div>
-                  <strong>Ana Torres</strong>
-                  <span>Event Coordinator</span>
-                </div>
-              </div>
             </div>
           </div>
         </section>
@@ -2307,7 +2040,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       const title = document.getElementById('modalTitle');
       const body = document.getElementById('modalBody');
       overlay.classList.add('open');
-      body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#e91e8c;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
+      body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#2B4C52;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
       fetch('../api/get-content.php?section=' + (type === 'contact' ? 'contact_info' : 'help_center'))
         .then(r => r.json())
         .then(json => {
@@ -2325,13 +2058,13 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             const faqs = d.meta && d.meta.faqs ? d.meta.faqs : [];
             title.innerHTML = '<i class="fas fa-question-circle"></i> ' + (d.title || 'Help Center');
             let html = d.subtitle ? '<p style="margin-bottom:1.25rem;">' + esc(d.subtitle) + '</p>' : '';
-            if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(233,30,140,0.04);border-radius:12px;border:1px solid rgba(233,30,140,0.08);"><p style="font-size:0.88rem;color:#475569;">' + esc(d.content) + '</p></div>';
+            if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(43, 76, 82,0.04);border-radius:12px;border:1px solid rgba(43, 76, 82,0.08);"><p style="font-size:0.88rem;color:#475569;">' + esc(d.content) + '</p></div>';
             if (faqs.length) {
               faqs.forEach((f, i) => {
                 html += '<details class="modal-faq"' + (i === 0 ? ' open' : '') + '><summary>' + esc(f.question || '') + ' <i class="fas fa-chevron-down"></i></summary><div class="modal-faq-answer">' + esc(f.answer || '') + '</div></details>';
               });
             } else {
-              html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(233,30,140,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
+              html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(43, 76, 82,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
             }
             body.innerHTML = html;
           }

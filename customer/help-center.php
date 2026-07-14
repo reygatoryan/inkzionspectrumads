@@ -28,7 +28,7 @@ $seoTitle = ($helpContent['title'] ?? 'Help Center') . ' | Inkzion Spectrum Ads'
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title><?php echo htmlspecialchars($seoTitle); ?></title>
   <meta name="description" content="Frequently asked questions about Inkzion Spectrum Ads printing services." />
-  <link rel="stylesheet" href="../styles.css?v=4">
+  <link rel="stylesheet" href="../styles.css?v=6">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -51,7 +51,7 @@ $seoTitle = ($helpContent['title'] ?? 'Help Center') . ' | Inkzion Spectrum Ads'
     </nav>
     <div class="header-action-set">
       <?php if ($loggedIn): ?>
-        <a href="profile.php" class="btn auth-btn nav-icon-btn" title="My Profile"><i class="fas fa-user"></i><span class="nav-icon-label">Profile</span></a>
+        <a href="profile.php" class="btn auth-btn" title="My Profile"><i class="fas fa-user"></i><span class="nav-icon-label">Profile</span></a>
         <a href="../logout.php" class="btn auth-btn">Logout</a>
       <?php else: ?>
         <a href="../index.php" class="btn auth-btn">Sign In</a>
@@ -70,7 +70,7 @@ $seoTitle = ($helpContent['title'] ?? 'Help Center') . ' | Inkzion Spectrum Ads'
       </div>
 
       <?php if (!empty($helpContent['content'])): ?>
-      <div style="margin-bottom:2rem;padding:1.25rem;background:rgba(233,30,140,0.05);border-radius:12px;border:1px solid rgba(233,30,140,0.1);">
+      <div style="margin-bottom:2rem;padding:1.25rem;background:rgba(43, 76, 82,0.05);border-radius:12px;border:1px solid rgba(43, 76, 82,0.1);">
         <p style="font-size:0.95rem;color:var(--text-secondary);"><?php echo htmlspecialchars($helpContent['content']); ?></p>
       </div>
       <?php endif; ?>
@@ -91,13 +91,13 @@ $seoTitle = ($helpContent['title'] ?? 'Help Center') . ' | Inkzion Spectrum Ads'
       </div>
       <?php else: ?>
       <div style="text-align:center;padding:3rem 1rem;color:var(--text-muted);">
-        <i class="fas fa-question-circle" style="font-size:3rem;display:block;margin-bottom:1rem;color:rgba(233,30,140,0.15);"></i>
+        <i class="fas fa-question-circle" style="font-size:3rem;display:block;margin-bottom:1rem;color:rgba(43, 76, 82,0.15);"></i>
         <h3>No FAQs yet</h3>
         <p>Check back soon for frequently asked questions.</p>
       </div>
       <?php endif; ?>
 
-      <div style="text-align:center;margin-top:2.5rem;padding:1.5rem;background:rgba(233,30,140,0.05);border-radius:12px;">
+      <div style="text-align:center;margin-top:2.5rem;padding:1.5rem;background:rgba(43, 76, 82,0.05);border-radius:12px;">
         <h3 style="font-size:1rem;margin-bottom:0.5rem;">Still have questions?</h3>
         <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;">We're here to help! Get in touch with us.</p>
         <a href="../index.php#contact" class="btn primary">Contact Us</a>

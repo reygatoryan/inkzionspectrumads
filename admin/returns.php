@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle = 'Return/Refund/Cancel';
 $pageSubtitle = 'Manage return, refund, and cancellation requests from buyers.';
 require 'includes/admin-header.php';
@@ -16,8 +16,8 @@ require 'includes/admin-header.php';
         font-size: 0.75rem; font-weight: 600; color: #64748b;
         transition: all 0.2s ease; white-space: nowrap; min-width: 0;
     }
-    .tab:hover { background: rgba(233,30,142,0.04); }
-    .tab.active { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; }
+    .tab:hover { background: rgba(43, 76, 82,0.04); }
+    .tab.active { background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; }
     .tab .tab-count {
         font-size: 0.65rem; background: rgba(0,0,0,0.08);
         padding: 0.05rem 0.4rem; border-radius: 999px; font-weight: 700;
@@ -33,8 +33,8 @@ require 'includes/admin-header.php';
         font-size: 0.75rem; font-weight: 600; color: #475569;
         cursor: pointer; transition: all 0.15s ease;
     }
-    .sr-subtab:hover { border-color: #e91e8c; color: #e91e8c; }
-    .sr-subtab.active { background: rgba(233,30,142,0.08); border-color: #e91e8c; color: #e91e8c; }
+    .sr-subtab:hover { border-color: #2B4C52; color: #2B4C52; }
+    .sr-subtab.active { background: rgba(43, 76, 82,0.08); border-color: #2B4C52; color: #2B4C52; }
 
     .sr-filters {
         display: flex; gap: 0.75rem; align-items: center;
@@ -47,17 +47,17 @@ require 'includes/admin-header.php';
         font-size: 0.75rem; font-weight: 600; color: #475569;
         cursor: pointer; transition: all 0.15s ease;
     }
-    .sr-filter-chip:hover { border-color: #e91e8c; color: #e91e8c; }
-    .sr-filter-chip.active { background: rgba(233,30,142,0.08); border-color: #e91e8c; color: #e91e8c; }
+    .sr-filter-chip:hover { border-color: #2B4C52; color: #2B4C52; }
+    .sr-filter-chip.active { background: rgba(43, 76, 82,0.08); border-color: #2B4C52; color: #2B4C52; }
     .sr-filter-label { font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
     .sr-search-input {
         padding: 0.45rem 0.75rem; border: 1px solid #e2e8f0;
         border-radius: 10px; font-size: 0.8rem; outline: none;
         min-width: 180px; transition: border-color 0.2s;
     }
-    .sr-search-input:focus { border-color: #e91e8c; box-shadow: 0 0 0 3px rgba(233,30,142,0.08); }
+    .sr-search-input:focus { border-color: #2B4C52; box-shadow: 0 0 0 3px rgba(43, 76, 82,0.08); }
     .sr-expand-filters {
-        font-size: 0.75rem; color: #e91e8c; font-weight: 600;
+        font-size: 0.75rem; color: #2B4C52; font-weight: 600;
         background: none; border: none; cursor: pointer;
         display: inline-flex; align-items: center; gap: 0.3rem;
     }
@@ -83,7 +83,7 @@ require 'includes/admin-header.php';
         border-bottom: 1px solid #e8ecf1; cursor: pointer;
         user-select: none; white-space: nowrap;
     }
-    .table th:hover { color: #e91e8c; }
+    .table th:hover { color: #2B4C52; }
     .table th i { font-size: 0.65rem; margin-left: 0.3rem; opacity: 0.5; }
     .table td {
         padding: 0.65rem 1rem; border-bottom: 1px solid #f1f5f9;
@@ -105,7 +105,7 @@ require 'includes/admin-header.php';
     }
     .sr-buyer { font-size: 0.8rem; font-weight: 600; color: #1a1a2e; }
     .sr-order-id { font-weight: 700; font-size: 0.82rem; color: #1a1a2e; }
-    .sr-amount { font-size: 0.82rem; font-weight: 700; color: #e91e8c; }
+    .sr-amount { font-size: 0.82rem; font-weight: 700; color: #2B4C52; }
     .sr-reason {
         font-size: 0.78rem; color: #475569; max-width: 200px;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -139,8 +139,8 @@ require 'includes/admin-header.php';
         font-size: 0.8rem; font-weight: 600; color: #475569;
         cursor: pointer; transition: all 0.15s ease;
     }
-    .page-btn:hover { border-color: #e91e8c; color: #e91e8c; }
-    .page-btn.active { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; border-color: transparent; }
+    .page-btn:hover { border-color: #2B4C52; color: #2B4C52; }
+    .page-btn.active { background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; border-color: transparent; }
     .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .empty-state {
@@ -148,7 +148,7 @@ require 'includes/admin-header.php';
         background: white; border: 2px dashed #e8ecf1;
         border-radius: 20px;
     }
-    .empty-state .empty-state-icon { font-size: 3rem; color: rgba(233,30,140,0.15); margin-bottom: 1rem; }
+    .empty-state .empty-state-icon { font-size: 3rem; color: rgba(43, 76, 82,0.15); margin-bottom: 1rem; }
     .empty-state h3 { color: #1a1a2e; margin: 0 0 0.5rem; font-size: 1.1rem; }
     .empty-state p { color: #64748b; margin: 0; font-size: 0.85rem; }
 
@@ -195,7 +195,7 @@ require 'includes/admin-header.php';
 
 <div class="sr-table-card">
     <div class="sr-table-header">
-        <h3><i class="fas fa-undo-alt" style="color:#e91e8c;margin-right:0.5rem;"></i> <span id="table-title">Return Requests</span></h3>
+        <h3><i class="fas fa-undo-alt" style="color:#2B4C52;margin-right:0.5rem;"></i> <span id="table-title">Return Requests</span></h3>
         <span style="font-size:0.72rem;color:#94a3b8;" id="table-count">0 records</span>
     </div>
     <div class="table-wrap">
@@ -333,7 +333,7 @@ require 'includes/admin-header.php';
                         </div>
                     </td>
                     <td>${item.qty}</td>
-                    <td><span class="sr-amount">₱${item.amount.toFixed(2)}</span></td>
+                    <td><span class="sr-amount">?${item.amount.toFixed(2)}</span></td>
                     <td><span class="sr-reason" title="${item.reason}">${item.reason}</span></td>
                     <td><span class="sr-reason" title="${item.reassessed}">${item.reassessed}</span></td>
                     <td>${item.solution}</td>

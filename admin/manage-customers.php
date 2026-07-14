@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   .mc-badge.email { background: var(--warning-bg); color: #b8860b; }
   .mc-actions { display: flex; gap: 0.35rem; }
   .mc-empty { text-align: center; padding: 3rem; color: var(--text-muted); }
-  .mc-empty i { font-size: 3rem; display: block; margin-bottom: 0.75rem; color: rgba(233,30,140,0.15); }
+  .mc-empty i { font-size: 3rem; display: block; margin-bottom: 0.75rem; color: rgba(43, 76, 82,0.15); }
 
   @media (max-width: 768px) {
     .mc-toolbar { flex-direction: column; align-items: stretch; }

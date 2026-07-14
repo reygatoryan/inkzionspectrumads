@@ -32,7 +32,7 @@ require_once __DIR__ . '/includes/admin-header.php';
   .so-order-item-info { flex: 1; min-width: 0; }
   .so-order-item-name { font-size: 0.8rem; font-weight: 600; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .so-order-item-meta { font-size: 0.7rem; color: #64748b; margin-top: 0.1rem; }
-  .so-order-item-price { font-size: 0.78rem; font-weight: 700; color: #e91e8c; white-space: nowrap; }
+  .so-order-item-price { font-size: 0.78rem; font-weight: 700; color: #2B4C52; white-space: nowrap; }
 
   .so-order-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; padding: 0.75rem; background: #f8fafc; border-radius: 10px; margin-bottom: 0.75rem; }
   .so-detail-label { font-size: 0.65rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -40,7 +40,7 @@ require_once __DIR__ . '/includes/admin-header.php';
 
   .so-order-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9; }
   .so-order-total { font-size: 0.9rem; color: #1a1a2e; }
-  .so-order-total strong { color: #e91e8c; font-size: 1.05rem; }
+  .so-order-total strong { color: #2B4C52; font-size: 1.05rem; }
   .so-order-actions { display: flex; gap: 0.4rem; }
   .so-countdown { font-size: 0.7rem; font-weight: 700; color: #ef4444; display: inline-flex; align-items: center; gap: 0.25rem; }
 
@@ -180,6 +180,17 @@ require_once __DIR__ . '/includes/admin-header.php';
   </div>
 </div>
 
+<!-- Order Details Modal -->
+<div class="modal-overlay" id="order-details-modal">
+  <div class="modal-content" style="max-width:720px;max-height:85vh;overflow-y:auto;">
+    <h2><i class="fas fa-file-invoice"></i> Order Details</h2>
+    <div id="order-details-content" style="margin-top:1rem;"></div>
+    <div class="modal-actions" style="margin-top:1rem;display:flex;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeOrderDetailsModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Approve/Reject Proposal Modal -->
 <div class="modal-overlay" id="proposal-modal">
   <div class="modal-content" style="max-width:560px;">
@@ -284,10 +295,16 @@ require_once __DIR__ . '/includes/admin-header.php';
       const dateStr = createdDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       const timeStr = createdDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-      const shipDeadline = new Date(createdDate.getTime() + 2 * 24 * 60 * 60 * 1000);
-      const now = new Date();
-      const hoursLeft = Math.max(0, Math.floor((shipDeadline - now) / (1000 * 60 * 60)));
-      const countdownHtml = hoursLeft > 0 ? `<span class="so-countdown"><i class="fas fa-clock"></i> ${hoursLeft}h left</span>` : '<span class="so-countdown" style="color:#dc2626;"><i class="fas fa-exclamation-triangle"></i> Overdue</span>';
+      const isFinalStatus = ['completed', 'delivered', 'cancelled', 'returned'].includes(String(order.status || '').toLowerCase());
+      let countdownHtml = '';
+      if (!isFinalStatus) {
+        const shipDeadline = new Date(createdDate.getTime() + 2 * 24 * 60 * 60 * 1000);
+        const now = new Date();
+        const hoursLeft = Math.max(0, Math.floor((shipDeadline - now) / (1000 * 60 * 60)));
+        countdownHtml = hoursLeft > 0
+          ? `<span class="so-countdown"><i class="fas fa-clock"></i> ${hoursLeft}h left</span>`
+          : '<span class="so-countdown" style="color:#dc2626;"><i class="fas fa-exclamation-triangle"></i> Overdue</span>';
+      }
 
       return `
         <div class="card so-order-card">
@@ -571,7 +588,88 @@ require_once __DIR__ . '/includes/admin-header.php';
   }
 
   function viewOrder(id) {
-    alert(`View details for Order #${id} - Full order details page coming soon.`);
+    const order = window._ordersData ? window._ordersData.find(o => Number(o.id) === Number(id)) : null;
+    const content = document.getElementById('order-details-content');
+
+    if (!order) {
+      content.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>Order not found</h3></div>';
+      document.getElementById('order-details-modal').classList.add('active');
+      return;
+    }
+
+    const statusLabel = String(order.status || 'pending').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const paymentLabel = order.payment_method ? order.payment_method.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A';
+    const createdDate = new Date(order.created_at);
+    const createdText = createdDate.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+    const items = order.items || [];
+
+    const itemsHtml = items.length ? items.map(item => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid #f1f5f9;gap:0.75rem;">
+        <div>
+          <div style="font-weight:700;color:#0f172a;">${escapeHtml(item.product_name || 'Product')}</div>
+          <div style="font-size:0.8rem;color:#64748b;">Qty: ${item.quantity || 1} × ₱${parseFloat(item.unit_price || 0).toFixed(2)}</div>
+        </div>
+        <div style="font-weight:700;color:#2B4C52;white-space:nowrap;">₱${(parseFloat(item.unit_price || 0) * (item.quantity || 1)).toFixed(2)}</div>
+      </div>
+    `).join('') : '<div style="color:#64748b;">No items found.</div>';
+
+    content.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem;margin-bottom:1rem;">
+        <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Order ID</div>
+          <div style="font-size:1rem;font-weight:700;color:#0f172a;margin-top:0.2rem;">#${order.id}</div>
+        </div>
+        <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Status</div>
+          <div style="font-size:1rem;font-weight:700;color:#0f172a;margin-top:0.2rem;">${escapeHtml(statusLabel)}</div>
+        </div>
+        <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Payment</div>
+          <div style="font-size:1rem;font-weight:700;color:#0f172a;margin-top:0.2rem;">${escapeHtml(paymentLabel)}</div>
+        </div>
+        <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Placed</div>
+          <div style="font-size:0.95rem;font-weight:700;color:#0f172a;margin-top:0.2rem;">${escapeHtml(createdText)}</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0.75rem;margin-bottom:1rem;">
+        <div class="card" style="padding:0.95rem;border:1px solid #e2e8f0;">
+          <div style="font-weight:700;color:#0f172a;margin-bottom:0.55rem;">Customer</div>
+          <div style="font-size:0.9rem;color:#475569;line-height:1.6;">${escapeHtml(order.customer_name || 'Guest')}<br>${escapeHtml(order.customer_email || '')}<br>${escapeHtml(order.customer_phone || '')}</div>
+        </div>
+        <div class="card" style="padding:0.95rem;border:1px solid #e2e8f0;">
+          <div style="font-weight:700;color:#0f172a;margin-bottom:0.55rem;">Shipping</div>
+          <div style="font-size:0.9rem;color:#475569;line-height:1.6;">${escapeHtml(order.contact_name || '')}<br>${escapeHtml(order.delivery_address || 'N/A')}<br>${escapeHtml([order.delivery_city, order.delivery_province].filter(Boolean).join(', '))}</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0.95rem;border:1px solid #e2e8f0;margin-bottom:1rem;">
+        <div style="font-weight:700;color:#0f172a;margin-bottom:0.6rem;">Items</div>
+        ${itemsHtml}
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">
+        <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Weight</div>
+          <div style="font-size:0.95rem;font-weight:700;color:#0f172a;margin-top:0.2rem;">${order.total_weight ? `${parseFloat(order.total_weight).toFixed(3)} kg` : 'N/A'}</div>
+        </div>
+        <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Shipping Fee</div>
+          <div style="font-size:0.95rem;font-weight:700;color:#0f172a;margin-top:0.2rem;">₱${parseFloat(order.shipping_fee || 0).toFixed(2)}</div>
+        </div>
+        <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Total Amount</div>
+          <div style="font-size:0.95rem;font-weight:700;color:#2B4C52;margin-top:0.2rem;">₱${parseFloat(order.total_amount || 0).toFixed(2)}</div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('order-details-modal').classList.add('active');
+  }
+
+  function closeOrderDetailsModal() {
+    document.getElementById('order-details-modal').classList.remove('active');
   }
 
   function massShip() {

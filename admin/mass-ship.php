@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle = 'Mass Shipment';
 $pageSubtitle = 'Bulk shipment management - arrange pickups, generate documents, and ship multiple orders.';
 require 'includes/admin-header.php';
@@ -51,7 +51,7 @@ require 'includes/admin-header.php';
     font-size: 0.78rem; color: var(--text-secondary); font-weight: 600;
     cursor: pointer;
   }
-  .ms-table tr.selected td { background: rgba(233,30,142,0.03); }
+  .ms-table tr.selected td { background: rgba(43, 76, 82,0.03); }
   .ms-checkbox {
     width: 18px; height: 18px; border-radius: 5px;
     border: 2px solid #d1d5db; cursor: pointer;

@@ -10,20 +10,20 @@ require 'includes/admin-header.php';
   .conv-list { flex: 1; overflow-y: auto; }
   .conv-item { padding: 0.85rem 1.25rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: all 0.15s; display: flex; gap: 0.65rem; align-items: center; }
   .conv-item:hover { background: #f8fafc; }
-  .conv-item.active { background: rgba(233,30,140,0.05); border-left: 3px solid #e91e8c; }
-  .conv-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg,#e91e8c,#00bcd4); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+  .conv-item.active { background: rgba(43, 76, 82,0.05); border-left: 3px solid #2B4C52; }
+  .conv-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg,#2B4C52,#4A7C84); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
   .conv-info { flex: 1; min-width: 0; }
   .conv-name { font-weight: 600; color: #0f172a; font-size: 0.85rem; }
   .conv-preview { font-size: 0.78rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .conv-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; }
   .conv-time { font-size: 0.7rem; color: #94a3b8; }
-  .conv-unread { background: #e91e8c; color: white; font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 999px; min-width: 18px; text-align: center; }
-  .conv-product { font-size: 0.65rem; color: #e91e8c; font-weight: 500; }
+  .conv-unread { background: #2B4C52; color: white; font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 999px; min-width: 18px; text-align: center; }
+  .conv-product { font-size: 0.65rem; color: #2B4C52; font-weight: 500; }
   .delete-conv-btn { font-size:0.75rem;color:#94a3b8;cursor:pointer;padding:0.15rem 0.3rem;border-radius:4px;transition:all 0.15s ease;opacity:0; }
   .conv-item:hover .delete-conv-btn { opacity:1; }
   .delete-conv-btn:hover { color:#dc2626;background:#fef2f2; }
   .admin-chat-main { background: white; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.04); display: flex; flex-direction: column; }
-  .chat-product-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1.25rem; background: #fef2f7; border-bottom: 1px solid rgba(233,30,140,0.12); }
+  .chat-product-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1.25rem; background: #E8F1ED; border-bottom: 1px solid rgba(43, 76, 82,0.12); }
   .chat-product-bar img { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; }
   .chat-product-bar .info { font-size: 0.82rem; font-weight: 600; color: #0f172a; }
   .chat-product-bar .info small { font-weight: 400; color: #64748b; }
@@ -31,8 +31,8 @@ require 'includes/admin-header.php';
   .chat-header h4 { margin: 0; font-size: 0.95rem; font-weight: 700; color: #0f172a; }
   .chat-header-actions { display: flex; gap: 0.5rem; }
   .chat-header-actions .btn-action { padding: 0.4rem 0.85rem; border-radius: 8px; border: none; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.35rem; }
-  .btn-send-request { background: rgba(233,30,140,0.1); color: #e91e8c; }
-  .btn-send-request:hover { background: #e91e8c; color: white; }
+  .btn-send-request { background: rgba(43, 76, 82,0.1); color: #2B4C52; }
+  .btn-send-request:hover { background: #2B4C52; color: white; }
   .btn-send-order { background: rgba(16,185,129,0.1); color: #047857; }
   .btn-send-order:hover { background: #10b981; color: white; }
   .btn-action-danger { background: rgba(220,38,38,0.1); color: #dc2626; }
@@ -41,9 +41,9 @@ require 'includes/admin-header.php';
   .msg { display: flex; gap: 0.65rem; max-width: 75%; }
   .msg.sent { align-self: flex-end; flex-direction: row-reverse; }
   .msg.received { align-self: flex-start; }
-  .msg-avatar { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg,#e91e8c,#00bcd4); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
+  .msg-avatar { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg,#2B4C52,#4A7C84); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
   .msg-bubble { padding: 0.7rem 1rem; border-radius: 14px; font-size: 0.85rem; line-height: 1.45; }
-  .msg.sent .msg-bubble { background: linear-gradient(135deg,#e91e8c,#9c27b0); color: white; border-bottom-right-radius: 4px; }
+  .msg.sent .msg-bubble { background: linear-gradient(135deg,#2B4C52,#4A7C84); color: white; border-bottom-right-radius: 4px; }
   .msg.received .msg-bubble { background: #f1f5f9; color: #0f172a; border-bottom-left-radius: 4px; }
   .msg-time { font-size: 0.65rem; color: #94a3b8; margin-top: 0.2rem; }
   .msg.sent .msg-time { text-align: right; }
@@ -52,19 +52,32 @@ require 'includes/admin-header.php';
   .chat-input-area { padding: 1rem 1.25rem; border-top: 1px solid #e2e8f0; }
   .chat-input-wrap { display: flex; gap: 0.5rem; }
   .chat-input-wrap input { flex: 1; padding: 0.7rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.85rem; outline: none; font-family: inherit; }
-  .chat-input-wrap input:focus { border-color: #e91e8c; }
-  .chat-input-wrap .btn-send-msg { padding: 0.7rem 1.2rem; border-radius: 10px; border: none; background: linear-gradient(135deg,#e91e8c,#9c27b0); color: white; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+  .chat-input-wrap input:focus { border-color: #2B4C52; }
+  .chat-input-wrap .btn-send-msg { padding: 0.7rem 1.2rem; border-radius: 10px; border: none; background: linear-gradient(135deg,#2B4C52,#4A7C84); color: white; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
   .chat-input-wrap .btn-send-msg:hover { transform: translateY(-1px); }
   .request-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.85rem; margin-top: 0.4rem; }
   .request-card .title { font-weight: 600; font-size: 0.85rem; color: #0f172a; margin-bottom: 0.3rem; }
-  .request-card .title i { color: #e91e8c; margin-right: 0.35rem; }
-  .request-card .btn-fill { display: inline-block; padding: 0.35rem 0.75rem; border-radius: 8px; background: #e91e8c; color: white; font-size: 0.75rem; font-weight: 600; text-decoration: none; margin-top: 0.4rem; }
+  .request-card .title i { color: #2B4C52; margin-right: 0.35rem; }
+  .request-card .btn-fill { display: inline-block; padding: 0.35rem 0.75rem; border-radius: 8px; background: #2B4C52; color: white; font-size: 0.75rem; font-weight: 600; text-decoration: none; margin-top: 0.4rem; }
   @media (max-width: 768px) { .admin-chat-layout { grid-template-columns: 1fr; } .admin-chat-sidebar { display: none; } }
+  .img-modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;display:none;align-items:center;justify-content:center;cursor:pointer; }
+  .img-modal-overlay.active { display:flex; }
+  .img-modal-overlay img { max-width:90%;max-height:90%;border-radius:8px;cursor:default;box-shadow:0 8px 40px rgba(0,0,0,0.5); }
+  .img-modal-close { position:fixed;top:1rem;right:1.5rem;color:#fff;font-size:2.5rem;cursor:pointer;z-index:10001;background:none;border:none;opacity:0.7;transition:opacity 0.2s;line-height:1; }
+  .img-modal-close:hover { opacity:1; }
+  .admin-file-preview { display:none;margin-bottom:0.5rem;padding:0.5rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;position:relative; }
+  .admin-file-preview-content { display:flex;align-items:center;gap:0.5rem; }
+  .admin-file-preview-content img { width:40px;height:40px;border-radius:6px;object-fit:cover; }
+  .admin-file-preview-content i { color:#2B4C52;font-size:1.2rem; }
+  .admin-file-preview-name { font-size:0.82rem;color:#0f172a; }
+  .admin-file-preview .btn-clear-file { position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:none;background:#ef4444;color:white;cursor:pointer;font-size:0.65rem;display:flex;align-items:center;justify-content:center; }
+  .btn-attach { width:40px;height:40px;border-radius:10px;border:2px solid #e2e8f0;background:white;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.15s;flex-shrink:0; }
+  .btn-attach:hover { border-color:#2B4C52;color:#2B4C52; }
 </style>
 
 <div class="admin-chat-layout">
   <div class="admin-chat-sidebar">
-    <h3><i class="fas fa-comments" style="color:#e91e8c;margin-right:0.4rem;"></i>Conversations</h3>
+    <h3><i class="fas fa-comments" style="color:#2B4C52;margin-right:0.4rem;"></i>Conversations</h3>
     <div style="padding:0.5rem 0.85rem;border-bottom:1px solid #e2e8f0;">
       <div style="position:relative;">
         <input type="text" id="admin-search-input" placeholder="Search customers or products..." style="width:100%;padding:0.45rem 0.65rem;border:2px solid #e2e8f0;border-radius:8px;font-size:0.78rem;outline:none;font-family:inherit;background:#f8fafc;" oninput="adminSearchConversations(this.value)">
@@ -97,6 +110,7 @@ let isTabVisibleAdmin = true;
 let adminSending = false;
 let adminLoadedMsgIds = new Set();
 let isLoadingAdminConv = false;
+let adminSelectedFile = null;
 
 function escapeHtml(t) { if(!t)return''; var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
 
@@ -117,7 +131,7 @@ function showAdminNotification(msg, type) {
   var t=document.createElement('div'); t.id='admin-toast';
   t.style.cssText='position:fixed;bottom:2rem;right:2rem;z-index:99999;background:#1e293b;color:white;padding:0.75rem 1.25rem;border-radius:12px;font-size:0.82rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.2);display:flex;align-items:center;gap:0.5rem;cursor:pointer;max-width:360px;';
   var icon=type==='error'?'exclamation-circle':'info-circle';
-  t.innerHTML='<i class="fas fa-'+icon+'" style="color:#e91e8c;"></i> '+escapeHtml(msg);
+  t.innerHTML='<i class="fas fa-'+icon+'" style="color:#2B4C52;"></i> '+escapeHtml(msg);
   t.onclick=function(){this.remove();};
   document.body.appendChild(t);
   setTimeout(function(){t.style.opacity='0';t.style.transition='all 0.3s';setTimeout(function(){t.remove();},300);},4000);
@@ -234,7 +248,7 @@ function adminRenderMsg(m) {
   if(m.message_type==='text'){content='<div class="msg-bubble">'+escapeHtml(m.content)+'</div>';}
   else if(m.message_type==='custom_request'){var rd=parseMsgContent(m.content);var rt=rd?(rd.title||'Custom Request'):'Custom Request';var ri=rd?rd.request_id:null;var lk=ri?'../customer/request-form.php?id='+ri:'#';content='<div class="msg-bubble"><div class="request-card"><div class="title"><i class="fas fa-paint-brush"></i> '+escapeHtml(rt)+'</div><a href="'+lk+'" class="btn-fill" target="_blank"><i class="fas fa-external-link-alt"></i> View Request</a></div></div>';}
   else if(m.message_type==='order_form'){var rd=parseMsgContent(m.content);var pt=rd?(rd.title||'Order Form'):'Order Form';var pi=rd?rd.proposal_id:null;var lk=pi?'../customer/order-form.php?id='+pi:'#';content='<div class="msg-bubble"><div class="request-card"><div class="title"><i class="fas fa-file-invoice"></i> '+escapeHtml(pt)+'</div><a href="'+lk+'" class="btn-fill" target="_blank"><i class="fas fa-external-link-alt"></i> View Order Form</a></div></div>';}
-  else if(m.message_type==='image'){var url=m.file_url||'';content='<div class="msg-bubble"><img src="'+escapeHtml(url)+'" style="max-width:200px;border-radius:8px;cursor:pointer;" onclick="window.open(\''+escapeHtml(url)+'\')"></div>';}
+  else if(m.message_type==='image'){var url=(m.file_url||'').startsWith('http')?m.file_url:'../'+(m.file_url||'');content='<div class="msg-bubble"><img src="'+escapeHtml(url)+'" style="max-width:200px;border-radius:8px;cursor:pointer;" onclick="openImageModal(\''+escapeHtml(url)+'\')"></div>';}
   else if(m.message_type==='file'){content='<div class="msg-bubble"><i class="fas fa-file"></i> '+escapeHtml(m.file_name||'File')+'</div>';}
   return '<div class="msg '+(isSent?'sent':'received')+'"><div class="msg-avatar">'+getInitials(m.sender_name)+'</div><div>'+content+'<div class="msg-time">'+time+'</div></div></div>';
 }
@@ -277,7 +291,7 @@ async function adminLoadChat(convId, silent) {
     if(msgs.length>0)lastMsgId=msgs[msgs.length-1].id;
     
     var prodBar='';
-    if(conv&&conv.product_name){var img=conv.product_image?'<img src="'+escapeHtml(conv.product_image)+'" alt="">':'<div style="width:36px;height:36px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#e91e8c;"><i class="fas fa-box"></i></div>';prodBar='<div class="chat-product-bar">'+img+'<div class="info">'+escapeHtml(conv.product_name)+'<small> &middot; Product</small></div></div>';}
+    if(conv&&conv.product_name){var img=conv.product_image?'<img src="'+escapeHtml(conv.product_image)+'" alt="">':'<div style="width:36px;height:36px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#2B4C52;"><i class="fas fa-box"></i></div>';prodBar='<div class="chat-product-bar">'+img+'<div class="info">'+escapeHtml(conv.product_name)+'<small> &middot; Product</small></div></div>';}
     var requestId=conv?conv.request_id:null, requestStatus=conv?conv.request_status:null;
     var hdrActions='';
     if(requestId){
@@ -290,13 +304,20 @@ async function adminLoadChat(convId, silent) {
     var customerName=conv?(conv.user_name||'Customer'):'Customer';
     
     var msgsHtml='';
-    if(msgs.length){msgsHtml='';var lastDt=null;msgs.forEach(function(m){var dt=getDateLabel(m.created_at);if(dt!==lastDt){msgsHtml+='<div style="text-align:center;padding:0.35rem 0;font-size:0.7rem;color:#94a3b8;font-weight:500;">'+dt+'</div>';lastDt=dt;}msgsHtml+=adminRenderMsg(m);});if(hasMoreMsgs){msgsHtml='<div style="text-align:center;padding:0.4rem;"><button onclick="adminLoadMoreMsgs()" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.8rem;color:#e91e8c;font-size:0.72rem;font-weight:500;cursor:pointer;"><i class="fas fa-chevron-up"></i> Load older</button></div>'+msgsHtml;}}
+    if(msgs.length){msgsHtml='';var lastDt=null;msgs.forEach(function(m){var dt=getDateLabel(m.created_at);if(dt!==lastDt){msgsHtml+='<div style="text-align:center;padding:0.35rem 0;font-size:0.7rem;color:#94a3b8;font-weight:500;">'+dt+'</div>';lastDt=dt;}msgsHtml+=adminRenderMsg(m);});if(hasMoreMsgs){msgsHtml='<div style="text-align:center;padding:0.4rem;"><button onclick="adminLoadMoreMsgs()" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.8rem;color:#2B4C52;font-size:0.72rem;font-weight:500;cursor:pointer;"><i class="fas fa-chevron-up"></i> Load older</button></div>'+msgsHtml;}}
     else{msgsHtml='<p style="text-align:center;color:#94a3b8;padding:1.5rem;">No messages yet.</p>';adminLoadedMsgIds=new Set();}
     
-    main.innerHTML=prodBar+'<div class="chat-header" id="chatHdr"><h4><i class="fas fa-user" style="color:#e91e8c;margin-right:0.35rem;"></i>'+escapeHtml(customerName)+'</h4><div class="chat-header-actions">'+hdrActions+'</div></div>'+
+    main.innerHTML=prodBar+'<div class="chat-header" id="chatHdr"><h4><i class="fas fa-user" style="color:#2B4C52;margin-right:0.35rem;"></i>'+escapeHtml(customerName)+'</h4><div class="chat-header-actions">'+hdrActions+'</div></div>'+
       '<div class="typing-indicator" id="admin-typing-indicator" style="display:none;padding:0.3rem 1.25rem;font-size:0.78rem;color:#94a3b8;font-style:italic;"></div>'+
       '<div class="chat-messages" id="chatMsgs">'+msgsHtml+'</div>'+
-      '<div class="chat-input-area" id="chatInputArea"><div class="chat-input-wrap"><input type="text" id="msgInput" placeholder="Type a message..."><button class="btn-send-msg" id="admin-btn-send"><i class="fas fa-paper-plane"></i></button></div></div>';
+      '<div class="chat-input-area" id="chatInputArea">'+
+      '<div class="admin-file-preview" id="admin-file-preview">'+
+        '<button class="btn-clear-file" onclick="adminClearFilePreview()"><i class="fas fa-times"></i></button>'+
+        '<div class="admin-file-preview-content" id="admin-file-preview-content"></div>'+
+      '</div>'+
+      '<div class="chat-input-wrap"><input type="text" id="msgInput" placeholder="Type a message...">'+
+      '<button class="btn-attach" onclick="document.getElementById(\'admin-file-input\').click()" title="Attach file"><i class="fas fa-paperclip"></i></button>'+
+      '<button class="btn-send-msg" id="admin-btn-send"><i class="fas fa-paper-plane"></i></button></div></div>';
     
     var msgsDiv=document.getElementById('chatMsgs');
     if(msgs.length)msgsDiv.scrollTop=msgsDiv.scrollHeight;
@@ -312,16 +333,73 @@ async function adminLoadChat(convId, silent) {
   }catch(e){if(!silent)main.innerHTML='<div class="no-chat"><i class="fas fa-exclamation-circle"></i><p>Failed to load conversation.</p></div>';}
 }
 
+function adminClearFilePreview() {
+  adminSelectedFile = null;
+  var pre = document.getElementById('admin-file-preview');
+  if (pre) pre.style.display = 'none';
+  document.getElementById('admin-file-input').value = '';
+}
+
+function adminShowFilePreview(file) {
+  var pre = document.getElementById('admin-file-preview');
+  var cont = document.getElementById('admin-file-preview-content');
+  if (!pre || !cont) return;
+  if (file.type.startsWith('image/')) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      cont.innerHTML = '<img src="'+e.target.result+'" alt=""><span class="admin-file-preview-name">'+escapeHtml(file.name)+'</span>';
+      pre.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    cont.innerHTML = '<i class="fas fa-file"></i><span class="admin-file-preview-name">'+escapeHtml(file.name)+' ('+(file.size/1024/1024).toFixed(1)+' MB)</span>';
+    pre.style.display = 'block';
+  }
+}
+
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'admin-file-input') {
+    var file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      showAdminNotification('File too large. Maximum size is 10MB.', 'error');
+      e.target.value = '';
+      return;
+    }
+    if (currentConvId) {
+      adminSelectedFile = file;
+      adminShowFilePreview(file);
+    } else {
+      showAdminNotification('Select a conversation first', 'error');
+      e.target.value = '';
+    }
+  }
+});
+
 async function adminSendTextMsg() {
   if(adminSending)return;
   var input=document.getElementById('msgInput');
-  if(!input||!input.value.trim()||!currentConvId)return;
-  adminSending=true;var content=input.value.trim();input.value='';
+  var content=input?input.value.trim():'';
+  if(!content&&!adminSelectedFile)return;
+  if(!currentConvId)return;
+  adminSending=true;if(input)input.value='';
   try{
-    var r=await fetch('../api/chat.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'send_message',conversation_id:currentConvId,message_type:'text',content})});
-    var d=await r.json();
-    if(d.success){await adminLoadConversations();}
-    else showAdminNotification(d.error||'Failed to send','error');
+    if(adminSelectedFile){
+      var fd=new FormData();
+      fd.append('action','send_message');
+      fd.append('conversation_id',currentConvId);
+      fd.append('file',adminSelectedFile);
+      if(content)fd.append('content',content);
+      var r=await fetch('../api/chat.php',{method:'POST',credentials:'include',body:fd});
+      var d=await r.json();
+      if(d.success){adminClearFilePreview();await adminLoadConversations();}
+      else showAdminNotification(d.error||'Failed to send','error');
+    }else{
+      var r=await fetch('../api/chat.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'send_message',conversation_id:currentConvId,message_type:'text',content})});
+      var d=await r.json();
+      if(d.success){await adminLoadConversations();}
+      else showAdminNotification(d.error||'Failed to send','error');
+    }
   }catch(e){showAdminNotification('Failed to send message','error');}
   finally{adminSending=false;}
 }
@@ -413,6 +491,24 @@ adminLoadConversations();
   var c=p.get('conversation');
   if(c)setTimeout(function(){adminSelectConversation(parseInt(c));},300);
 })();
+
+function openImageModal(url){
+  document.getElementById('adminImgModalContent').src=url;
+  document.getElementById('adminImgModalOverlay').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closeImageModal(){
+  document.getElementById('adminImgModalOverlay').classList.remove('active');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeImageModal();});
 </script>
+
+<div class="img-modal-overlay" id="adminImgModalOverlay" onclick="closeImageModal()">
+  <button class="img-modal-close" onclick="closeImageModal()">&times;</button>
+  <img id="adminImgModalContent" onclick="event.stopPropagation()" alt="Preview">
+</div>
+
+<input type="file" id="admin-file-input" style="display:none;" accept="image/*,.pdf,.ai,.psd,.zip">
 
 <?php require 'includes/admin-footer.php'; ?>

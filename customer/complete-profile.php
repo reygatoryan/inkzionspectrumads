@@ -65,8 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --primary: #e91e8c;
-      --primary-bg: rgba(233,30,140,0.1);
+      --primary: #2B4C52;
+      --primary-bg: rgba(43, 76, 82, 0.1);
       --text-primary: #0F172A;
       --text-secondary: #475569;
       --text-muted: #64748B;
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       --danger: #EF4444;
       --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
-    body { font-family: var(--font); background: linear-gradient(135deg,#FFF5F8,#fef0f5); color: var(--text-primary); line-height: 1.6; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    body { font-family: var(--font); background: linear-gradient(135deg,#FAF7EE,#E8F1ED); color: var(--text-primary); line-height: 1.6; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
     .profile-wrapper { width: 100%; max-width: 460px; padding: 2rem; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); margin: 2rem; }
     .profile-header { text-align: center; margin-bottom: 1.5rem; }
     .profile-header h1 { font-size: 1.5rem; font-weight: 800; color: var(--text-primary); }
@@ -87,8 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.3rem; }
     .form-group input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 10px; font-size: 0.88rem; font-family: var(--font); color: var(--text-primary); outline: none; transition: all 0.2s; }
     .form-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
-    .btn-primary { width: 100%; padding: 0.85rem; background: linear-gradient(135deg, var(--primary), #9c27b0); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(233,30,140,0.3); }
+    .btn-primary { width: 100%; padding: 0.85rem; background: linear-gradient(135deg, var(--primary), #4A7C84); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(43, 76, 82,0.3); }
     .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: var(--danger); font-size: 0.85rem; font-weight: 600; }
     .success-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: var(--success); font-size: 0.85rem; font-weight: 600; }
     .skip-link { display: block; text-align: center; margin-top: 1rem; font-size: 0.8rem; }

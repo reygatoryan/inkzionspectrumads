@@ -101,14 +101,14 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --sidebar-bg: #FFF5F8;
-      --sidebar-hover: rgba(233, 30, 140, 0.08);
-      --sidebar-active: #e91e8c;
-      --sidebar-active-bg: rgba(233, 30, 140, 0.12);
+      --sidebar-bg: #FAF7EE;
+      --sidebar-hover: rgba(43, 76, 82, 0.08);
+      --sidebar-active: #2B4C52;
+      --sidebar-active-bg: rgba(43, 76, 82, 0.12);
       --sidebar-width: 270px;
-      --primary: #e91e8c;
-      --primary-light: #9c27b0;
-      --primary-bg: rgba(233, 30, 140, 0.1);
+      --primary: #2B4C52;
+      --primary-light: #4A7C84;
+      --primary-bg: rgba(43, 76, 82, 0.1);
       --success: #10B981;
       --success-bg: rgba(16, 185, 129, 0.1);
       --warning: #F59E0B;
@@ -132,7 +132,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .products-sidebar {
       width: var(--sidebar-width);
       background: var(--sidebar-bg);
-      border-right: 1px solid rgba(233, 30, 140, 0.1);
+      border-right: 1px solid rgba(43, 76, 82, 0.1);
       padding: 0;
       position: fixed;
       top: 0;
@@ -144,14 +144,14 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       flex-direction: column;
     }
     .products-sidebar::-webkit-scrollbar { width: 3px; }
-    .products-sidebar::-webkit-scrollbar-thumb { background: rgba(233, 30, 140, 0.2); border-radius: 4px; }
+    .products-sidebar::-webkit-scrollbar-thumb { background: rgba(43, 76, 82, 0.2); border-radius: 4px; }
     
     .sidebar-brand {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       padding: 1.25rem 1.25rem 1rem;
-      border-bottom: 1px solid rgba(233, 30, 140, 0.12);
+      border-bottom: 1px solid rgba(43, 76, 82, 0.12);
       position: sticky;
       top: 0;
       background: var(--sidebar-bg);
@@ -164,7 +164,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       object-fit: contain;
       background: white;
       padding: 4px;
-      box-shadow: 0 2px 6px rgba(233, 30, 140, 0.15);
+      box-shadow: 0 2px 6px rgba(43, 76, 82, 0.15);
     }
     .sidebar-brand-text { line-height: 1.2; }
     .sidebar-brand-name { font-size: 0.85rem; font-weight: 800; color: #1a1a2e; letter-spacing: 0.03em; display: block; }
@@ -175,8 +175,8 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       display: flex;
       align-items: center;
       gap: 0.65rem;
-      border-bottom: 1px solid rgba(233, 30, 140, 0.08);
-      background: rgba(233, 30, 140, 0.03);
+      border-bottom: 1px solid rgba(43, 76, 82, 0.08);
+      background: rgba(43, 76, 82, 0.03);
     }
     .sidebar-avatar {
       width: 30px;
@@ -223,7 +223,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       width: 20px;
       text-align: center;
       font-size: 0.85rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: var(--transition);
     }
     .sidebar-menu-item:hover {
@@ -238,7 +238,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       color: var(--primary);
       font-weight: 600;
       border-left-color: var(--primary);
-      box-shadow: 0 2px 8px rgba(233, 30, 140, 0.08);
+      box-shadow: 0 2px 8px rgba(43, 76, 82, 0.08);
     }
     .sidebar-menu-item.active i { color: var(--primary); }
     .sidebar-menu-item .badge {
@@ -286,7 +286,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       width: 16px;
       text-align: center;
       font-size: 0.75rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: var(--transition);
     }
     .sidebar-submenu-item:hover {
@@ -315,7 +315,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     
     .sidebar-footer {
       padding: 0.75rem 1.25rem;
-      border-top: 1px solid rgba(233, 30, 140, 0.1);
+      border-top: 1px solid rgba(43, 76, 82, 0.1);
     }
     .sidebar-footer-item {
       display: flex;
@@ -328,7 +328,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       transition: var(--transition);
     }
     .sidebar-footer-item:hover { color: var(--primary); }
-    .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #b06ab3; }
+    .sidebar-footer-item i { width: 18px; font-size: 0.85rem; color: #4A7C84; }
     button.sidebar-footer-item { background: none; border: none; cursor: pointer; width: 100%; text-align: left; font: inherit; color: var(--text-muted); display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0; font-size: 0.78rem; text-decoration: none; transition: var(--transition); }
     button.sidebar-footer-item:hover { color: var(--primary); }
 
@@ -338,7 +338,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; }
     .modal-header h2 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; display: flex; align-items: center; gap: 0.5rem; }
-    .modal-header h2 i { color: #e91e8c; }
+    .modal-header h2 i { color: #2B4C52; }
     .modal-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: all 0.15s ease; }
     .modal-close:hover { border-color: #ef4444; color: #ef4444; }
     .modal-body { padding: 1.5rem; }
@@ -346,7 +346,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .modal-body p:last-child { margin-bottom: 0; }
     .modal-contact-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; }
     .modal-contact-item:last-child { border-bottom: none; }
-    .modal-contact-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(233,30,140,0.08); color: #e91e8c; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; }
+    .modal-contact-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(43, 76, 82,0.08); color: #2B4C52; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; }
     .modal-contact-label { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; }
     .modal-contact-value { font-size: 0.9rem; font-weight: 600; color: #1a1a2e; margin-top: 0.1rem; }
     .modal-faq { border: 1px solid #e8ecf1; border-radius: 12px; margin-bottom: 0.75rem; overflow: hidden; }
@@ -474,7 +474,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       width: 18px;
       text-align: center;
       font-size: 0.8rem;
-      color: #b06ab3;
+      color: #4A7C84;
       transition: var(--transition);
     }
     .header-profile-dropdown-item:hover {
@@ -531,19 +531,19 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       background: white; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
       font-family: var(--font); box-sizing: border-box;
     }
-    .form-group input:focus, .form-group textarea:focus { border-color: #e91e8c; box-shadow: 0 0 0 3px rgba(233,30,142,0.08); }
+    .form-group input:focus, .form-group textarea:focus { border-color: #2B4C52; box-shadow: 0 0 0 3px rgba(43, 76, 82,0.08); }
     .form-group textarea { min-height: 80px; resize: vertical; }
     .form-hint { font-size: 0.78rem; color: #94a3b8; margin-top: 0.15rem; }
     .form-section-divider { height: 1px; background: var(--border-light); margin: 1.5rem 0; }
     .btn-save {
       display: inline-flex; align-items: center; gap: 0.5rem;
       padding: 0.85rem 2rem; border-radius: 12px; border: none;
-      background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white;
+      background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white;
       cursor: pointer; font-weight: 700; font-size: 0.95rem;
-      transition: all 0.2s ease; box-shadow: 0 6px 16px rgba(233,30,142,0.25);
+      transition: all 0.2s ease; box-shadow: 0 6px 16px rgba(43, 76, 82,0.25);
       font-family: var(--font);
     }
-    .btn-save:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(233,30,142,0.35); }
+    .btn-save:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(43, 76, 82,0.35); }
     .flash-msg { padding: 0.85rem 1.2rem; border-radius: 12px; margin-bottom: 1.25rem; font-size: 0.9rem; font-weight: 600; }
     .flash-success { background: rgba(5,150,105,0.1); color: #047857; border: 1px solid rgba(5,150,105,0.25); }
     .flash-error { background: rgba(239,68,68,0.1); color: #dc2626; border: 1px solid rgba(239,68,68,0.25); }
@@ -822,7 +822,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       const title = document.getElementById('modalTitle');
       const body = document.getElementById('modalBody');
       overlay.classList.add('open');
-      body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#e91e8c;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
+      body.innerHTML = '<div style="text-align:center;padding:2rem;"><i class="fas fa-spinner fa-pulse" style="font-size:1.5rem;color:#2B4C52;"></i><p style="margin-top:0.75rem;color:#64748b;">Loading...</p></div>';
       fetch('../api/get-content.php?section=' + (type === 'contact' ? 'contact_info' : 'help_center'))
         .then(r => r.json())
         .then(json => {
@@ -840,13 +840,13 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             const faqs = d.meta && d.meta.faqs ? d.meta.faqs : [];
             title.innerHTML = '<i class="fas fa-question-circle"></i> ' + (d.title || 'Help Center');
             let html = d.subtitle ? '<p style="margin-bottom:1.25rem;">' + esc(d.subtitle) + '</p>' : '';
-            if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(233,30,140,0.04);border-radius:12px;border:1px solid rgba(233,30,140,0.08);"><p style="font-size:0.88rem;color:#475569;">' + esc(d.content) + '</p></div>';
+            if (d.content) html += '<div style="margin-bottom:1.25rem;padding:1rem;background:rgba(43, 76, 82,0.04);border-radius:12px;border:1px solid rgba(43, 76, 82,0.08);"><p style="font-size:0.88rem;color:#475569;">' + esc(d.content) + '</p></div>';
             if (faqs.length) {
               faqs.forEach((f, i) => {
                 html += '<details class="modal-faq"' + (i === 0 ? ' open' : '') + '><summary>' + esc(f.question || '') + ' <i class="fas fa-chevron-down"></i></summary><div class="modal-faq-answer">' + esc(f.answer || '') + '</div></details>';
               });
             } else {
-              html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(233,30,140,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
+              html += '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-question-circle" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;color:rgba(43, 76, 82,0.15);"></i><p>No FAQs yet. Check back soon.</p></div>';
             }
             body.innerHTML = html;
           }

@@ -56,21 +56,21 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
     .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; width: 100%; }
     .page-header { margin-bottom: 2rem; }
     .page-header h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.6rem; }
-    .page-header h1 i { color: #e91e8c; }
+    .page-header h1 i { color: #2B4C52; }
     .page-header p { color: #64748b; margin-top: 0.3rem; }
-    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #e91e8c; text-decoration: none; font-weight: 600; font-size: 0.88rem; margin-bottom: 1.5rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: #2B4C52; text-decoration: none; font-weight: 600; font-size: 0.88rem; margin-bottom: 1.5rem; }
     .back-link:hover { text-decoration: underline; }
 
     .card { background: white; border-radius: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); padding: 2rem; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; }
     .card h2 { font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-bottom: 1.25rem; }
-    .card h2 i { color: #e91e8c; margin-right: 0.5rem; }
+    .card h2 i { color: #2B4C52; margin-right: 0.5rem; }
 
     .quote-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
     .quote-table th { text-align: left; padding: 0.6rem 0.75rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
     .quote-table td { padding: 0.6rem 0.75rem; font-size: 0.88rem; color: #1e293b; border-bottom: 1px solid #f1f5f9; }
     .quote-table tr:last-child td { border-bottom: none; }
     .total-row td { font-weight: 700; padding-top: 1rem; border-top: 2px solid #e2e8f0; }
-    .total-row .amount { color: #e91e8c; font-size: 1.05rem; }
+    .total-row .amount { color: #2B4C52; font-size: 1.05rem; }
 
     .admin-notes { background: #f0f9ff; border-radius: 12px; padding: 1rem; color: #1e293b; font-size: 0.9rem; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6; }
     .admin-notes strong { display: block; font-size: 0.78rem; color: #3b82f6; text-transform: uppercase; margin-bottom: 0.3rem; }
@@ -80,7 +80,7 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
     .status-banner.filled { background: rgba(5,150,105,0.1); color: #047857; border: 1px solid rgba(5,150,105,0.25); }
     .status-banner.approved { background: rgba(5,150,105,0.1); color: #047857; border: 1px solid rgba(5,150,105,0.25); }
     .status-banner.rejected { background: rgba(239,68,68,0.1); color: #dc2626; border: 1px solid rgba(239,68,68,0.25); }
-    .status-banner.converted { background: rgba(233,30,142,0.08); color: #be1871; border: 1px solid rgba(233,30,142,0.25); }
+    .status-banner.converted { background: rgba(43, 76, 82,0.08); color: #3D5C42; border: 1px solid rgba(43, 76, 82,0.25); }
 
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-grid .full-width { grid-column: 1 / -1; }
@@ -91,7 +91,7 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
       width: 100%; padding: 0.75rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
       font-size: 0.9rem; font-family: inherit; outline: none; transition: border-color 0.2s; background: white;
     }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #e91e8c; box-shadow: 0 0 0 3px rgba(233,30,142,0.08); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #2B4C52; box-shadow: 0 0 0 3px rgba(43, 76, 82,0.08); }
     .form-group textarea { min-height: 80px; resize: vertical; }
     .form-group .error-msg { font-size: 0.75rem; color: #ef4444; display: none; }
     .form-group.has-error input, .form-group.has-error select, .form-group.has-error textarea { border-color: #ef4444; }
@@ -100,11 +100,11 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
     .btn-primary {
       display: inline-flex; align-items: center; gap: 0.5rem;
       padding: 0.85rem 2rem; border-radius: 12px; border: none;
-      background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white;
+      background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white;
       cursor: pointer; font-weight: 700; font-size: 0.95rem;
       transition: all 0.2s ease; font-family: inherit;
     }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(233,30,142,0.3); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(43, 76, 82,0.3); }
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
     .success-msg { text-align: center; padding: 3rem 2rem; }

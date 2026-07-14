@@ -59,10 +59,10 @@ $activity = array_slice($activity, 0, 10);
 <style>
   .dash-kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1.75rem; }
   .dash-kpi { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem 1.25rem; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.04); transition: all 0.2s ease; text-decoration: none; display: block; }
-  .dash-kpi:hover { border-color: var(--primary); box-shadow: 0 8px 28px rgba(233,30,140,0.08); transform: translateY(-2px); }
+  .dash-kpi:hover { border-color: var(--primary); box-shadow: 0 8px 28px rgba(43, 76, 82,0.08); transform: translateY(-2px); }
   .dash-kpi-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; font-size: 1.2rem; }
   .dash-kpi-icon.blue { background: rgba(59,130,246,0.1); color: #1d4ed8; }
-  .dash-kpi-icon.pink { background: rgba(233,30,140,0.1); color: #be1871; }
+  .dash-kpi-icon.pink { background: rgba(43, 76, 82,0.1); color: #3D5C42; }
   .dash-kpi-icon.green { background: rgba(16,185,129,0.1); color: #059669; }
   .dash-kpi-value { font-size: 2rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; }
   .dash-kpi-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-top: 0.3rem; }
@@ -72,7 +72,7 @@ $activity = array_slice($activity, 0, 10);
   .dash-activity-item:hover { border-color: var(--primary); background: white; }
   .dash-activity-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
   .dash-activity-icon.order { background: rgba(59,130,246,0.1); color: #1d4ed8; }
-  .dash-activity-icon.request { background: rgba(233,30,140,0.1); color: #be1871; }
+  .dash-activity-icon.request { background: rgba(43, 76, 82,0.1); color: #3D5C42; }
   .dash-activity-body { flex: 1; min-width: 0; }
   .dash-activity-title { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
   .dash-activity-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem; }

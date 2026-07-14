@@ -2,19 +2,28 @@
 $pageTitle = 'Customization Requests';
 $pageSubtitle = 'Review and manage custom printing requests from customers';
 require 'includes/admin-header.php';
-$adminId = $userId;
+// Ensure $adminId is set even if $userId is not defined by header
+if (isset($userId)) {
+  $adminId = $userId;
+} elseif (isset($user) && isset($user['id'])) {
+  $adminId = $user['id'];
+} elseif (isset($_SESSION) && isset($_SESSION['user_id'])) {
+  $adminId = $_SESSION['user_id'];
+} else {
+  $adminId = null; // fallback: no authenticated user id available
+}
 ?>
 <style>
     .cr-table { width: 100%; border-collapse: collapse; }
     .cr-table th { text-align: left; padding: 0.85rem 1rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
     .cr-table td { padding: 0.85rem 1rem; font-size: 0.88rem; color: #1e293b; border-bottom: 1px solid #f1f5f9; }
     .cr-table tr:hover td { background: #f8fafc; }
-    .cr-table tr.cr-selected td { background: rgba(233,30,142,0.04); }
+    .cr-table tr.cr-selected td { background: rgba(43, 76, 82,0.04); }
     .cr-badge { display: inline-flex; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
     .cr-badge-pending { background: rgba(245,158,11,0.12); color: #b8860b; }
     .cr-badge-in_review { background: rgba(59,130,246,0.12); color: #1d4ed8; }
     .cr-badge-approved { background: rgba(16,185,129,0.12); color: #047857; }
-    .cr-badge-ready_for_purchase { background: rgba(233,30,142,0.12); color: #be1871; }
+    .cr-badge-ready_for_purchase { background: rgba(43, 76, 82,0.12); color: #3D5C42; }
     .cr-badge-rejected { background: rgba(239,68,68,0.12); color: #dc2626; }
     .cr-badge-completed { background: rgba(100,116,139,0.12); color: #475569; }
     .cr-empty { text-align: center; padding: 3rem; color: #94a3b8; }
@@ -34,25 +43,37 @@ $adminId = $userId;
     .cr-form-group { margin-bottom: 1rem; }
     .cr-form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 0.35rem; }
     .cr-form-group input, .cr-form-group select, .cr-form-group textarea { width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
-    .cr-form-group input:focus, .cr-form-group select:focus, .cr-form-group textarea:focus { border-color: #e91e8c; }
+    .cr-form-group input:focus, .cr-form-group select:focus, .cr-form-group textarea:focus { border-color: #2B4C52; }
     .cr-form-group textarea { min-height: 80px; resize: vertical; }
     .cr-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .cr-chat-box { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 1.5rem; overflow: hidden; }
     .cr-chat-header { padding: 0.75rem 1rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 0.85rem; color: #1e293b; display: flex; justify-content: space-between; align-items: center; }
     .cr-chat-msgs { max-height: 250px; overflow-y: auto; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
     .cr-msg { max-width: 80%; padding: 0.6rem 0.85rem; border-radius: 12px; font-size: 0.82rem; line-height: 1.4; }
-    .cr-msg.sent { align-self: flex-end; background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; border-bottom-right-radius: 4px; }
+    .cr-msg.sent { align-self: flex-end; background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; border-bottom-right-radius: 4px; }
     .cr-msg.received { align-self: flex-start; background: #f1f5f9; color: #1e293b; border-bottom-left-radius: 4px; }
     .cr-msg-time { font-size: 0.65rem; color: #94a3b8; margin-top: 0.2rem; }
     .cr-chat-input { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid #e2e8f0; }
     .cr-chat-input input { flex: 1; padding: 0.55rem 0.85rem; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; outline: none; }
-    .cr-chat-input input:focus { border-color: #e91e8c; }
-    .cr-chat-input button { padding: 0.55rem 1rem; border-radius: 8px; border: none; background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; font-weight: 600; cursor: pointer; font-size: 0.82rem; }
+    .cr-chat-input input:focus { border-color: #2B4C52; }
+    .cr-chat-input button { padding: 0.55rem 1rem; border-radius: 8px; border: none; background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; font-weight: 600; cursor: pointer; font-size: 0.82rem; }
     .ai-image-wrap { flex: 0 0 48px; width: 48px; height: 48px; flex-shrink: 0; position: relative; }
     .ai-image-btn { width: 48px; height: 48px; border-radius: 6px; border: 1.5px dashed #d1d5db; background: white; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: border-color 0.2s, color 0.2s, background 0.2s; }
-    .ai-image-btn:hover { border-color: #e91e8c; color: #e91e8c; background: rgba(233,30,142,0.04); }
+    .ai-image-btn:hover { border-color: #2B4C52; color: #2B4C52; background: rgba(43, 76, 82,0.04); }
     .ai-image-preview { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; cursor: pointer; border: 1px solid #e2e8f0; transition: border-color 0.2s; display: block; }
-    .ai-image-preview:hover { border-color: #e91e8c; box-shadow: 0 0 0 3px rgba(233,30,142,0.1); }
+    .ai-image-preview:hover { border-color: #2B4C52; box-shadow: 0 0 0 3px rgba(43, 76, 82,0.1); }
+    .admin-item-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; padding: 0.65rem; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .admin-item-row:focus-within { border-color: #2B4C52; }
+    .ai-size { padding: 0.45rem 0.65rem; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.82rem; outline: none; font-family: inherit; background: white; min-width: 110px; flex:2; color: #1e293b; }
+    .ai-size:focus { border-color: #2B4C52; }
+    .admin-item-row .ai-qty-stepper { display: inline-flex; align-items: center; gap: 0; flex:1; min-width: 90px; }
+    .admin-item-row .ai-qty-stepper .ai-qty-btn { width: 30px; height: 30px; border: 1.5px solid #e2e8f0; background: white; color: #1e293b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; user-select: none; }
+    .admin-item-row .ai-qty-stepper .ai-qty-btn:first-child { border-radius: 6px 0 0 6px; }
+    .admin-item-row .ai-qty-stepper .ai-qty-btn:last-child { border-radius: 0 6px 6px 0; }
+    .admin-item-row .ai-qty-stepper .ai-qty-btn:hover { background: rgba(43,76,82,0.08); border-color: #2B4C52; color: #2B4C52; }
+    .admin-item-row .ai-qty-stepper .ai-qty-value { width: 40px; height: 30px; border: 1.5px solid #e2e8f0; border-left: none; border-right: none; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: #1e293b; background: white; }
+    .admin-item-row .ai-remove { padding: 0.25rem 0.65rem; border-radius: 999px; border: none; background: rgba(239,68,68,0.08); color: #ef4444; cursor: pointer; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem; transition: all 0.2s; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
+    .admin-item-row .ai-remove:hover { background: rgba(220,38,38,0.15); color: #dc2626; }
     @media (max-width: 768px) { .cr-detail-grid { grid-template-columns: 1fr; } .cr-form-row { grid-template-columns: 1fr; } }
 </style>
 
@@ -98,7 +119,7 @@ $adminId = $userId;
     <div class="cr-chat-box" id="chatBox" style="display:none;">
       <div class="cr-chat-header">
         <span><i class="fas fa-comments"></i> Chat with Customer</span>
-        <span><a href="chat.php" id="openInChatLink" style="font-size:0.75rem;color:#e91e8c;text-decoration:none;font-weight:600;display:none;" target="_blank"><i class="fas fa-external-link-alt"></i> Open in Chat</a></span>
+        <span><a href="chat.php" id="openInChatLink" style="font-size:0.75rem;color:#2B4C52;text-decoration:none;font-weight:600;display:none;" target="_blank"><i class="fas fa-external-link-alt"></i> Open in Chat</a></span>
       </div>
       <div class="cr-chat-msgs" id="chatMessages"></div>
       <div class="cr-chat-input">
@@ -123,8 +144,12 @@ $adminId = $userId;
       <label>Order Items <span style="font-weight:400;color:#94a3b8;">(size, qty &amp; reference image)</span></label>
       <div id="admin-items-container">
         <div class="admin-item-row">
-          <input type="text" class="ai-size" placeholder="Size (e.g., Small, XL, 2XL)" style="flex:2;">
-          <input type="number" class="ai-qty" placeholder="Qty" min="1" value="1" style="flex:1;">
+          <input type="text" class="ai-size" list="admin-size-list" placeholder="e.g., M, A4, Letter, Small, 3x5ft, etc.">
+          <div class="ai-qty-stepper">
+            <button type="button" class="ai-qty-btn" data-action="dec">&minus;</button>
+            <span class="ai-qty-value">1</span>
+            <button type="button" class="ai-qty-btn" data-action="inc">+</button>
+          </div>
           <div class="ai-image-wrap">
             <input type="file" class="ai-image-input" accept="image/*" style="display:none;">
             <div class="ai-image-btn" onclick="this.previousElementSibling.click()" title="Upload reference image">
@@ -132,10 +157,20 @@ $adminId = $userId;
             </div>
             <img class="ai-image-preview" style="display:none;" onclick="openItemPreview(this)">
           </div>
-          <button type="button" class="ai-remove" onclick="adminRemoveItem(this)" style="display:none;" title="Remove">&times;</button>
+          <button type="button" class="ai-remove" onclick="adminRemoveItem(this)" style="display:none;" title="Remove"><i class="fas fa-times"></i> Remove</button>
         </div>
       </div>
-      <button type="button" onclick="adminAddItem()" style="margin-top:0.5rem;padding:0.4rem 0.8rem;border:1.5px dashed #d1d5db;border-radius:8px;background:none;color:#e91e8c;font-weight:600;font-size:0.82rem;cursor:pointer;width:100%;"><i class="fas fa-plus"></i> Add Item</button>
+      <button type="button" onclick="adminAddItem()" style="margin-top:0.5rem;padding:0.4rem 0.8rem;border:1.5px dashed #d1d5db;border-radius:8px;background:none;color:#2B4C52;font-weight:600;font-size:0.82rem;cursor:pointer;width:100%;"><i class="fas fa-plus"></i> Add Item</button>
+      <datalist id="admin-size-list">
+        <option value="XS"><option value="S"><option value="M"><option value="L"><option value="XL">
+        <option value="2XL"><option value="3XL"><option value="4XL"><option value="5XL">
+        <option value="A4"><option value="A5"><option value="A3"><option value="Letter">
+        <option value="Legal"><option value="Tabloid"><option value="Small">
+        <option value="Medium"><option value="Large"><option value="X-Large">
+        <option value="One Size"><option value="Standard"><option value="Square">
+        <option value="Rounded"><option value="Mini"><option value="Oversized">
+        <option value="Custom">
+      </datalist>
     </div>
     <div class="cr-form-group">
       <label>Special Requests</label>
@@ -458,7 +493,7 @@ async function saveCustomization() {
   const items = [];
   document.querySelectorAll('#admin-items-container .admin-item-row').forEach(function(row) {
     const size = row.querySelector('.ai-size').value.trim();
-    const qty = parseInt(row.querySelector('.ai-qty').value) || 1;
+    const qty = parseInt(row.querySelector('.ai-qty-value').textContent) || 1;
     const preview = row.querySelector('.ai-image-preview');
     const image = (preview && preview.style.display !== 'none' && preview.src) ? preview.src : '';
     if (size) items.push({size: size, qty: qty, image: image});
@@ -830,14 +865,18 @@ function adminRenderItems(items) {
     row.className = 'admin-item-row';
     const hasImg = it.image && it.image.length > 100;
     row.innerHTML =
-      '<input type="text" class="ai-size" placeholder="Size (e.g., Small, XL, 2XL)" style="flex:2;" value="' + escapeHtml(it.size||'') + '">' +
-      '<input type="number" class="ai-qty" placeholder="Qty" min="1" value="' + (it.qty||1) + '" style="flex:1;">' +
+      '<input type="text" class="ai-size" list="admin-size-list" placeholder="e.g., M, A4, Letter, Small, 3x5ft, etc." value="' + escapeHtml(it.size||'') + '">' +
+      '<div class="ai-qty-stepper">' +
+        '<button type="button" class="ai-qty-btn" data-action="dec">&minus;</button>' +
+        '<span class="ai-qty-value">' + (it.qty||1) + '</span>' +
+        '<button type="button" class="ai-qty-btn" data-action="inc">+</button>' +
+      '</div>' +
       '<div class="ai-image-wrap">' +
         '<input type="file" class="ai-image-input" accept="image/*" style="display:none;">' +
         '<div class="ai-image-btn" onclick="this.previousElementSibling.click()" title="Upload reference image"' + (hasImg ? ' style="display:none;"' : '') + '><i class="fas fa-camera"></i></div>' +
         '<img class="ai-image-preview"' + (hasImg ? ' src="' + escapeHtml(it.image) + '" onclick="openItemPreview(this)" style="display:block;"' : ' style="display:none;"') + '>' +
       '</div>' +
-      '<button type="button" class="ai-remove" onclick="adminRemoveItem(this)" title="Remove"' + (parsed.length < 2 ? ' style="display:none;"' : '') + '>&times;</button>';
+      '<button type="button" class="ai-remove" onclick="adminRemoveItem(this)" title="Remove"' + (parsed.length < 2 ? ' style="display:none;"' : '') + '><i class="fas fa-times"></i> Remove</button>';
     container.appendChild(row);
     if (!hasImg) attachAdminImageHandler(row.querySelector('.ai-image-input'));
   });
@@ -848,7 +887,8 @@ function adminAddItem() {
   const first = container.querySelector('.admin-item-row');
   const clone = first.cloneNode(true);
   clone.querySelector('.ai-size').value = '';
-  clone.querySelector('.ai-qty').value = '1';
+  const qtyVal = clone.querySelector('.ai-qty-value');
+  if (qtyVal) qtyVal.textContent = '1';
   clone.querySelector('.ai-image-input').value = '';
   const btn = clone.querySelector('.ai-image-btn');
   if (btn) btn.style.display = 'flex';
@@ -887,6 +927,21 @@ function attachAdminImageHandler(input) {
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeImgPreview();
+});
+
+// Admin qty stepper delegation
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.ai-qty-btn');
+  if (!btn) return;
+  var stepper = btn.closest('.ai-qty-stepper');
+  if (!stepper) return;
+  var val = stepper.querySelector('.ai-qty-value');
+  var qty = parseInt(val.textContent) || 1;
+  if (btn.getAttribute('data-action') === 'inc') {
+    val.textContent = qty + 1;
+  } else if (btn.getAttribute('data-action') === 'dec' && qty > 1) {
+    val.textContent = qty - 1;
+  }
 });
 
 function escapeHtml(str) {

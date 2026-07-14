@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle = 'Shipping Settings';
 $pageSubtitle = 'Manage shipping channels, pickup hours, and delivery options';
 require_once __DIR__ . '/includes/admin-header.php';
@@ -16,8 +16,8 @@ require_once __DIR__ . '/includes/admin-header.php';
       font-size: 0.8rem; font-weight: 600; border: none;
       cursor: pointer; text-decoration: none; transition: all 0.2s ease;
     }
-    .btn-primary { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; box-shadow: 0 4px 12px rgba(233,30,142,0.2); }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(233,30,142,0.3); }
+    .btn-primary { background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; box-shadow: 0 4px 12px rgba(43, 76, 82,0.2); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(43, 76, 82,0.3); }
     .btn-outline { background: white; color: #475569; border: 1px solid #e2e8f0; }
     .btn-outline:hover { background: #f1f5f9; }
     .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.72rem; border-radius: 6px; }
@@ -38,8 +38,8 @@ require_once __DIR__ . '/includes/admin-header.php';
       font-size: 0.75rem; font-weight: 600; color: #64748b;
       transition: all 0.2s ease; white-space: nowrap; min-width: 0;
     }
-    .ss-top-tab:hover { background: rgba(233,30,142,0.04); }
-    .ss-top-tab.active { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; }
+    .ss-top-tab:hover { background: rgba(43, 76, 82,0.04); }
+    .ss-top-tab.active { background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; }
 
     .ss-subtabs {
       display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;
@@ -50,8 +50,8 @@ require_once __DIR__ . '/includes/admin-header.php';
       font-size: 0.75rem; font-weight: 600; color: #475569;
       cursor: pointer; transition: all 0.15s ease;
     }
-    .ss-subtab:hover { border-color: #e91e8c; color: #e91e8c; }
-    .ss-subtab.active { background: rgba(233,30,142,0.08); border-color: #e91e8c; color: #e91e8c; }
+    .ss-subtab:hover { border-color: #2B4C52; color: #2B4C52; }
+    .ss-subtab.active { background: rgba(43, 76, 82,0.08); border-color: #2B4C52; color: #2B4C52; }
 
     .ss-card {
       background: white; border: 1px solid #e8ecf1;
@@ -65,7 +65,7 @@ require_once __DIR__ . '/includes/admin-header.php';
       font-size: 1rem; font-weight: 700; color: #1a1a2e;
       display: flex; align-items: center; gap: 0.5rem;
     }
-    .ss-card-header h2 i { color: #e91e8c; }
+    .ss-card-header h2 i { color: #2B4C52; }
     .ss-card-actions { display: flex; gap: 0.5rem; align-items: center; }
 
     .ss-toggle-wrapper {
@@ -81,7 +81,7 @@ require_once __DIR__ . '/includes/admin-header.php';
       background: #e2e8f0; border-radius: 999px; cursor: pointer;
       transition: background 0.3s ease; flex-shrink: 0;
     }
-    .ss-toggle.active { background: linear-gradient(135deg, #e91e8c, #9c27b0); }
+    .ss-toggle.active { background: linear-gradient(135deg, #2B4C52, #4A7C84); }
     .ss-toggle::after {
       content: ''; position: absolute; top: 2px; left: 2px;
       width: 20px; height: 20px; background: white;
@@ -103,7 +103,7 @@ require_once __DIR__ . '/includes/admin-header.php';
       font-size: 0.88rem; font-weight: 700; color: #1a1a2e;
       display: flex; align-items: center; gap: 0.5rem;
     }
-    .ss-collapsible-title i { color: #e91e8c; }
+    .ss-collapsible-title i { color: #2B4C52; }
     .ss-collapsible-icon {
       width: 24px; height: 24px; border-radius: 6px;
       background: white; display: flex; align-items: center; justify-content: center;
@@ -128,7 +128,7 @@ require_once __DIR__ . '/includes/admin-header.php';
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .form-input:focus, .form-select:focus {
-      border-color: #e91e8c; box-shadow: 0 0 0 3px rgba(233,30,142,0.1);
+      border-color: #2B4C52; box-shadow: 0 0 0 3px rgba(43, 76, 82,0.1);
     }
     .form-row {
       display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
@@ -139,7 +139,7 @@ require_once __DIR__ . '/includes/admin-header.php';
       border-radius: 12px; padding: 1rem; margin-bottom: 0.75rem;
       transition: border-color 0.2s ease;
     }
-    .ss-address-card.editing { border-color: #e91e8c; box-shadow: 0 0 0 2px rgba(233,30,142,0.1); }
+    .ss-address-card.editing { border-color: #2B4C52; box-shadow: 0 0 0 2px rgba(43, 76, 82,0.1); }
     .ss-address-header {
       display: flex; justify-content: space-between; align-items: flex-start;
       margin-bottom: 0.5rem;
@@ -148,7 +148,7 @@ require_once __DIR__ . '/includes/admin-header.php';
       font-size: 0.85rem; font-weight: 700; color: #1a1a2e;
       display: flex; align-items: center; gap: 0.5rem;
     }
-    .ss-address-label i { color: #e91e8c; }
+    .ss-address-label i { color: #2B4C52; }
     .ss-address-text {
       font-size: 0.82rem; color: #475569; line-height: 1.6;
     }
@@ -642,7 +642,7 @@ function renderAddresses() {
       card.innerHTML = `
         <div class="ss-address-header">
           <div class="ss-address-label">
-            <i class="fas ${isDefault ? 'fa-check-circle' : 'fa-map-marker-alt'}" style="color:${isDefault ? '#059669' : '#e91e8c'};"></i>
+            <i class="fas ${isDefault ? 'fa-check-circle' : 'fa-map-marker-alt'}" style="color:${isDefault ? '#059669' : '#2B4C52'};"></i>
             ${esc(a.label)}
             ${isDefault ? '<span class="ss-badge success">Default</span>' : ''}
           </div>

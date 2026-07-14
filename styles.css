@@ -8,9 +8,9 @@
   --text: #111827;
   --muted: #64748b;
   --border: #e2e8f0;
-  --primary: #e91e8c;
-  --primary-dark: #9c27b0;
-  --secondary: #00bcd4;
+  --primary: #2B4C52;
+  --primary-dark: #4A7C84;
+  --secondary: #4A7C84;
   --success: #8bc34a;
   --warning: #ffc107;
   --radius: 24px;
@@ -47,8 +47,8 @@ body {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.6;
   background: 
-    linear-gradient(90deg, rgba(233, 30, 142, 0.05) 1px, transparent 1px),
-    linear-gradient(rgba(233, 30, 142, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43, 76, 82, 0.05) 1px, transparent 1px),
+    linear-gradient(rgba(43, 76, 82, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(247, 214, 29, 0.308) 2px, transparent 2px),
     linear-gradient(rgba(0, 187, 212, 0.432) 2px, transparent 2px),
     radial-gradient(circle at top left, rgb(115, 126, 243), transparent 30%),
@@ -107,7 +107,7 @@ textarea {
 
 .topbar {
   height: 4px;
-  background: linear-gradient(90deg, #e91e8c, #00bcd4, #8bc34a, #ffc107);
+  background: linear-gradient(90deg, #2B4C52, #4A7C84, #8bc34a, #ffc107);
 }
 
 .header-inner {
@@ -160,7 +160,7 @@ textarea {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: #e91e8c;
+  color: #2B4C52;
   font-weight: 700;
 }
 
@@ -187,7 +187,7 @@ textarea {
   bottom: -6px;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #e91e8c, #00bcd4);
+  background: linear-gradient(90deg, #2B4C52, #4A7C84);
   transition: width 250ms ease;
 }
 
@@ -220,41 +220,27 @@ textarea {
   display: inline-flex;
 }
 
-.auth-btn {
+.btn.auth-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0.6rem 1.4rem;
   font-weight: 700;
   border-radius: 999px;
-  border: 2px solid #e91e8c;
-  background: transparent;
-  color: #e91e8c;
+  border: none;
+  background: linear-gradient(135deg, #2B4C52 0%, #4A7C84 100%);
+  color: white;
+  box-shadow: 0 3px 10px rgba(43, 76, 82, 0.2);
   text-decoration: none;
   transition: all 0.3s ease;
   cursor: pointer;
   font-size: 0.95rem;
-}
-
-.auth-btn:hover {
-  background: #e91e8c;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(233, 30, 142, 0.3);
-}
-
-.nav-icon-btn {
   gap: 0.4rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
 }
 
-.nav-icon-btn i {
-  font-size: 1.1rem;
-}
-
-.nav-icon-label {
-  font-size: 0.82rem;
+.btn.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(43, 76, 82, 0.3);
 }
 
 .profile-icon {
@@ -265,7 +251,7 @@ textarea {
   width: 44px;
   height: 44px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #00bcd4 0%, #8bc34a 100%);
+  background: linear-gradient(135deg, #4A7C84 0%, #8bc34a 100%);
   color: white;
   text-decoration: none;
   transition: all 0.3s ease;
@@ -275,7 +261,7 @@ textarea {
 
 .profile-icon:hover {
   transform: scale(1.1);
-  box-shadow: 0 8px 24px rgba(0, 188, 212, 0.3);
+  box-shadow: 0 8px 24px rgba(43, 76, 82, 0.3);
 }
 
 /* Header action set - container for header buttons */
@@ -426,7 +412,7 @@ textarea {
 }
 
 .fb-dropdown-menu li a:hover {
-  background: linear-gradient(90deg, rgba(233,30,140,0.04), rgba(0,188,212,0.03));
+  background: linear-gradient(90deg, rgba(43, 76, 82,0.04), rgba(43, 76, 82,0.03));
 }
 
 /* Show menu when dropdown has .open */
@@ -523,8 +509,8 @@ textarea {
 
 .search-input:focus {
   outline: none;
-  border-color: #e91e8c;
-  box-shadow: 0 0 0 2px rgba(233, 30, 142, 0.1);
+  border-color: #2B4C52;
+  box-shadow: 0 0 0 2px rgba(43, 76, 82, 0.1);
 }
 
 .search-input::placeholder {
@@ -603,10 +589,10 @@ textarea {
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(90deg, rgba(233,30,140,0.05) 1px, transparent 1px),
-    linear-gradient(rgba(233,30,140,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,188,212,0.03) 2px, transparent 2px),
-    linear-gradient(rgba(0,188,212,0.03) 2px, transparent 2px);
+    linear-gradient(90deg, rgba(43, 76, 82,0.05) 1px, transparent 1px),
+    linear-gradient(rgba(43, 76, 82,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43, 76, 82,0.03) 2px, transparent 2px),
+    linear-gradient(rgba(43, 76, 82,0.03) 2px, transparent 2px);
   background-size: 80px 80px, 80px 80px, 160px 160px, 160px 160px;
   background-position: 0 0, 0 0, 0 0, 0 0;
 }
@@ -720,7 +706,7 @@ textarea {
   text-shadow: 
     -1.5px -1.5px 0 #ff0f7f,
     1.5px -1.5px 0 #ffc107,
-    -1.5px 1.5px 0 #00bcd4,
+    -1.5px 1.5px 0 #4A7C84,
     1.5px 1.5px 0 #8bc34a,
     0 4px 30px rgba(0, 229, 255, 0.4);
   font-weight: 900;
@@ -808,7 +794,7 @@ textarea {
   display: inline-block;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--primary);
+  color: #f8fafc;
   font-size: 1.5rem;
   font-weight: 700;
 }
@@ -1020,11 +1006,11 @@ textarea {
   color: white;
 }
 
-.service-icon-pink { background: linear-gradient(135deg, #e91e8c, #c2185b); }
-.service-icon-cyan { background: linear-gradient(135deg, #00bcd4, #0097a7); }
+.service-icon-pink { background: linear-gradient(135deg, #2B4C52, #c2185b); }
+.service-icon-cyan { background: linear-gradient(135deg, #4A7C84, #3D5C42); }
 .service-icon-green { background: linear-gradient(135deg, #8bc34a, #689f38); }
 .service-icon-gold { background: linear-gradient(135deg, #ffc107, #ff9800); }
-.service-icon-purple { background: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+.service-icon-purple { background: linear-gradient(135deg, #4A7C84, #7b1fa2); }
 .service-icon-blue { background: linear-gradient(135deg, #2196f3, #1976d2); }
 
 .service-card h3 {
@@ -1086,10 +1072,10 @@ textarea {
 }
 
 .service-item:hover {
-  background: linear-gradient(135deg, rgba(233,30,140,0.15), rgba(0,188,212,0.15));
-  border-color: rgba(233,30,140,0.5);
+  background: linear-gradient(135deg, rgba(43, 76, 82,0.15), rgba(43, 76, 82,0.15));
+  border-color: rgba(43, 76, 82,0.5);
   transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(233,30,140,0.15);
+  box-shadow: 0 12px 30px rgba(43, 76, 82,0.15);
 }
 
 .tabs {
@@ -1112,7 +1098,7 @@ textarea {
 
 .tab-button.active,
 .tab-button:hover {
-  background: linear-gradient(90deg, #e91e8c, #00bcd4);
+  background: linear-gradient(90deg, #2B4C52, #4A7C84);
   color: white;
   border-color: transparent;
   transform: translateY(-2px);
@@ -1158,8 +1144,8 @@ textarea {
 
 .product-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 30px 80px rgba(233, 30, 142, 0.25);
-  border: 3px solid #e91e8c;
+  box-shadow: 0 30px 80px rgba(43, 76, 82, 0.25);
+  border: 3px solid #2B4C52;
   background: rgba(255,255,255,0.98);
 }
 
@@ -1215,7 +1201,7 @@ textarea {
 
 .btn-customize {
   padding: 8px 16px;
-  background: linear-gradient(135deg, #e91e8c 0%, #00bcd4 100%);
+  background: linear-gradient(135deg, #2B4C52 0%, #4A7C84 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -1228,7 +1214,7 @@ textarea {
 
 .btn-customize:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(233, 30, 142, 0.3);
+  box-shadow: 0 8px 20px rgba(43, 76, 82, 0.3);
 }
 
 .btn-customize:active {
@@ -1300,7 +1286,7 @@ textarea {
 
 .image-cta {
   min-height: 320px;
-  background: linear-gradient(135deg, rgba(233,30,140,0.95), rgba(0,188,212,0.85));
+  background: linear-gradient(135deg, rgba(43, 76, 82,0.95), rgba(43, 76, 82,0.85));
   color: white;
   display: flex;
   align-items: center;
@@ -1359,7 +1345,7 @@ textarea {
   height: 12px;
   margin-top: 0.6rem;
   border-radius: 999px;
-  background: linear-gradient(135deg, #e91e8c, #00bcd4);
+  background: linear-gradient(135deg, #2B4C52, #4A7C84);
 }
 
 .contact-grid {
@@ -1579,7 +1565,7 @@ textarea {
 
 .footer-top {
   height: 4px;
-  background: linear-gradient(90deg, #e91e8c, #00bcd4, #8bc34a, #ffc107);
+  background: linear-gradient(90deg, #2B4C52, #4A7C84, #8bc34a, #ffc107);
 }
 
 .footer-grid {
@@ -1688,19 +1674,19 @@ textarea {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(233, 30, 142, 0.2);
-  color: #e91e8c;
+  background: rgba(43, 76, 82, 0.2);
+  color: #2B4C52;
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
   transition: all 0.3s ease;
-  border: 1px solid rgba(233, 30, 142, 0.4);
+  border: 1px solid rgba(43, 76, 82, 0.4);
 }
 
 .social-links a:hover {
-  background: rgba(233, 30, 142, 0.3);
-  border-color: #e91e8c;
+  background: rgba(43, 76, 82, 0.3);
+  border-color: #2B4C52;
   transform: translateY(-2px);
 }
 
@@ -1744,14 +1730,14 @@ textarea {
 
 .btn.primary {
   color: white;
-  background: linear-gradient(90deg, #ee55a9ef, #1fc4dae7, #d4d10fec);
-  box-shadow: 0 20px 50px rgba(235, 225, 87, 0.603);
+  background: linear-gradient(135deg, #2B4C52 0%, #4A7C84 100%);
+  box-shadow: 0 8px 24px rgba(43, 76, 82, 0.3);
 }
 
 .btn.ghost:hover,
 .btn.outline:hover {
   background: rgba(255,255,255,1);
-  border-color: rgba(233,30,140,0.3);
+  border-color: rgba(43, 76, 82,0.3);
 }
 
 .btn.ghost,
@@ -1778,10 +1764,10 @@ textarea {
 
 @keyframes glowPulse {
   0%, 100% {
-    filter: drop-shadow(0 0 20px rgba(233,30,140,0.12));
+    filter: drop-shadow(0 0 20px rgba(43, 76, 82,0.12));
   }
   50% {
-    filter: drop-shadow(0 0 24px rgba(233,30,140,0.2));
+    filter: drop-shadow(0 0 24px rgba(43, 76, 82,0.2));
   }
 }
 
@@ -1869,8 +1855,8 @@ textarea {
 
 /* Auth Pages (Login & Sign Up) */
 .auth-page {
-  background: radial-gradient(circle at top right, rgba(233, 30, 140, 0.18), transparent 25%),
-              radial-gradient(circle at 15% 20%, rgba(0, 188, 212, 0.16), transparent 18%),
+  background: radial-gradient(circle at top right, rgba(43, 76, 82, 0.18), transparent 25%),
+              radial-gradient(circle at 15% 20%, rgba(43, 76, 82, 0.16), transparent 18%),
               linear-gradient(180deg, #07101f 0%, #0f1d35 100%);
   min-height: 100vh;
   display: flex;
@@ -1895,7 +1881,7 @@ textarea {
 }
 
 .auth-page .nav-list a::after {
-  background: linear-gradient(90deg, #e91e8c, #00bcd4);
+  background: linear-gradient(90deg, #2B4C52, #4A7C84);
 }
 
 .auth-page .btn.outline {
@@ -1933,7 +1919,7 @@ textarea {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(233, 30, 140, 0.14), rgba(0, 188, 212, 0.14));
+  background: linear-gradient(135deg, rgba(43, 76, 82, 0.14), rgba(43, 76, 82, 0.14));
   opacity: 0.08;
   pointer-events: none;
 }
@@ -2003,9 +1989,9 @@ textarea {
 
 .form-group input:focus {
   outline: none;
-  border-color: rgba(233, 30, 142, 0.85);
+  border-color: rgba(43, 76, 82, 0.85);
   background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 0 2px rgba(233, 30, 142, 0.12);
+  box-shadow: 0 0 0 2px rgba(43, 76, 82, 0.12);
 }
 
 .form-row {
@@ -2030,7 +2016,7 @@ textarea {
 .checkbox-label input {
   width: 18px;
   height: 18px;
-  accent-color: #e91e8c;
+  accent-color: #2B4C52;
   cursor: pointer;
 }
 
@@ -2071,7 +2057,7 @@ textarea {
 
 .google-btn:hover {
   background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(233, 30, 142, 0.25);
+  border-color: rgba(43, 76, 82, 0.25);
 }
 
 .auth-footer {
@@ -2312,7 +2298,7 @@ div.dashboard-shell {
 }
 .stat-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(233, 30, 140, 0.2);
+  border-color: rgba(43, 76, 82, 0.2);
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 }
 
@@ -2330,7 +2316,7 @@ div.dashboard-shell {
 }
 /* Per-stat icon colors */
 .stat-icon.users { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
-.stat-icon.products { background: linear-gradient(135deg, #e91e8c, #9c27b0); }
+.stat-icon.products { background: linear-gradient(135deg, #2B4C52, #4A7C84); }
 .stat-icon.orders { background: linear-gradient(135deg, #059669, #10b981); }
 .stat-icon.contacts { background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
 .stat-icon.resets { background: linear-gradient(135deg, #f59e0b, #f97316); }
@@ -2338,7 +2324,7 @@ div.dashboard-shell {
 .stat-icon.shipping { background: linear-gradient(135deg, #0ea5e9, #6366f1); }
 .stat-icon.completed { background: linear-gradient(135deg, #8bc34a, #689f38); }
 .stat-icon.returns { background: linear-gradient(135deg, #f59e0b, #f97316); }
-.stat-icon.custom { background: linear-gradient(135deg, #9c27b0, #6366f1); }
+.stat-icon.custom { background: linear-gradient(135deg, #4A7C84, #6366f1); }
 .stat-icon.to-ship { background: linear-gradient(135deg, #f97316, #f59e0b); }
 
 .stat-content {
@@ -2446,7 +2432,7 @@ div.dashboard-shell {
 .badge-admin { background: #dbeafe; color: #1e40af; }
 .badge-seller { background: #fce7f3; color: #9d174d; }
 .badge-user { background: #f3f4f6; color: #374151; }
-.badge-processing { background: rgba(0, 188, 212, 0.15); color: #0097a7; }
+.badge-processing { background: rgba(43, 76, 82, 0.15); color: #3D5C42; }
 .badge-confirmed { background: rgba(99, 102, 241, 0.15); color: #4338ca; }
 .badge-to_ship { background: rgba(249, 115, 22, 0.15); color: #c2410c; }
 .badge-shipped { background: rgba(14, 165, 233, 0.15); color: #0369a1; }
@@ -2465,7 +2451,7 @@ div.dashboard-shell {
   text-transform: capitalize;
 }
 .status-badge.status-pending { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
-.status-badge.status-processing { background: rgba(0, 188, 212, 0.12); color: #0097a7; border: 1px solid rgba(0, 188, 212, 0.3); }
+.status-badge.status-processing { background: rgba(43, 76, 82, 0.12); color: #3D5C42; border: 1px solid rgba(43, 76, 82, 0.3); }
 .status-badge.status-completed { background: rgba(139, 195, 74, 0.12); color: #3d7a1e; border: 1px solid rgba(139, 195, 74, 0.3); }
 .status-badge.status-cancelled { background: rgba(239, 68, 68, 0.12); color: #991b1b; border: 1px solid rgba(239, 68, 68, 0.3); }
 .status-badge.status-confirmed { background: rgba(99, 102, 241, 0.12); color: #4338ca; border: 1px solid rgba(99, 102, 241, 0.3); }
@@ -2510,13 +2496,13 @@ div.dashboard-shell {
   border: 1px solid transparent;
 }
 .btn-action.edit {
-  background: rgba(0, 188, 212, 0.12);
+  background: rgba(43, 76, 82, 0.12);
   color: #0f1724;
-  border-color: rgba(0, 188, 212, 0.18);
+  border-color: rgba(43, 76, 82, 0.18);
 }
 .btn-action.edit:hover {
-  background: rgba(0, 188, 212, 0.25);
-  border-color: #00bcd4;
+  background: rgba(43, 76, 82, 0.25);
+  border-color: #4A7C84;
   transform: scale(1.08);
 }
 .btn-action.delete {
@@ -2550,7 +2536,7 @@ div.dashboard-shell {
 }
 .admin-actions .btn.primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(233, 30, 142, 0.25);
+  box-shadow: 0 8px 20px rgba(43, 76, 82, 0.25);
 }
 .admin-actions .btn.ghost,
 .admin-actions .btn.outline {

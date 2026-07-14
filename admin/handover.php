@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle = 'Handover Centre';
 $pageSubtitle = 'Manage pickups and drop-offs - track drivers, schedule pickups, and monitor handover status.';
 require 'includes/admin-header.php';
@@ -17,8 +17,8 @@ require 'includes/admin-header.php';
     font-size: 0.75rem; font-weight: 600; color: #64748b;
     transition: all 0.2s ease; white-space: nowrap; min-width: 0;
   }
-  .tab:hover { background: rgba(233,30,142,0.04); }
-  .tab.active { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; }
+  .tab:hover { background: rgba(43, 76, 82,0.04); }
+  .tab.active { background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; }
   .tab .tab-count {
     font-size: 0.65rem; background: rgba(0,0,0,0.08);
     padding: 0.05rem 0.4rem; border-radius: 999px; font-weight: 700;
@@ -35,8 +35,8 @@ require 'includes/admin-header.php';
     font-size: 0.75rem; font-weight: 600; color: #475569;
     cursor: pointer; transition: all 0.15s ease;
   }
-  .sh-subtab:hover { border-color: #e91e8c; color: #e91e8c; }
-  .sh-subtab.active { background: rgba(233,30,142,0.08); border-color: #e91e8c; color: #e91e8c; }
+  .sh-subtab:hover { border-color: #2B4C52; color: #2B4C52; }
+  .sh-subtab.active { background: rgba(43, 76, 82,0.08); border-color: #2B4C52; color: #2B4C52; }
 
   /* ===== SCHEDULE CARD ===== */
   .sh-schedule-card {
@@ -78,7 +78,7 @@ require 'includes/admin-header.php';
     border-bottom: 1px solid #e8ecf1; cursor: pointer;
     user-select: none; white-space: nowrap;
   }
-  .table th:hover { color: #e91e8c; }
+  .table th:hover { color: #2B4C52; }
   .table th i { font-size: 0.65rem; margin-left: 0.3rem; opacity: 0.5; }
   .table td {
     padding: 0.65rem 1rem; border-bottom: 1px solid #f1f5f9;
@@ -98,7 +98,7 @@ require 'includes/admin-header.php';
   }
   .sh-driver-avatar {
     width: 32px; height: 32px; border-radius: 50%;
-    background: linear-gradient(135deg, #e91e8c, #00bcd4);
+    background: linear-gradient(135deg, #2B4C52, #4A7C84);
     color: white; display: flex; align-items: center; justify-content: center;
     font-size: 0.7rem; font-weight: 700;
   }
@@ -136,8 +136,8 @@ require 'includes/admin-header.php';
     font-size: 0.8rem; font-weight: 600; color: #475569;
     cursor: pointer; transition: all 0.15s ease;
   }
-  .page-btn:hover { border-color: #e91e8c; color: #e91e8c; }
-  .page-btn.active { background: linear-gradient(135deg, #e91e8c, #9c27b0); color: white; border-color: transparent; }
+  .page-btn:hover { border-color: #2B4C52; color: #2B4C52; }
+  .page-btn.active { background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; border-color: transparent; }
   .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
   /* ===== EMPTY STATE ===== */
@@ -147,7 +147,7 @@ require 'includes/admin-header.php';
     border-radius: 20px;
   }
   .empty-state .sh-empty-icon {
-    font-size: 3rem; color: rgba(233,30,142,0.15); margin-bottom: 1rem;
+    font-size: 3rem; color: rgba(43, 76, 82,0.15); margin-bottom: 1rem;
   }
   .empty-state h3 { color: #1a1a2e; margin: 0 0 0.5rem; font-size: 1.1rem; }
   .empty-state p { color: #64748b; margin: 0; font-size: 0.85rem; }
@@ -195,7 +195,7 @@ require 'includes/admin-header.php';
 
 <div class="sh-table-card">
   <div class="sh-table-header">
-    <h3><i class="fas fa-truck" style="color:#e91e8c;margin-right:0.5rem;"></i> <span id="table-title">Upcoming Pickups</span></h3>
+    <h3><i class="fas fa-truck" style="color:#2B4C52;margin-right:0.5rem;"></i> <span id="table-title">Upcoming Pickups</span></h3>
     <span style="font-size:0.72rem;color:#94a3b8;" id="table-count">0 records</span>
   </div>
   <div class="table-wrap">

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle = 'My Account';
 $pageSubtitle = 'Manage your profile, security, and preferences.';
 require 'includes/admin-header.php';
@@ -32,8 +32,8 @@ unset($_SESSION['success'], $_SESSION['error']);
 ?>
 <style>
   :root {
-    --pa-primary: #e91e8c; --pa-primary-light: #9c27b0;
-    --pa-primary-bg: rgba(233,30,140,0.1);
+    --pa-primary: #2B4C52; --pa-primary-light: #4A7C84;
+    --pa-primary-bg: rgba(43, 76, 82,0.1);
     --pa-success: #059669; --pa-error: #ef4444;
   }
   .pa-card { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 2px 8px rgba(15,23,42,0.04); }
@@ -41,7 +41,7 @@ unset($_SESSION['success'], $_SESSION['error']);
   .pa-card-header h2 { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
   .pa-card-header h2 i { color: var(--pa-primary); }
   .pa-photo-section { display: flex; align-items: center; gap: 1.5rem; }
-  .pa-photo-preview { width: 100px; height: 100px; border-radius: 16px; background: linear-gradient(135deg, var(--pa-primary), #00bcd4); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; overflow: hidden; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-shrink: 0; }
+  .pa-photo-preview { width: 100px; height: 100px; border-radius: 16px; background: linear-gradient(135deg, var(--pa-primary), #4A7C84); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; overflow: hidden; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-shrink: 0; }
   .pa-photo-preview img { width: 100%; height: 100%; object-fit: cover; }
   .pa-photo-actions { flex: 1; }
   .pa-photo-actions p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
