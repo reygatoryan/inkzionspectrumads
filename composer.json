@@ -1,7 +1,0 @@
-{
-  "name": "inkzion/website",
-  "require": {
-    "php": ">=8.0",
-    "ext-mysqli": "*"
-  }
-}
