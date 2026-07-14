@@ -1,7 +1,6 @@
 <?php
 // Database configuration
 // Uses environment variables in production (Render), falls back to local XAMPP defaults
-// On Render: set DB_HOST, DB_USER, DB_PASS, DB_NAME in Environment tab
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') ?: '');
