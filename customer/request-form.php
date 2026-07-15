@@ -166,6 +166,9 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
       .header-profile-arrow { display: none; }
       .form-grid { grid-template-columns: 1fr; }
     }
+    @media (max-width: 480px) {
+      .form-card { padding: 1rem; }
+    }
 
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 1.5rem; }
     .modal-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
@@ -248,6 +251,22 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
     .sidebar-menu-toggle.open .toggle-arrow {
       transform: rotate(180deg);
     }
+    .sidebar-badge {
+      margin-left: auto;
+      background: #ef4444;
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.3rem;
+      line-height: 1;
+    }
+    .sidebar-badge.show { display: flex; }
   </style>
 </head>
 <body>
@@ -270,12 +289,11 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
     <nav class="sidebar-menu">
       <div class="sidebar-section-title">Shop</div>
       <a href="store-product.php" class="sidebar-menu-item"><i class="fas fa-box"></i> All Products</a>
-      <a href="notifications.php" class="sidebar-menu-item"><i class="fas fa-bell"></i> Notifications</a>
-      <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages</a>
+      
+      <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
-      <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders</a>
-      <a href="my-requests.php" class="sidebar-menu-item active"><i class="fas fa-clipboard-list"></i> My Requests</a>
-      <a href="my-order-forms.php" class="sidebar-menu-item"><i class="fas fa-file-invoice"></i> Order Forms</a>
+      <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders<span class="sidebar-badge" id="sidebar-orders-badge"></span></a>
+      <a href="my-requests.php" class="sidebar-menu-item active"><i class="fas fa-clipboard-list"></i> My Requests<span class="sidebar-badge" id="sidebar-requests-badge"></span></a>
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Account</div>
       <div class="sidebar-menu-item sidebar-menu-toggle open" id="accountToggle" onclick="toggleAccountMenu()">
         <i class="fas fa-user-circle"></i> My Profile
@@ -626,6 +644,16 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
         submenu.classList.toggle('open');
       }
     }
+    function updateSidebarBadges() {
+      fetch('../api/notif-counts.php').then(r=>r.json()).then(d=>{
+        const sb = (id, c) => { const b = document.getElementById(id); if(b){ b.textContent = c||''; b.classList.toggle('show', c>0); } };
+        sb('sidebar-msg-badge', d.chat);
+        sb('sidebar-orders-badge', d.order);
+        sb('sidebar-requests-badge', d.custom_request);
+      }).catch(()=>{});
+    }
+    updateSidebarBadges();
+    setInterval(updateSidebarBadges, 10000);
   </script>
   <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
     <div class="modal-box">

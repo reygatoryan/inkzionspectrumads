@@ -30,6 +30,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 $totalToday = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE DATE(created_at)=CURDATE()")->fetch_assoc()['cnt'];
 $totalLogins = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE action LIKE '%login%'")->fetch_assoc()['cnt'];
 $totalSeller = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE action LIKE '%seller%' OR action LIKE '%store%'")->fetch_assoc()['cnt'];
+$totalCustomer = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs al JOIN users u ON al.user_id=u.id WHERE u.role='user'")->fetch_assoc()['cnt'];
 $totalAdmin = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE action LIKE '%admin%' OR action LIKE '%user%' OR action LIKE '%system%'")->fetch_assoc()['cnt'];
 $totalFailed = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE action LIKE '%fail%' OR action LIKE '%error%'")->fetch_assoc()['cnt'];
 $totalSystem = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE action LIKE '%backup%' OR action LIKE '%setting%' OR action LIKE '%database%'")->fetch_assoc()['cnt'];
@@ -224,6 +225,14 @@ $logs = $conn->query("SELECT al.*, COALESCE(u.name, 'System') as user_name, COAL
       </div>
       <div class="it-kpi">
         <div class="it-kpi-header">
+          <span class="it-kpi-title">Customer Activities</span>
+          <div class="it-kpi-icon blue"><i class="fas fa-users"></i></div>
+        </div>
+        <div class="it-kpi-value"><?php echo $totalCustomer; ?></div>
+        <div class="it-kpi-sub">Login, orders, profile changes</div>
+      </div>
+      <div class="it-kpi">
+        <div class="it-kpi-header">
           <span class="it-kpi-title">Failed Attempts</span>
           <div class="it-kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div>
         </div>
@@ -291,7 +300,7 @@ $logs = $conn->query("SELECT al.*, COALESCE(u.name, 'System') as user_name, COAL
         <tbody>
           <?php if ($logs && $logs->num_rows > 0): while ($log = $logs->fetch_assoc()):
             $role = $log['user_role'] ?? 'system';
-            $roleTag = in_array($role, ['admin','admin','user']) ? $role : 'system';
+            $roleTag = in_array($role, ['admin', 'seller', 'user']) ? $role : 'system';
             $isFailed = stripos($log['action'], 'fail') !== false || stripos($log['action'], 'error') !== false;
             $isWarning = stripos($log['action'], 'warning') !== false;
             $isSecurity = stripos($log['action'], 'block') !== false || stripos($log['action'], 'ban') !== false || stripos($log['action'], 'suspici') !== false;

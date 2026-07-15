@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $pageTitle = 'Products';
 $pageSubtitle = 'Manage your product catalog';
 require_once __DIR__ . '/includes/admin-header.php';
@@ -91,7 +91,7 @@ if (!empty($categoryOptions)) {
                   </span>
                 </td>
                 <td><?php echo htmlspecialchars($product['category'], ENT_QUOTES, 'UTF-8'); ?></td>
-                <td style="font-weight:700;color:var(--text-primary);">?<?php echo number_format((float)$product['price'], 2); ?></td>
+                <td style="font-weight:700;color:var(--text-primary);">â‚±<?php echo number_format((float)$product['price'], 2); ?></td>
                 <td>
                   <span class="badge" style="<?php echo ($product['stock'] > 0) ? 'background:rgba(16,185,129,0.1);color:#059669;' : 'background:var(--danger-bg);color:var(--danger);'; ?>">
                     <?php echo (int)$product['stock']; ?> units
@@ -146,7 +146,7 @@ if (!empty($categoryOptions)) {
               <span style="font-size:0.9rem;font-weight:600;color:var(--text-primary);" id="viewModalStock">-</span>
             </div>
           </div>
-          <div style="font-size:1.3rem;font-weight:800;color:var(--primary);margin:0.75rem 0;" id="viewModalPrice">?0.00</div>
+          <div style="font-size:1.3rem;font-weight:800;color:var(--primary);margin:0.75rem 0;" id="viewModalPrice">â‚±0.00</div>
           <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem;" id="viewModalDescription">No description available.</div>
           <div class="modal-actions">
             <a href="product-form.php" id="viewModalEditBtn" class="btn-primary"><i class="fas fa-edit"></i> Edit Product</a>
@@ -182,7 +182,7 @@ if (!empty($categoryOptions)) {
       document.getElementById('viewModalName').textContent = data.name;
       document.getElementById('viewModalCategory2').textContent = data.category;
       document.getElementById('viewModalStock').textContent = data.stock + ' units';
-      document.getElementById('viewModalPrice').textContent = '?' + data.price;
+      document.getElementById('viewModalPrice').textContent = 'â‚±' + data.price;
       document.getElementById('viewModalDescription').textContent = data.description;
       document.getElementById('viewModalEditBtn').href = 'product-form.php?id=' + data.id;
       document.getElementById('viewModal').classList.add('active');
@@ -340,3 +340,4 @@ if (!empty($categoryOptions)) {
     }
   </script>
 <?php require_once __DIR__ . '/includes/admin-footer.php'; ?>
+

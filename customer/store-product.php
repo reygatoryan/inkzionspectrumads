@@ -558,9 +558,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       color: var(--danger);
     }
 
-    @media (max-width: 768px) {
-      }
-    }
     .header-profile-btn:hover {
       border-color: var(--primary);
       background: var(--primary-bg);
@@ -859,27 +856,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       overflow: hidden;
     }
     
-    /* RATING */
-    .card-rating {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      margin-bottom: 0.65rem;
-    }
-    .card-rating i {
-      font-size: 0.7rem;
-      color: #f59e0b;
-    }
-    .card-rating i.empty {
-      color: #e2e8f0;
-    }
-    .card-rating span {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-left: 0.15rem;
-    }
-    
     /* PRICE + STOCK ROW */
     .card-price-stock {
       display: flex;
@@ -1082,9 +1058,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       font-size: 0.65rem; font-weight: 700;
     }
     .qv-info h2 { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); line-height: 1.3; }
-    .qv-rating { display: flex; align-items: center; gap: 0.2rem; }
-    .qv-rating i { font-size: 0.8rem; color: #f59e0b; }
-    .qv-rating span { font-size: 0.78rem; color: var(--text-muted); margin-left: 0.3rem; }
     .qv-price { font-size: 1.8rem; font-weight: 900; color: var(--primary); }
     .qv-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
     .qv-spec-grid {
@@ -1162,9 +1135,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .qv-related-item-body { padding: 0.5rem; }
     .qv-related-item-title { font-size: 0.7rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.2rem; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     .qv-related-item-price { font-size: 0.75rem; font-weight: 800; color: var(--primary); }
-    .qv-related-item-rating { font-size: 0.55rem; color: #f59e0b; margin-top: 0.1rem; }
-
-
 
 
     .float-panel-header {
@@ -1370,6 +1340,22 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .sidebar-menu-toggle.open .toggle-arrow {
       transform: rotate(180deg);
     }
+    .sidebar-badge {
+      margin-left: auto;
+      background: #ef4444;
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.3rem;
+      line-height: 1;
+    }
+    .sidebar-badge.show { display: flex; }
   </style>
 </head>
 <body>
@@ -1396,12 +1382,11 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         <div class="sidebar-section-title">Shop</div>
         <a href="store-product.php" class="sidebar-menu-item active"><i class="fas fa-box"></i> All Products</a>
         <?php if ($loggedIn): ?>
-        <a href="notifications.php" class="sidebar-menu-item"><i class="fas fa-bell"></i> Notifications</a>
-        <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages</a>
+        
+        <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
-        <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders</a>
-        <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests</a>
-        <a href="my-order-forms.php" class="sidebar-menu-item"><i class="fas fa-file-invoice"></i> Order Forms</a>
+        <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders<span class="sidebar-badge" id="sidebar-orders-badge"></span></a>
+        <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests<span class="sidebar-badge" id="sidebar-requests-badge"></span></a>
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Account</div>
         <div class="sidebar-menu-item sidebar-menu-toggle open" id="accountToggle" onclick="toggleAccountMenu()">
           <i class="fas fa-user-circle"></i> My Profile
@@ -1447,9 +1432,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
               <i class="fas fa-home"></i>
             </a>
             <?php if ($loggedIn): ?>
-            <a href="notifications.php" class="header-icon-btn" title="Notifications" style="position:relative;">
-              <i class="fas fa-bell"></i>
-            </a>
             <div class="header-profile-dropdown-wrapper">
               <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
                 <div class="header-profile-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
@@ -1569,10 +1551,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
               <div class="product-card-body">
                 <h3 class="product-card-title"><?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?></h3>
                 <p class="product-card-desc"><?php echo htmlspecialchars($product['description'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
-                <div class="card-rating">
-                  <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
-                  <span>(4.5)</span>
-                </div>
                 <div class="card-price-stock">
                   <span class="product-price"><?php echo $priceText; ?></span>
                   <span class="card-stock in-stock"><span class="stock-dot"></span> In Stock</span>
@@ -1738,10 +1716,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         <div class="qv-info">
           <span class="qv-badge" id="qvBadge"></span>
           <h2 id="qvName"></h2>
-          <div class="qv-rating" id="qvRating">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
-            <span>(4.5)</span>
-          </div>
           <div class="qv-price" id="qvPrice"></div>
           <p class="qv-desc" id="qvDesc"></p>
           <!-- SPECIFICATIONS DASHBOARD CARDS -->
@@ -2103,6 +2077,16 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         submenu.classList.toggle('open');
       }
     }
+    function updateSidebarBadges() {
+      fetch('../api/notif-counts.php').then(r=>r.json()).then(d=>{
+        const sb = (id, c) => { const b = document.getElementById(id); if(b){ b.textContent = c||''; b.classList.toggle('show', c>0); } };
+        sb('sidebar-msg-badge', d.chat);
+        sb('sidebar-orders-badge', d.order);
+        sb('sidebar-requests-badge', d.custom_request);
+      }).catch(()=>{});
+    }
+    updateSidebarBadges();
+    setInterval(updateSidebarBadges, 10000);
   </script>
   <script>navigator.sendBeacon('../api/track-visit.php?url=' + encodeURIComponent(location.pathname + location.search) + '&_=' + Date.now());</script>
   <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">

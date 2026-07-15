@@ -191,6 +191,11 @@ try {
     $timelineStmt->bind_param('ii', $orderId, $userId);
     $timelineStmt->execute();
     $timelineStmt->close();
+
+    // Log order placed in activity logs
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $conn->query("INSERT INTO activity_logs (user_id, action, description, ip_address, user_agent) VALUES ($userId, 'order_placed', 'Order #$orderReference placed (₱" . number_format($total, 2) . ")', '" . $conn->real_escape_string($ip) . "', '" . $conn->real_escape_string($ua) . "')");
     
     // Create notification for customer
     $customerNotif = $conn->prepare("
@@ -198,7 +203,7 @@ try {
         VALUES (?, 'order_placed', ?, ?, 'order', ?, NOW())
     ");
     $customerTitle = "Order #$orderReference Confirmed";
-    $customerBody = "Your order #$orderReference has been placed successfully. Total: â‚±" . number_format($total, 2);
+    $customerBody = "Your order #$orderReference has been placed successfully. Total: ₱" . number_format($total, 2);
     $customerNotif->bind_param('issi', $userId, $customerTitle, $customerBody, $orderId);
     $customerNotif->execute();
     $customerNotif->close();

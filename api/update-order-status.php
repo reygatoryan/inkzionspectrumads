@@ -137,7 +137,7 @@ if (!isset($validTransitions[$currentStatus]) || !in_array($newStatus, $validTra
 $updateStmt = $conn->prepare("UPDATE orders SET status = ?, updated_at = NOW() WHERE id = ?");
 $updateStmt->bind_param('si', $newStatus, $orderId);
 
-if ($updateStmt->execute()) {
+    if ($updateStmt->execute()) {
     $timelineStmt = $conn->prepare("
         INSERT INTO order_timeline (order_id, from_status, to_status, changed_by, created_at)
         VALUES (?, ?, ?, ?, NOW())
@@ -145,6 +145,13 @@ if ($updateStmt->execute()) {
     $timelineStmt->bind_param('issi', $orderId, $currentStatus, $newStatus, $userId);
     $timelineStmt->execute();
     $timelineStmt->close();
+
+    // Log order status change in activity logs
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $actionType = 'order_' . $newStatus;
+    $statusLabel = ucfirst($newStatus);
+    $conn->query("INSERT INTO activity_logs (user_id, action, description, ip_address, user_agent) VALUES ($userId, '$actionType', 'Order #$orderId status changed to $statusLabel', '" . $conn->real_escape_string($ip) . "', '" . $conn->real_escape_string($ua) . "')");
 
     $orderDetailsStmt = $conn->prepare("
         SELECT o.user_id as customer_id FROM orders o WHERE o.id = ?

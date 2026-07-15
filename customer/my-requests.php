@@ -112,7 +112,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 99; }
     .sidebar-overlay.active { display: block; }
 
-    .page-wrap { max-width: 1000px; margin: 0 auto; }
+    .page-wrap { max-width: 900px; margin: 0 auto; }
     .page-heading { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
     .page-heading h1 { font-size: 1.5rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.6rem; }
     .page-heading h1 i { color: var(--primary); }
@@ -156,6 +156,12 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       .hamburger-btn { display: flex; }
       .products-main { margin-left: 0; }
       .content-area { padding: 1rem; }
+    }
+    @media (max-width: 480px) {
+      .top-header-title p { display: none; }
+      .top-header-title h1 { font-size: 1.1rem; }
+      .header-profile-name, .header-profile-arrow { display: none; }
+      .req-card { padding: 1rem; }
     }
     .sidebar-submenu {
       max-height: 0;
@@ -216,6 +222,22 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     .sidebar-menu-toggle.open .toggle-arrow {
       transform: rotate(180deg);
     }
+    .sidebar-badge {
+      margin-left: auto;
+      background: #ef4444;
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.3rem;
+      line-height: 1;
+    }
+    .sidebar-badge.show { display: flex; }
   </style>
 </head>
 <body>
@@ -238,12 +260,11 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       <nav class="sidebar-menu">
         <div class="sidebar-section-title">Shop</div>
         <a href="store-product.php" class="sidebar-menu-item"><i class="fas fa-box"></i> All Products</a>
-        <a href="notifications.php" class="sidebar-menu-item"><i class="fas fa-bell"></i> Notifications</a>
-        <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages</a>
+        
+        <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
-        <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders</a>
-        <a href="my-requests.php" class="sidebar-menu-item active"><i class="fas fa-clipboard-list"></i> My Requests</a>
-        <a href="my-order-forms.php" class="sidebar-menu-item"><i class="fas fa-file-invoice"></i> Order Forms</a>
+        <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders<span class="sidebar-badge" id="sidebar-orders-badge"></span></a>
+        <a href="my-requests.php" class="sidebar-menu-item active"><i class="fas fa-clipboard-list"></i> My Requests<span class="sidebar-badge" id="sidebar-requests-badge"></span></a>
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Account</div>
         <div class="sidebar-menu-item sidebar-menu-toggle open" id="accountToggle" onclick="toggleAccountMenu()">
           <i class="fas fa-user-circle"></i> My Profile
@@ -420,6 +441,16 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         submenu.classList.toggle('open');
       }
     }
+    function updateSidebarBadges() {
+      fetch('../api/notif-counts.php').then(r=>r.json()).then(d=>{
+        const sb = (id, c) => { const b = document.getElementById(id); if(b){ b.textContent = c||''; b.classList.toggle('show', c>0); } };
+        sb('sidebar-msg-badge', d.chat);
+        sb('sidebar-orders-badge', d.order);
+        sb('sidebar-requests-badge', d.custom_request);
+      }).catch(()=>{});
+    }
+    updateSidebarBadges();
+    setInterval(updateSidebarBadges, 10000);
   </script>
 </body>
 </html>

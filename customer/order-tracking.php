@@ -36,6 +36,11 @@ if (!$order) {
     exit;
 }
 
+$markNotif = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND related_type = 'order' AND related_id = ? AND is_read = 0");
+$markNotif->bind_param('ii', $userId, $orderId);
+$markNotif->execute();
+$markNotif->close();
+
 // Get order timeline
 $timelineStmt = $conn->prepare("
     SELECT ot.*, u.name, u.role
@@ -48,6 +53,19 @@ $timelineStmt->bind_param('i', $orderId);
 $timelineStmt->execute();
 $timeline = $timelineStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $timelineStmt->close();
+
+// Get order items
+$itemsStmt = $conn->prepare("
+    SELECT oi.product_name, oi.quantity, oi.unit_price,
+           COALESCE(p.image_url, 'assets/products-demo.jpg') as image_url
+    FROM order_items oi
+    LEFT JOIN products p ON oi.product_id = p.id
+    WHERE oi.order_id = ?
+");
+$itemsStmt->bind_param('i', $orderId);
+$itemsStmt->execute();
+$orderItems = $itemsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$itemsStmt->close();
 
 // Status flow for progress bar
 $statusFlow = [
@@ -398,6 +416,30 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .section-title { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 20px; }
+        .order-items-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .order-item-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .order-item-row:last-child { border-bottom: none; }
+        .order-item-row img {
+            width: 48px; height: 48px; border-radius: 8px;
+            object-fit: cover; border: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+        .order-item-details { flex: 1; min-width: 0; }
+        .order-item-name { font-size: 0.88rem; font-weight: 600; color: #111827; }
+        .order-item-meta { font-size: 0.78rem; color: #64748b; margin-top: 0.15rem; }
+        .order-item-total { font-size: 0.9rem; font-weight: 700; color: #2B4C52; white-space: nowrap; }
         .timeline { position: relative; padding-left: 30px; }
         .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #e0e0e0; }
         .timeline-item { position: relative; padding-bottom: 25px; }
@@ -480,10 +522,27 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         .modal-faq-answer { padding: 1rem 1.25rem; font-size: 0.88rem; color: #475569; line-height: 1.7; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-    </style>
+        .sidebar-badge {
+          margin-left: auto;
+          background: #ef4444;
+          color: white;
+          font-size: 0.6rem;
+          font-weight: 700;
+          min-width: 18px;
+          height: 18px;
+          border-radius: 9px;
+          display: none;
+          align-items: center;
+          justify-content: center;
+          padding: 0 0.3rem;
+          line-height: 1;
+        }
+        .sidebar-badge.show { display: flex; }
+      </style>
 </head>
 <body>
 <div class="dashboard-wrapper">
+<?php if (empty($_GET['modal'])): ?>
     <aside class="products-sidebar" id="sidebar">
         <div class="sidebar-brand">
             <img src="../assets/logo.png" alt="Inkzion" class="sidebar-brand-img">
@@ -502,12 +561,11 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     <nav class="sidebar-menu">
       <div class="sidebar-section-title">Shop</div>
       <a href="store-product.php" class="sidebar-menu-item"><i class="fas fa-box"></i> All Products</a>
-      <a href="notifications.php" class="sidebar-menu-item"><i class="fas fa-bell"></i> Notifications</a>
-      <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages</a>
+      
+      <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
-      <a href="my-orders.php" class="sidebar-menu-item active"><i class="fas fa-box"></i> My Orders</a>
-      <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests</a>
-      <a href="my-order-forms.php" class="sidebar-menu-item"><i class="fas fa-file-invoice"></i> Order Forms</a>
+      <a href="my-orders.php" class="sidebar-menu-item active"><i class="fas fa-box"></i> My Orders<span class="sidebar-badge" id="sidebar-orders-badge"></span></a>
+      <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests<span class="sidebar-badge" id="sidebar-requests-badge"></span></a>
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Account</div>
       <div class="sidebar-menu-item sidebar-menu-toggle open" id="accountToggle" onclick="toggleAccountMenu()">
         <i class="fas fa-user-circle"></i> My Profile
@@ -524,8 +582,10 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         </div>
     </aside>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<?php endif; ?>
 
-    <main class="products-main">
+    <main class="products-main"<?php if (!empty($_GET['modal'])) echo ' style="margin-left:0;"'; ?>>
+<?php if (empty($_GET['modal'])): ?>
         <header class="top-header">
             <div class="top-header-inner">
                 <div class="top-header-left">
@@ -558,15 +618,18 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                 </div>
             </div>
         </header>
+<?php endif; ?>
 
         <div class="content-area">
             <div class="tracking-page">
+                <?php if (empty($_GET['modal'])): ?>
                 <a href="profile.php" class="back-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M19 12H5M12 19l-7-7 7-7"/>
                     </svg>
                     Back to Orders
                 </a>
+                <?php endif; ?>
 
                 <div class="order-header-card">
                     <h1 class="order-title">Order #<?php echo $order['order_reference'] ?? $order['id']; ?></h1>
@@ -588,6 +651,24 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                             <?php echo htmlspecialchars($order['name']); ?>
                         </span>
                     </div>
+                </div>
+
+                <div class="order-items-card">
+                    <h2 class="section-title"><i class="fas fa-box"></i> Order Items</h2>
+                    <?php if (!empty($orderItems)): ?>
+                        <?php foreach ($orderItems as $item): ?>
+                        <div class="order-item-row">
+                            <img src="../<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
+                            <div class="order-item-details">
+                                <div class="order-item-name"><?php echo htmlspecialchars($item['product_name']); ?></div>
+                                <div class="order-item-meta">Qty: <?php echo (int)$item['quantity']; ?> × ₱<?php echo number_format((float)$item['unit_price'], 2); ?></div>
+                            </div>
+                            <div class="order-item-total">₱<?php echo number_format((float)$item['unit_price'] * (int)$item['quantity'], 2); ?></div>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p style="color:#64748b;font-size:0.85rem;">No items found.</p>
+                    <?php endif; ?>
                 </div>
 
                 <div class="progress-section">
@@ -637,12 +718,6 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                             <div class="info-item">
                                 <div class="info-label">Courier</div>
                                 <div class="info-value"><?php echo htmlspecialchars($order['courier']); ?></div>
-                            </div>
-                        <?php endif; ?>
-                        <?php if ($order['total_weight']): ?>
-                            <div class="info-item">
-                                <div class="info-label">Total Weight</div>
-                                <div class="info-value"><?php echo number_format((float)$order['total_weight'], 3); ?> kg</div>
                             </div>
                         <?php endif; ?>
                         <?php if ($order['shipping_fee']): ?>
@@ -884,6 +959,16 @@ function toggleAccountMenu() {
     submenu.classList.toggle('open');
   }
 }
+function updateSidebarBadges() {
+  fetch('../api/notif-counts.php').then(r=>r.json()).then(d=>{
+    const sb = (id, c) => { const b = document.getElementById(id); if(b){ b.textContent = c||''; b.classList.toggle('show', c>0); } };
+    sb('sidebar-msg-badge', d.chat);
+    sb('sidebar-orders-badge', d.order);
+    sb('sidebar-requests-badge', d.custom_request);
+  }).catch(()=>{});
+}
+updateSidebarBadges();
+setInterval(updateSidebarBadges, 10000);
 </script>
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal-box">

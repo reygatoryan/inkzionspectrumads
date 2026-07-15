@@ -186,24 +186,6 @@ $contactContent = $siteContent['contact_info'] ?? [];
           <div class="service-item">FULL SUBLIMATION VARSITY JACKET</div>
           <div class="service-item">FULL SUBLIMATION CHINESE COLLAR</div>
           <div class="service-item">FULL SUBLIMATION BASKET BALL JERSEY</div>
-          <div class="service-item">TARPAULINS</div>
-          <div class="service-item">PANAFLEX</div>
-          <div class="service-item">VINYL STICKERS</div>
-          <div class="service-item">CALENDARS</div>
-          <div class="service-item">CALLING CARDS</div>
-          <div class="service-item">LANYARDS</div>
-          <div class="service-item">PVC IDs</div>
-          <div class="service-item">GIVEAWAYS</div>
-          <div class="service-item">PHOTO PRINTING</div>
-          <div class="service-item">STAND BANNERS</div>
-          <div class="service-item">SIGNAGE</div>
-          <div class="service-item">CERTIFICATE PRINTING</div>
-          <div class="service-item">MUG</div>
-          <div class="service-item">CAPS</div>
-          <div class="service-item">DTF</div>
-          <div class="service-item">FLYERS</div>
-          <div class="service-item">TUMBLER</div>
-          <div class="service-item">MOUSE PAD</div>
         </div>
       </div>
     </section>
@@ -452,9 +434,9 @@ $contactContent = $siteContent['contact_info'] ?? [];
       <div>
         <h4>Support</h4>
         <ul>
-          <li><a href="customer/help-center.php">FAQ</a></li>
-          <li><a href="customer/help-center.php">Shipping Info</a></li>
-          <li><a href="customer/help-center.php">Help Center</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#contact">Shipping Info</a></li>
+          <li><a href="#contact">Help Center</a></li>
         </ul>
       </div>
     </div>

@@ -125,6 +125,10 @@ if (!$user) {
             'avatar' => $avatar
         ];
         $isNew = true;
+
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $conn->query("INSERT INTO activity_logs (user_id, action, description, ip_address, user_agent) VALUES ($newId, 'registration', 'User registered via Google ($email)', '" . $conn->real_escape_string($ip) . "', '" . $conn->real_escape_string($ua) . "')");
     }
 }
 
@@ -141,6 +145,13 @@ $_SESSION['user_name'] = $user['name'];
 $_SESSION['user_email'] = $user['email'];
 $_SESSION['user_role'] = $user['role'];
 
+// Log login (not for new registrations, already logged above)
+if (!$isNew) {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $conn->query("INSERT INTO activity_logs (user_id, action, description, ip_address, user_agent) VALUES ({$user['id']}, 'login', 'User logged in via Google', '" . $conn->real_escape_string($ip) . "', '" . $conn->real_escape_string($ua) . "')");
+}
+
 // Check if profile is complete (admin skips this requirement)
 $needsProfile = ($user['role'] !== 'admin') && (empty($user['name']) || empty($user['contact_number']) || empty($user['address']));
 
@@ -150,7 +161,7 @@ echo json_encode([
     'ok' => true,
     'is_new' => $isNew,
     'needs_profile' => $needsProfile,
-    'redirect' => $needsProfile ? $basePath . '/customer/complete-profile.php' : $redirect,
+    'redirect' => $redirect,
     'user' => [
         'id' => $user['id'],
         'name' => $user['name'],

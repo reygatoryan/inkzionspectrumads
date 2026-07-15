@@ -30,6 +30,35 @@ if (!$proposal) {
 
 $items = json_decode($proposal['items'], true) ?: [];
 
+// Use Ready for Purchase data for Quote Summary
+$rfpName = '';
+$rfpPrice = 0;
+$rfpQty = 1;
+$rfpShipping = 0;
+$rfpSubtotal = 0;
+$rfpTotal = 0;
+if (!empty($proposal['request_id'])) {
+    $rfpStmt = $conn->prepare("SELECT ready_for_purchase_name, ready_for_purchase_price, ready_for_purchase_qty, ready_for_purchase_shipping FROM custom_printing_requests WHERE id = ?");
+    $rfpStmt->bind_param('i', $proposal['request_id']);
+    $rfpStmt->execute();
+    $rfpRow = $rfpStmt->get_result()->fetch_assoc();
+    $rfpStmt->close();
+    if ($rfpRow && $rfpRow['ready_for_purchase_price']) {
+        $rfpName = $rfpRow['ready_for_purchase_name'];
+        $rfpPrice = (float)$rfpRow['ready_for_purchase_price'];
+        $rfpQty = (int)$rfpRow['ready_for_purchase_qty'];
+        $rfpShipping = (float)$rfpRow['ready_for_purchase_shipping'];
+        $rfpSubtotal = $rfpPrice * $rfpQty;
+        $rfpTotal = $rfpSubtotal + $rfpShipping;
+    }
+}
+// Fall back to stored proposal data if no RFP data
+if (empty($rfpName)) {
+    $rfpSubtotal = (float)$proposal['subtotal'];
+    $rfpShipping = (float)$proposal['shipping_fee'];
+    $rfpTotal = (float)$proposal['total_amount'];
+}
+
 // Fetch user data for pre-filling
 $userStmt = $conn->prepare("SELECT name, email, contact_number, address FROM users WHERE id = ?");
 $userStmt->bind_param('i', $userId);
@@ -37,6 +66,12 @@ $userStmt->execute();
 $userResult = $userStmt->get_result();
 $userData = $userResult->fetch_assoc();
 $userStmt->close();
+
+$markNotif = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND related_type = 'order_proposal' AND related_id = ? AND is_read = 0");
+$markNotif->bind_param('ii', $userId, $proposalId);
+$markNotif->execute();
+$markNotif->close();
+
 $conn->close();
 
 $canEdit = ($proposal['status'] === 'sent' || $proposal['status'] === 'rejected');
@@ -53,7 +88,7 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; line-height: 1.6; min-height: 100vh; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; width: 100%; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; width: 100%; }
     .page-header { margin-bottom: 2rem; }
     .page-header h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.6rem; }
     .page-header h1 i { color: #2B4C52; }
@@ -107,6 +142,7 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(43, 76, 82,0.3); }
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
+    .submitted-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .success-msg { text-align: center; padding: 3rem 2rem; }
     .success-msg i { font-size: 4rem; color: #10b981; margin-bottom: 1rem; display: block; }
     .success-msg h2 { font-size: 1.4rem; margin-bottom: 0.5rem; color: #0f172a; }
@@ -116,12 +152,31 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
     .rejection-box strong { color: #dc2626; font-size: 0.85rem; display: block; margin-bottom: 0.3rem; }
     .rejection-box p { color: #991b1b; font-size: 0.88rem; }
 
-    @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } .container { padding: 1rem; } .card { padding: 1.25rem; } }
+    @media (max-width: 768px) {
+      .container { padding: 1.5rem; }
+      .card { padding: 1.5rem; }
+      .page-header h1 { font-size: 1.4rem; }
+    }
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .submitted-grid { grid-template-columns: 1fr; }
+      .page-header h1 { font-size: 1.3rem; }
+      .card { padding: 1.25rem; }
+      .container { padding: 1rem; }
+      .quote-table th, .quote-table td { padding: 0.4rem 0.5rem; font-size: 0.8rem; }
+    }
+    @media (max-width: 480px) {
+      .page-header h1 { font-size: 1.2rem; }
+      .container { padding: 0.75rem; }
+      .card { padding: 1rem; }
+      .btn-primary { padding: 0.75rem 1.25rem; font-size: 0.85rem; width: 100%; justify-content: center; }
+      .quote-table th, .quote-table td { padding: 0.35rem 0.4rem; font-size: 0.75rem; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <a href="profile.php" class="back-link"><i class="fas fa-arrow-left"></i> Back to Account</a>
+    <a href="my-requests.php" class="back-link"><i class="fas fa-arrow-left"></i> Back to My Requests</a>
 
     <div class="page-header">
       <h1><i class="fas fa-file-invoice"></i> Order Form</h1>
@@ -146,7 +201,7 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
     <!-- Quote Summary -->
     <div class="card">
       <h2><i class="fas fa-receipt"></i> Quote Summary</h2>
-      <table class="quote-table">
+      <div style="overflow-x:auto;"><table class="quote-table">
         <thead>
           <tr>
             <th>Item</th>
@@ -156,6 +211,14 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
           </tr>
         </thead>
         <tbody>
+          <?php if (!empty($rfpName)): ?>
+          <tr>
+            <td><?php echo htmlspecialchars($rfpName); ?></td>
+            <td style="text-align:center;"><?php echo $rfpQty; ?></td>
+            <td style="text-align:right;">₱<?php echo number_format($rfpPrice, 2); ?></td>
+            <td style="text-align:right;">₱<?php echo number_format($rfpSubtotal, 2); ?></td>
+          </tr>
+          <?php else: ?>
           <?php foreach ($items as $item): ?>
           <tr>
             <td><?php echo htmlspecialchars($item['name'] ?? 'Item'); ?></td>
@@ -164,24 +227,25 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
             <td style="text-align:right;">₱<?php echo number_format((float)($item['unit_price'] ?? 0) * (int)($item['quantity'] ?? 1), 2); ?></td>
           </tr>
           <?php endforeach; ?>
+          <?php endif; ?>
         </tbody>
         <tfoot>
           <tr>
             <td colspan="3" style="text-align:right;font-weight:600;">Subtotal</td>
-            <td style="text-align:right;">₱<?php echo number_format((float)$proposal['subtotal'], 2); ?></td>
+            <td style="text-align:right;">₱<?php echo number_format($rfpSubtotal, 2); ?></td>
           </tr>
-          <?php if ((float)$proposal['shipping_fee'] > 0): ?>
+          <?php if ($rfpShipping > 0): ?>
           <tr>
             <td colspan="3" style="text-align:right;font-weight:600;">Shipping Fee</td>
-            <td style="text-align:right;">₱<?php echo number_format((float)$proposal['shipping_fee'], 2); ?></td>
+            <td style="text-align:right;">₱<?php echo number_format($rfpShipping, 2); ?></td>
           </tr>
           <?php endif; ?>
           <tr class="total-row">
             <td colspan="3" style="text-align:right;">Total</td>
-            <td class="amount" style="text-align:right;">₱<?php echo number_format((float)$proposal['total_amount'], 2); ?></td>
+            <td class="amount" style="text-align:right;">₱<?php echo number_format($rfpTotal, 2); ?></td>
           </tr>
         </tfoot>
-      </table>
+      </table></div>
 
       <?php if ($proposal['admin_notes']): ?>
       <div class="admin-notes">
@@ -195,7 +259,7 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
     <!-- Submitted Details -->
     <div class="card">
       <h2><i class="fas fa-check-circle" style="color:#10b981;"></i> Your Submitted Details</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="submitted-grid">
         <div><strong>Full Name:</strong><br><?php echo htmlspecialchars($proposal['full_name'] ?? ''); ?></div>
         <div><strong>Email:</strong><br><?php echo htmlspecialchars($proposal['email'] ?? ''); ?></div>
         <div><strong>Phone:</strong><br><?php echo htmlspecialchars($proposal['phone'] ?? ''); ?></div>

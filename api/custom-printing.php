@@ -56,6 +56,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
 
+        $reqCheck = $conn->prepare("SELECT user_id FROM custom_printing_requests WHERE id = ?");
+        $reqCheck->bind_param('i', $requestId);
+        $reqCheck->execute();
+        $reqResult = $reqCheck->get_result();
+        $reqRow = $reqResult->fetch_assoc();
+        $reqCheck->close();
+        if ($reqRow) {
+            $customerId = (int)$reqRow['user_id'];
+            $notifStmt = $conn->prepare("INSERT INTO notifications (user_id, type, title, body, related_type, related_id, created_at) VALUES (?, 'custom_request_status', ?, ?, 'custom_request', ?, NOW())");
+            $notifTitle = "Custom Request #{$requestId} Status Updated";
+            $notifBody = "Your custom request #{$requestId} status has been updated to: {$newStatus}.";
+            $notifStmt->bind_param('issi', $customerId, $notifTitle, $notifBody, $requestId);
+            $notifStmt->execute();
+            $notifStmt->close();
+        }
+
         echo json_encode(['success' => true, 'message' => 'Status updated']);
         $conn->close();
         exit;
@@ -72,7 +88,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $price = isset($data['price']) ? (float)$data['price'] : 0;
         $productName = isset($data['product_name']) ? trim($data['product_name']) : '';
         $qty = isset($data['quantity']) ? (int)$data['quantity'] : 1;
-        $image = isset($data['image_url']) ? trim($data['image_url']) : '';
+        $image = '';
+        if (isset($_FILES['rfp_image']) && $_FILES['rfp_image']['error'] === UPLOAD_ERR_OK) {
+            $allowedTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
+            $imageInfo = getimagesize($_FILES['rfp_image']['tmp_name']);
+            if ($imageInfo !== false && isset($allowedTypes[$imageInfo['mime']])) {
+                $ext = $allowedTypes[$imageInfo['mime']];
+                $filename = 'rfp_' . $requestId . '_' . time() . '.' . $ext;
+                $uploadDir = __DIR__ . '/../uploads/products/';
+                if (!is_dir($uploadDir)) { mkdir($uploadDir, 0777, true); }
+                if (move_uploaded_file($_FILES['rfp_image']['tmp_name'], $uploadDir . $filename)) {
+                    $image = 'uploads/products/' . $filename;
+                }
+            }
+        }
 
         if ($price <= 0 || empty($productName)) {
             http_response_code(400);
@@ -80,10 +109,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        $stmt = $conn->prepare("UPDATE custom_printing_requests SET status = 'ready_for_purchase', ready_for_purchase_price = ?, ready_for_purchase_name = ?, ready_for_purchase_qty = ?, ready_for_purchase_image = ? WHERE id = ?");
-        $stmt->bind_param('dsisi', $price, $productName, $qty, $image, $requestId);
+        $shipping = isset($data['shipping']) ? (float)$data['shipping'] : 0;
+        $stmt = $conn->prepare("UPDATE custom_printing_requests SET status = 'ready_for_purchase', ready_for_purchase_price = ?, ready_for_purchase_name = ?, ready_for_purchase_qty = ?, ready_for_purchase_image = ?, ready_for_purchase_shipping = ? WHERE id = ?");
+        $stmt->bind_param('dsisid', $price, $productName, $qty, $image, $shipping, $requestId);
         $stmt->execute();
         $stmt->close();
+
+        $reqCheck = $conn->prepare("SELECT user_id FROM custom_printing_requests WHERE id = ?");
+        $reqCheck->bind_param('i', $requestId);
+        $reqCheck->execute();
+        $reqResult = $reqCheck->get_result();
+        $reqRow = $reqResult->fetch_assoc();
+        $reqCheck->close();
+        if ($reqRow) {
+            $customerId = (int)$reqRow['user_id'];
+            $notifStmt = $conn->prepare("INSERT INTO notifications (user_id, type, title, body, related_type, related_id, created_at) VALUES (?, 'ready_for_purchase', ?, ?, 'custom_request', ?, NOW())");
+            $notifTitle = "Custom Request #{$requestId} Ready for Purchase";
+            $notifBody = "Your custom request #{$requestId} ({$productName}) is now ready for purchase at ₱" . number_format($price, 2) . "!";
+            $notifStmt->bind_param('issi', $customerId, $notifTitle, $notifBody, $requestId);
+            $notifStmt->execute();
+            $notifStmt->close();
+
+            // Auto-create order proposal if none exists
+            $checkProp = $conn->prepare("SELECT id FROM order_proposals WHERE request_id = ? LIMIT 1");
+            $checkProp->bind_param('i', $requestId);
+            $checkProp->execute();
+            $existingProp = $checkProp->get_result()->fetch_assoc();
+            $checkProp->close();
+
+            if (!$existingProp) {
+                $itemsJson = json_encode([['name' => $productName, 'quantity' => $qty, 'unit_price' => $price]]);
+                $subtotal = $price * $qty;
+                $total = $subtotal + $shipping;
+                $insertProp = $conn->prepare("INSERT INTO order_proposals (user_id, admin_id, request_id, conversation_id, items, subtotal, shipping_fee, total_amount, admin_notes, status, created_at) VALUES (?, ?, ?, 0, ?, ?, ?, ?, '', 'converted', NOW())");
+                $insertProp->bind_param('iiisddd', $customerId, $userId, $requestId, $itemsJson, $subtotal, $shipping, $total);
+                $insertProp->execute();
+                $insertProp->close();
+            }
+        }
 
         echo json_encode(['success' => true, 'message' => 'Request marked as ready for purchase']);
         $conn->close();
@@ -107,6 +170,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Set order_proposals request_id to NULL
             $conn->query("UPDATE order_proposals SET request_id = NULL WHERE request_id = $requestId");
+
+            // Clean up notifications
+            $conn->query("DELETE FROM notifications WHERE related_type = 'custom_request' AND related_id = $requestId");
 
             // Delete the request (cascades to custom_request_files)
             $stmt = $conn->prepare("DELETE FROM custom_printing_requests WHERE id = ?");
@@ -148,6 +214,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         $stmt->close();
+
+        $reqCheck = $conn->prepare("SELECT user_id FROM custom_printing_requests WHERE id = ?");
+        $reqCheck->bind_param('i', $requestId);
+        $reqCheck->execute();
+        $reqResult = $reqCheck->get_result();
+        $reqRow = $reqResult->fetch_assoc();
+        $reqCheck->close();
+        if ($reqRow) {
+            $customerId = (int)$reqRow['user_id'];
+            $notifStmt = $conn->prepare("INSERT INTO notifications (user_id, type, title, body, related_type, related_id, created_at) VALUES (?, 'request_updated', ?, ?, 'custom_request', ?, NOW())");
+            $notifTitle = "Custom Request #{$requestId} Updated by Admin";
+            $notifBody = "Your custom request #{$requestId} has been reviewed and updated by our team. Please check the latest details.";
+            $notifStmt->bind_param('issi', $customerId, $notifTitle, $notifBody, $requestId);
+            $notifStmt->execute();
+            $notifStmt->close();
+        }
 
         echo json_encode(['success' => true, 'message' => 'Customization details saved']);
         $conn->close();

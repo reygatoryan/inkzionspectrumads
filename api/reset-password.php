@@ -34,19 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (empty($token) || empty($password) || empty($confirm_password) || empty($answer1) || empty($answer2)) {
         $_SESSION['flash'] = ['type' => 'error', 'message' => 'All fields are required.'];
-        header('Location: ../reset-password.php?token=' . urlencode($token));
+        header('Location: ../index.php');
         exit();
     }
 
     if ($password !== $confirm_password) {
         $_SESSION['flash'] = ['type' => 'error', 'message' => 'Passwords do not match.'];
-        header('Location: ../reset-password.php?token=' . urlencode($token));
+        header('Location: ../index.php');
         exit();
     }
 
     if (!preg_match('/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/', $password)) {
         $_SESSION['flash'] = ['type' => 'error', 'message' => 'Password must be at least 8 characters and include one uppercase letter, one number, and one special symbol.'];
-        header('Location: ../reset-password.php?token=' . urlencode($token));
+        header('Location: ../index.php');
         exit();
     }
 
@@ -57,14 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($result->num_rows === 0) {
         $_SESSION['flash'] = ['type' => 'error', 'message' => 'Invalid password reset token.'];
-        header('Location: ../forgot-password.php');
+        header('Location: ../index.php');
         exit();
     }
 
     $row = $result->fetch_assoc();
     if ($row['used'] || strtotime($row['expires_at']) < time()) {
         $_SESSION['flash'] = ['type' => 'error', 'message' => 'This password reset token is invalid or expired.'];
-        header('Location: ../forgot-password.php');
+        header('Location: ../index.php');
         exit();
     }
 
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (!$validAnswers) {
         $_SESSION['flash'] = ['type' => 'error', 'message' => 'Security answers do not match our records.'];
-        header('Location: ../reset-password.php?token=' . urlencode($token));
+        header('Location: ../index.php');
         exit();
     }
 

@@ -81,9 +81,9 @@ if (!$product) {
 
 $displayPrice = $product['price'];
 if (is_numeric($displayPrice)) {
-    $displayPrice = 'â‚±' . number_format((float)$displayPrice, 2);
+    $displayPrice = '₱' . number_format((float)$displayPrice, 2);
 } else {
-    $displayPrice = str_replace('$', 'â‚±', $displayPrice);
+    $displayPrice = str_replace('$', '₱', $displayPrice);
 }
 ?>
 <!doctype html>
@@ -437,6 +437,13 @@ if (is_numeric($displayPrice)) {
       .testimonials-section {
         padding: 30px 20px;
       }
+    }
+    @media (max-width: 480px) {
+      .product-info-section h1 { font-size: 1.5rem; }
+      .product-details-container { gap: 20px; }
+      .product-info-section .price { font-size: 1.5rem; }
+      .related-products-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .testimonials-section { padding: 20px 15px; }
     }
   </style>
 </head>

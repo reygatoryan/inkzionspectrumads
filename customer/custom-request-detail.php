@@ -37,6 +37,11 @@ $result = $stmt->get_result();
 $req = $result->fetch_assoc();
 $stmt->close();
 
+$markNotif = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND related_type = 'custom_request' AND related_id = ? AND is_read = 0");
+$markNotif->bind_param('ii', $userId, $requestId);
+$markNotif->execute();
+$markNotif->close();
+
 if (!$req) { echo '<html><body style="font-family:sans-serif;padding:3rem;text-align:center;color:#64748b;"><h2>Request not found</h2><p>This request does not exist or you do not have access.</p><a href="my-requests.php" style="color:#2B4C52;">Back to My Requests</a></body></html>'; $conn->close(); exit(); }
 
 // Fetch files
@@ -238,6 +243,17 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
     .status-step.current { color: var(--primary); font-weight: 700; }
     .status-arrow { color: var(--border-color); font-size: 0.65rem; }
 
+    .rfp-card { display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; }
+    .rfp-image { width: 200px; height: 200px; border-radius: 16px; object-fit: cover; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .rfp-info { flex: 1; min-width: 200px; }
+    .rfp-info h3 { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; }
+    .rfp-price { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 0.25rem; }
+    .rfp-qty { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .rfp-divider { height: 1px; background: var(--border-color); margin: 0.75rem 0; }
+    .rfp-subtotal { font-size: 0.9rem; color: var(--text-secondary); }
+    .rfp-shipping { font-size: 0.9rem; color: var(--text-secondary); }
+    .rfp-total { font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin-top: 0.25rem; }
+
     @media (max-width: 768px) {
       .products-sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
       .products-sidebar.open { transform: translateX(0); }
@@ -249,6 +265,13 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
       .detail-section { padding: 1.25rem; }
       .content-area { padding: 1rem; }
       .status-timeline { gap: 0.5rem; }
+    }
+    @media (max-width: 480px) {
+      .top-header-title p { display: none; }
+      .top-header-title h1 { font-size: 1.1rem; }
+      .header-profile-name, .header-profile-arrow { display: none; }
+      .detail-header { padding: 1rem; }
+      .detail-section { padding: 1rem; }
     }
     .sidebar-submenu {
       max-height: 0;
@@ -309,6 +332,22 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
     .sidebar-menu-toggle.open .toggle-arrow {
       transform: rotate(180deg);
     }
+    .sidebar-badge {
+      margin-left: auto;
+      background: #ef4444;
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.3rem;
+      line-height: 1;
+    }
+    .sidebar-badge.show { display: flex; }
   </style>
 </head>
 <body>
@@ -331,12 +370,11 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
     <nav class="sidebar-menu">
       <div class="sidebar-section-title">Shop</div>
       <a href="store-product.php" class="sidebar-menu-item"><i class="fas fa-box"></i> All Products</a>
-      <a href="notifications.php" class="sidebar-menu-item"><i class="fas fa-bell"></i> Notifications</a>
-      <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages</a>
+      
+      <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
-      <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders</a>
-      <a href="my-requests.php" class="sidebar-menu-item active"><i class="fas fa-clipboard-list"></i> My Requests</a>
-      <a href="my-order-forms.php" class="sidebar-menu-item"><i class="fas fa-file-invoice"></i> Order Forms</a>
+      <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders<span class="sidebar-badge" id="sidebar-orders-badge"></span></a>
+      <a href="my-requests.php" class="sidebar-menu-item active"><i class="fas fa-clipboard-list"></i> My Requests<span class="sidebar-badge" id="sidebar-requests-badge"></span></a>
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Account</div>
       <div class="sidebar-menu-item sidebar-menu-toggle open" id="accountToggle" onclick="toggleAccountMenu()">
         <i class="fas fa-user-circle"></i> My Profile
@@ -434,7 +472,7 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
               <span><?php echo !empty($req['need_design_assistance']) ? 'Yes' : 'No'; ?></span>
             </div>
             <div class="detail-field full">
-              <label>Special Requests</label>
+              <label>Note</label>
               <span><?php echo htmlspecialchars($req['special_requests'] ?? 'None'); ?></span>
             </div>
           </div>
@@ -491,6 +529,15 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
         </div>
         <?php endif; ?>
 
+        <!-- Ready for Purchase -->
+        <?php
+          $rfpPrice = (float)($req['ready_for_purchase_price'] ?? 0);
+          $rfpQty = (int)($req['ready_for_purchase_qty'] ?? 1);
+          $rfpShipping = (float)($req['ready_for_purchase_shipping'] ?? 0);
+          $rfpSubtotal = $rfpPrice * $rfpQty;
+          $rfpTotal = $rfpSubtotal + $rfpShipping;
+        ?>
+
         <!-- Order Proposal -->
         <?php if ($proposal): ?>
         <div class="detail-section">
@@ -500,31 +547,24 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
           $ps = $propStatusLabels[$proposal['status']] ?? [$proposal['status'], '#64748b', 'rgba(100,116,139,0.12)'];
           ?>
           <div class="prop-card">
+            <?php if (!empty($req['ready_for_purchase_image'])): ?>
+            <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border-color);">
+              <img src="../<?php echo htmlspecialchars($req['ready_for_purchase_image']); ?>" alt="<?php echo htmlspecialchars($req['ready_for_purchase_name'] ?? 'Product'); ?>" style="width:140px;height:140px;border-radius:12px;object-fit:cover;border:1px solid var(--border-color);">
+              <div style="flex:1;min-width:160px;">
+                <h3 style="margin:0 0 0.35rem;font-size:1.1rem;"><?php echo htmlspecialchars($req['ready_for_purchase_name'] ?? 'Product'); ?></h3>
+                <div style="font-size:1.3rem;font-weight:800;color:var(--primary);">₱<?php echo number_format($rfpPrice, 2); ?></div>
+                <div style="font-size:0.85rem;color:var(--text-muted);">Quantity: <?php echo $rfpQty; ?></div>
+                <div style="height:1px;background:var(--border-color);margin:0.5rem 0;"></div>
+                <div style="font-size:0.88rem;color:var(--text-secondary);">Subtotal (×<?php echo $rfpQty; ?>): ₱<?php echo number_format($rfpSubtotal, 2); ?></div>
+                <div style="font-size:0.88rem;color:var(--text-secondary);">Shipping: ₱<?php echo number_format($rfpShipping, 2); ?></div>
+                <div style="font-size:1.1rem;font-weight:800;color:var(--text-primary);margin-top:0.25rem;">Total: ₱<?php echo number_format($rfpTotal, 2); ?></div>
+              </div>
+            </div>
+            <?php endif; ?>
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
               <span style="font-weight:700;font-size:0.95rem;color:var(--text-primary);">Quote Summary</span>
               <span class="prop-status" style="background:<?php echo $ps[2]; ?>;color:<?php echo $ps[1]; ?>;padding:0.25rem 0.75rem;border-radius:999px;"><?php echo $ps[0]; ?></span>
             </div>
-
-            <?php if (!empty($proposal['items'])): ?>
-            <table class="items-table" style="margin-top:0.75rem;">
-              <thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
-              <tbody>
-                <?php $propItems = is_array($proposal['items']) ? $proposal['items'] : (is_string($proposal['items']) ? json_decode($proposal['items'], true) : []); ?>
-                <?php foreach ($propItems as $item): ?>
-                <tr>
-                  <td><?php echo htmlspecialchars($item['name'] ?? 'Product'); ?></td>
-                  <td><?php echo (int)($item['quantity'] ?? 1); ?></td>
-                  <td>₱<?php echo number_format((float)($item['unit_price'] ?? 0), 2); ?></td>
-                  <td>₱<?php echo number_format((float)($item['unit_price'] ?? 0) * (int)($item['quantity'] ?? 1), 2); ?></td>
-                </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-            <div style="text-align:right;margin-top:0.75rem;font-size:0.9rem;">
-              <span style="color:var(--text-muted);">Shipping: ₱<?php echo number_format((float)($proposal['shipping_fee'] ?? 0), 2); ?></span>
-              <div style="font-weight:700;font-size:1.1rem;color:var(--text-primary);margin-top:0.25rem;">Total: ₱<?php echo number_format((float)($proposal['total_amount'] ?? 0), 2); ?></div>
-            </div>
-            <?php endif; ?>
 
             <?php if (!empty($proposal['admin_notes'])): ?>
             <div style="margin-top:0.75rem;padding:0.75rem;background:white;border-radius:8px;font-size:0.85rem;color:var(--text-secondary);border:1px solid var(--border-color);">
@@ -667,6 +707,16 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
         submenu.classList.toggle('open');
       }
     }
+    function updateSidebarBadges() {
+      fetch('../api/notif-counts.php').then(r=>r.json()).then(d=>{
+        const sb = (id, c) => { const b = document.getElementById(id); if(b){ b.textContent = c||''; b.classList.toggle('show', c>0); } };
+        sb('sidebar-msg-badge', d.chat);
+        sb('sidebar-orders-badge', d.order);
+        sb('sidebar-requests-badge', d.custom_request);
+      }).catch(()=>{});
+    }
+    updateSidebarBadges();
+    setInterval(updateSidebarBadges, 10000);
   </script>
 </body>
 </html>

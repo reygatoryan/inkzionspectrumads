@@ -335,6 +335,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Handle file upload from multipart form
         if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+            // Check file size against configured max
+            $maxSizeMB = 25;
+            $sizeStmt = $conn->prepare("SELECT settings FROM shipping_settings WHERE section_key = 'shipping' LIMIT 1");
+            $sizeStmt->execute();
+            $sizeRow = $sizeStmt->get_result()->fetch_assoc();
+            $sizeStmt->close();
+            if ($sizeRow) {
+                $shipSet = json_decode($sizeRow['settings'], true);
+                $maxSizeMB = (int)($shipSet['chat']['file_upload']['max_size_mb'] ?? 25);
+            }
+            $maxSizeBytes = $maxSizeMB * 1024 * 1024;
+            if ($_FILES['file']['size'] > $maxSizeBytes) {
+                http_response_code(413);
+                echo json_encode(['success' => false, 'error' => "File too large. Maximum size is {$maxSizeMB}MB."]);
+                $conn->close();
+                exit;
+            }
             $uploadDir = __DIR__ . '/../uploads/chats/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);

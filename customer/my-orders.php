@@ -23,7 +23,7 @@ $orderStmt = $conn->prepare("
   SELECT o.id, o.total_amount, o.status, o.created_at, o.updated_at,
          o.total_weight, o.shipping_fee,
          oi.quantity, oi.unit_price, oi.product_id,
-         p.name as product_name, p.image_url
+         COALESCE(p.name, oi.product_name) as product_name, p.image_url
   FROM orders o
   LEFT JOIN order_items oi ON o.id = oi.order_id
   LEFT JOIN products p ON oi.product_id = p.id
@@ -184,6 +184,7 @@ foreach ($groupedOrders as $o) {
     .header-profile-dropdown-item.danger:hover { background: var(--danger-bg); color: var(--danger); }
     .header-profile-dropdown-item.danger:hover i { color: var(--danger); }
     .content-area { padding: 1.5rem 2rem 2rem; }
+    .page-wrap { max-width: 900px; margin: 0 auto; }
     .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 99; }
     .sidebar-overlay.active { display: block; }
 
@@ -256,9 +257,20 @@ foreach ($groupedOrders as $o) {
       .content-area { padding: 1rem; }
       .order-tabs { overflow-x: auto; }
     }
+    @media (max-width: 480px) {
+      .top-header-title p { display: none; }
+      .top-header-title h1 { font-size: 1.1rem; }
+      .header-profile-name, .header-profile-arrow { display: none; }
+      .progress-tracker { overflow-x: auto; gap: 0.5rem; padding-bottom: 0.5rem; }
+      .order-card { padding: 1rem; }
+      .order-header { flex-direction: column; align-items: flex-start; }
+    }
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 1.5rem; }
     .modal-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
     .modal-box { background: white; border-radius: 24px; max-width: 640px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); animation: scaleIn 0.25s ease; }
+    .modal-box.tracking { max-width: 900px; height: 90vh; display: flex; flex-direction: column; padding: 0; }
+    .modal-box.tracking .modal-header { flex-shrink: 0; }
+    .modal-box.tracking iframe { flex: 1; width: 100%; border: none; border-radius: 0 0 24px 24px; }
     .sidebar-submenu {
       max-height: 0;
       overflow: hidden;
@@ -318,6 +330,22 @@ foreach ($groupedOrders as $o) {
     .sidebar-menu-toggle.open .toggle-arrow {
       transform: rotate(180deg);
     }
+    .sidebar-badge {
+      margin-left: auto;
+      background: #ef4444;
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.3rem;
+      line-height: 1;
+    }
+    .sidebar-badge.show { display: flex; }
   </style>
 </head>
 <body>
@@ -340,12 +368,11 @@ foreach ($groupedOrders as $o) {
     <nav class="sidebar-menu">
       <div class="sidebar-section-title">Shop</div>
       <a href="store-product.php" class="sidebar-menu-item"><i class="fas fa-box"></i> All Products</a>
-      <a href="notifications.php" class="sidebar-menu-item"><i class="fas fa-bell"></i> Notifications</a>
-      <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages</a>
+      
+      <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
-      <a href="my-orders.php" class="sidebar-menu-item active"><i class="fas fa-box"></i> My Orders</a>
-      <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests</a>
-      <a href="my-order-forms.php" class="sidebar-menu-item"><i class="fas fa-file-invoice"></i> Order Forms</a>
+      <a href="my-orders.php" class="sidebar-menu-item active"><i class="fas fa-box"></i> My Orders<span class="sidebar-badge" id="sidebar-orders-badge"></span></a>
+      <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests<span class="sidebar-badge" id="sidebar-requests-badge"></span></a>
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Account</div>
       <div class="sidebar-menu-item sidebar-menu-toggle open" id="accountToggle" onclick="toggleAccountMenu()">
         <i class="fas fa-user-circle"></i> My Profile
@@ -374,7 +401,6 @@ foreach ($groupedOrders as $o) {
         </div>
         <div class="top-header-right">
           <a href="../index.php" class="header-icon-btn" title="Home"><i class="fas fa-home"></i></a>
-          <a href="notifications.php" class="header-icon-btn" title="Notifications" style="position:relative;"><i class="fas fa-bell"></i></a>
           <div class="header-profile-dropdown-wrapper">
             <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
               <div class="header-profile-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
@@ -390,7 +416,8 @@ foreach ($groupedOrders as $o) {
     </header>
 
     <div class="content-area">
-      <div class="page-heading">
+      <div class="page-wrap">
+        <div class="page-heading">
         <h1><i class="fas fa-box"></i> My Orders</h1>
       </div>
       <div class="order-tabs" id="order-tabs">
@@ -463,15 +490,12 @@ foreach ($groupedOrders as $o) {
               <?php endforeach; ?>
             </div>
             <div class="order-footer">
-              <?php if ($order['total_weight']): ?>
-              <div class="order-total" style="font-size:0.78rem;">Weight: <?= number_format((float)$order['total_weight'], 3) ?> kg</div>
-              <?php endif; ?>
               <?php if ($order['shipping_fee']): ?>
               <div class="order-total" style="font-size:0.78rem;">Shipping: <strong>₱<?= number_format((float)$order['shipping_fee'], 2) ?></strong></div>
               <?php endif; ?>
               <div class="order-total">Total: <strong>₱<?= number_format((float)$order['total_amount'], 2) ?></strong></div>
               <div class="order-actions">
-                <a href="order-tracking.php?order_id=<?= $order['id'] ?>" class="btn-order-action primary"><i class="fas fa-eye"></i> View</a>
+                <button type="button" class="btn-order-action primary" onclick="openTrackingModal(<?= (int)$order['id'] ?>)"><i class="fas fa-eye"></i> View</button>
                 <?php if ($order['status'] === 'pending' || $order['status'] === 'confirmed'): ?>
                 <button type="button" class="btn-order-action danger" onclick="cancelOrder(<?= (int)$order['id'] ?>, this)"><i class="fas fa-times"></i> Cancel</button>
                 <?php endif; ?>
@@ -480,6 +504,7 @@ foreach ($groupedOrders as $o) {
           </div>
           <?php endforeach; ?>
         <?php endif; ?>
+      </div>
       </div>
     </div>
   </main>
@@ -492,6 +517,17 @@ foreach ($groupedOrders as $o) {
       <button class="modal-close" onclick="closeModal()" style="width:36px;height:36px;border-radius:50%;border:none;background:#f1f5f9;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body" id="modalBody" style="padding:1.5rem;"></div>
+  </div>
+</div>
+
+<!-- Tracking Modal -->
+<div class="modal-overlay" id="trackingModal" onclick="if(event.target===this)closeTrackingModal()">
+  <div class="modal-box tracking">
+    <div class="modal-header" style="position:sticky;top:0;background:white;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 1.5rem 1rem;border-bottom:1px solid #f1f5f9;">
+      <h2 style="font-size:1.2rem;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:0.5rem;"><i class="fas fa-truck"></i> Order Tracking</h2>
+      <button class="modal-close" onclick="closeTrackingModal()" style="width:36px;height:36px;border-radius:50%;border:none;background:#f1f5f9;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;"><i class="fas fa-times"></i></button>
+    </div>
+    <iframe id="trackingIframe" style="flex:1;width:100%;border:none;border-radius:0 0 24px 24px;"></iframe>
   </div>
 </div>
 
@@ -592,6 +628,16 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeModal();
 });
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function openTrackingModal(orderId) {
+      document.getElementById('trackingIframe').src = 'order-tracking.php?order_id=' + orderId + '&modal=1';
+      document.getElementById('trackingModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeTrackingModal() {
+      document.getElementById('trackingModal').classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('trackingIframe').src = '';
+    }
     function toggleAccountMenu() {
       const toggle = document.getElementById('accountToggle');
       const submenu = document.getElementById('accountSubmenu');
@@ -600,6 +646,16 @@ function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
         submenu.classList.toggle('open');
       }
     }
+    function updateSidebarBadges() {
+      fetch('../api/notif-counts.php').then(r=>r.json()).then(d=>{
+        const sb = (id, c) => { const b = document.getElementById(id); if(b){ b.textContent = c||''; b.classList.toggle('show', c>0); } };
+        sb('sidebar-msg-badge', d.chat);
+        sb('sidebar-orders-badge', d.order);
+        sb('sidebar-requests-badge', d.custom_request);
+      }).catch(()=>{});
+    }
+    updateSidebarBadges();
+    setInterval(updateSidebarBadges, 10000);
   </script>
 </body>
 </html>

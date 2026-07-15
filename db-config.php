@@ -432,6 +432,7 @@ db_add_column_if_missing($conn, 'custom_printing_requests', 'ready_for_purchase_
 db_add_column_if_missing($conn, 'custom_printing_requests', 'ready_for_purchase_name', 'ready_for_purchase_name VARCHAR(255) DEFAULT NULL AFTER ready_for_purchase_price');
 db_add_column_if_missing($conn, 'custom_printing_requests', 'ready_for_purchase_qty', 'ready_for_purchase_qty INT DEFAULT NULL AFTER ready_for_purchase_name');
 db_add_column_if_missing($conn, 'custom_printing_requests', 'ready_for_purchase_image', 'ready_for_purchase_image VARCHAR(500) DEFAULT NULL AFTER ready_for_purchase_qty');
+db_add_column_if_missing($conn, 'custom_printing_requests', 'ready_for_purchase_shipping', 'ready_for_purchase_shipping DECIMAL(12,2) DEFAULT 0.00 AFTER ready_for_purchase_image');
 $conn->query("ALTER TABLE custom_printing_requests MODIFY status ENUM('pending', 'in_review', 'approved', 'rejected', 'ready_for_purchase', 'completed') DEFAULT 'pending'");
 
 db_add_column_if_missing($conn, 'chat_conversations', 'request_id', 'request_id INT DEFAULT NULL AFTER last_message_at');
@@ -542,7 +543,7 @@ if ((int)$row['cnt'] === 0) {
             'enabled' => true,
             'operating_hours' => ['enabled' => false, 'weekday_start' => '09:00', 'weekday_end' => '18:00'],
             'auto_response' => ['enabled' => false, 'message' => 'Thank you for reaching out! We will get back to you shortly.'],
-            'file_upload' => ['max_size_mb' => 10, 'allowed_types' => 'jpg,jpeg,png,pdf,doc,docx']
+            'file_upload' => ['max_size_mb' => 25, 'allowed_types' => 'jpg,jpeg,png,pdf,doc,docx']
         ],
         'notification' => [
             'in_app' => [

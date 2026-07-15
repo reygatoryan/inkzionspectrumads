@@ -58,8 +58,6 @@ if (isset($userId)) {
     .cr-chat-input input:focus { border-color: #2B4C52; }
     .cr-chat-input button { padding: 0.55rem 1rem; border-radius: 8px; border: none; background: linear-gradient(135deg, #2B4C52, #4A7C84); color: white; font-weight: 600; cursor: pointer; font-size: 0.82rem; }
     .ai-image-wrap { flex: 0 0 48px; width: 48px; height: 48px; flex-shrink: 0; position: relative; }
-    .ai-image-btn { width: 48px; height: 48px; border-radius: 6px; border: 1.5px dashed #d1d5db; background: white; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: border-color 0.2s, color 0.2s, background 0.2s; }
-    .ai-image-btn:hover { border-color: #2B4C52; color: #2B4C52; background: rgba(43, 76, 82,0.04); }
     .ai-image-preview { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; cursor: pointer; border: 1px solid #e2e8f0; transition: border-color 0.2s; display: block; }
     .ai-image-preview:hover { border-color: #2B4C52; box-shadow: 0 0 0 3px rgba(43, 76, 82,0.1); }
     .admin-item-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; padding: 0.65rem; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; }
@@ -141,7 +139,7 @@ if (isset($userId)) {
       </div>
     </div>
     <div class="cr-form-group">
-      <label>Order Items <span style="font-weight:400;color:#94a3b8;">(size, qty &amp; reference image)</span></label>
+      <label>Order Items <span style="font-weight:400;color:#94a3b8;">(size, qty)</span></label>
       <div id="admin-items-container">
         <div class="admin-item-row">
           <input type="text" class="ai-size" list="admin-size-list" placeholder="e.g., M, A4, Letter, Small, 3x5ft, etc.">
@@ -150,14 +148,7 @@ if (isset($userId)) {
             <span class="ai-qty-value">1</span>
             <button type="button" class="ai-qty-btn" data-action="inc">+</button>
           </div>
-          <div class="ai-image-wrap">
-            <input type="file" class="ai-image-input" accept="image/*" style="display:none;">
-            <div class="ai-image-btn" onclick="this.previousElementSibling.click()" title="Upload reference image">
-              <i class="fas fa-camera"></i>
-            </div>
-            <img class="ai-image-preview" style="display:none;" onclick="openItemPreview(this)">
-          </div>
-          <button type="button" class="ai-remove" onclick="adminRemoveItem(this)" style="display:none;" title="Remove"><i class="fas fa-times"></i> Remove</button>
+          <button type="button" class="ai-remove" onclick="adminRemoveItem(this)" title="Remove"><i class="fas fa-times"></i> Remove</button>
         </div>
       </div>
       <button type="button" onclick="adminAddItem()" style="margin-top:0.5rem;padding:0.4rem 0.8rem;border:1.5px dashed #d1d5db;border-radius:8px;background:none;color:#2B4C52;font-weight:600;font-size:0.82rem;cursor:pointer;width:100%;"><i class="fas fa-plus"></i> Add Item</button>
@@ -173,7 +164,7 @@ if (isset($userId)) {
       </datalist>
     </div>
     <div class="cr-form-group">
-      <label>Special Requests</label>
+      <label>Note</label>
       <textarea id="editSpecialReq" placeholder="Any special instructions..."></textarea>
     </div>
     <button class="btn btn-primary" onclick="saveCustomization()" style="margin-bottom:1.5rem;"><i class="fas fa-save"></i> Save Customization</button>
@@ -191,19 +182,28 @@ if (isset($userId)) {
     </div>
     <div class="cr-form-row">
       <div class="cr-form-group">
+        <label>Shipping Fee (&#8369;)</label>
+        <input type="number" id="rfpShipping" step="0.01" min="0" value="0" placeholder="0.00">
+      </div>
+      <div class="cr-form-group">
         <label>Quantity</label>
         <input type="number" id="rfpQty" min="1" value="1">
       </div>
+    </div>
+    <div class="cr-form-row">
       <div class="cr-form-group">
-        <label>Image URL</label>
-        <input type="text" id="rfpImage" placeholder="https://... or ../assets/...">
+        <label>Image</label>
+        <input type="file" id="rfpImageInput" accept="image/*" style="display:none;" onchange="previewRfpImage(this)">
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <button type="button" onclick="document.getElementById('rfpImageInput').click()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer;font-size:0.82rem;white-space:nowrap;">
+            <i class="fas fa-upload"></i> Choose Image
+          </button>
+          <span id="rfpImageName" style="font-size:0.8rem;color:#64748b;">No file chosen</span>
+          <img id="rfpImagePreview" style="display:none;width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid #e2e8f0;">
+        </div>
       </div>
     </div>
     <button class="btn btn-primary" onclick="setReadyForPurchase()"><i class="fas fa-check-circle"></i> Mark Ready for Purchase</button>
-
-    <h3 style="margin: 1.5rem 0 0.75rem; font-size: 1rem; color: #0f172a;">Send Order Form</h3>
-    <p style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;">Create a formal order proposal for the customer to fill in their details.</p>
-    <button class="btn btn-primary" onclick="openSendOrderForm()" style="background:linear-gradient(135deg,#3b82f6,#2563eb);"><i class="fas fa-file-invoice"></i> Send Order Form</button>
 
     <!-- Order Proposal -->
     <h3 style="margin: 1.5rem 0 0.75rem; font-size: 1rem; color: #0f172a;">Order Proposal</h3>
@@ -227,82 +227,6 @@ if (isset($userId)) {
     </div>
     <div id="proposalActions" style="display:none;margin-top:0.75rem;margin-bottom:1.5rem;gap:0.75rem;"></div>
 
-    <!-- Admin Actions -->
-    <h3 style="margin: 1.5rem 0 0.75rem; font-size: 1rem; color: #0f172a;">Admin Actions</h3>
-    <div class="cr-form-row" style="margin-bottom:1rem;">
-      <div class="cr-form-group">
-        <label>Update Status</label>
-        <select id="editStatus">
-          <option value="pending">Pending</option>
-          <option value="in_review">In Review</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-          <option value="completed">Completed</option>
-        </select>
-      </div>
-      <div class="cr-form-group">
-        <label>Admin Notes</label>
-        <textarea id="editNotes" placeholder="Notes visible to customer..."></textarea>
-      </div>
-    </div>
-    <div style="display:flex;gap:0.75rem;">
-      <button class="btn btn-primary" onclick="updateStatus()"><i class="fas fa-save"></i> Save Status</button>
-      <button class="btn btn-danger" onclick="deleteRequest()" style="display:inline-flex;align-items:center;gap:0.4rem;"><i class="fas fa-trash-alt"></i> Delete Request</button>
-    </div>
-  </div>
-</div>
-
-<!-- Send Order Form Modal -->
-<div class="cr-modal-overlay" id="orderFormModal">
-  <div class="cr-modal" style="max-width:600px;">
-    <button class="cr-modal-close" onclick="closeOrderFormModal()">&times;</button>
-    <h2><i class="fas fa-file-invoice"></i> Send Order Form</h2>
-    <p style="color:#64748b;font-size:0.85rem;margin-bottom:1.25rem;">Create an order proposal for the customer. Add items, prices, and notes.</p>
-
-    <div id="orderFormItems">
-      <div class="cr-form-row" style="margin-bottom:0.5rem;">
-        <div class="cr-form-group" style="flex:2;">
-          <label>Item Name</label>
-          <input type="text" class="of-name" placeholder="e.g. Custom T-Shirt">
-        </div>
-        <div class="cr-form-group" style="flex:1;">
-          <label>Qty</label>
-          <input type="number" class="of-qty" value="1" min="1">
-        </div>
-        <div class="cr-form-group" style="flex:1;">
-          <label>Unit Price (₱)</label>
-          <input type="number" class="of-price" step="0.01" min="0" placeholder="0.00">
-        </div>
-        <div style="display:flex;align-items:flex-end;padding-bottom:0.65rem;">
-          <button type="button" class="btn btn-danger btn-sm" onclick="removeOrderFormItem(this)" style="display:none;"><i class="fas fa-times"></i></button>
-        </div>
-      </div>
-    </div>
-    <button class="btn btn-outline btn-sm" onclick="addOrderFormItem()" style="margin-bottom:1rem;"><i class="fas fa-plus"></i> Add Item</button>
-
-    <div class="cr-form-row">
-      <div class="cr-form-group">
-        <label>Shipping Fee (₱)</label>
-        <input type="number" id="ofShippingFee" step="0.01" min="0" value="0" placeholder="0.00">
-      </div>
-      <div class="cr-form-group">
-        <label>&nbsp;</label>
-        <div style="padding:0.65rem 0;font-weight:700;font-size:1.1rem;">Total: ₱<span id="ofTotalDisplay">0.00</span></div>
-      </div>
-    </div>
-
-    <div class="cr-form-group">
-      <label>Admin Notes <span style="font-weight:400;color:#94a3b8;">(optional)</span></label>
-      <textarea id="ofAdminNotes" rows="2" placeholder="Message to the customer..."></textarea>
-    </div>
-
-    <div id="ofError" style="color:#ef4444;font-size:0.85rem;display:none;margin-bottom:0.75rem;"></div>
-    <div id="ofLoading" style="display:none;color:#64748b;margin-bottom:0.75rem;"><i class="fas fa-spinner fa-pulse"></i> Sending...</div>
-
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeOrderFormModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="submitOrderForm()" style="background:linear-gradient(135deg,#3b82f6,#2563eb);"><i class="fas fa-paper-plane"></i> Send to Customer</button>
-    </div>
   </div>
 </div>
 
@@ -337,7 +261,10 @@ async function loadRequests(status = 'all') {
         <td>${escapeHtml(r.service_type)}</td>
         <td><span class="cr-badge ${statusBadge(r.status)}">${statusLabels[r.status] || r.status}</span></td>
         <td><small>${new Date(r.created_at).toLocaleDateString()}</small></td>
-        <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openDetail(${r.id})">View</button></td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openDetail(${r.id})">View</button>
+          <button class="btn btn-sm btn-outline-danger" style="margin-left:0.35rem;" onclick="event.stopPropagation();deleteRequest(${r.id})" title="Delete"><i class="fas fa-trash"></i></button>
+        </td>
       </tr>
     `).join('');
   } catch (err) {
@@ -388,14 +315,23 @@ async function openDetail(id) {
       <div class="cr-detail-field"><label>Material</label><span>${req.material || '--'}</span></div>
       <div class="cr-detail-field"><label>Deadline</label><span>${req.preferred_deadline || '--'}</span></div>
       <div class="cr-detail-field" style="grid-column:1/-1;"><label>Order Items</label><span>${itemsHtml}</span></div>
-      <div class="cr-detail-field" style="grid-column:1/-1;"><label>Special Requests</label><span>${escapeHtml(req.special_requests || 'None')}</span></div>
+      <div class="cr-detail-field" style="grid-column:1/-1;"><label>Note</label><span>${escapeHtml(req.special_requests || 'None')}</span></div>
       <div class="cr-detail-field" style="grid-column:1/-1;"><label>Admin Notes</label><span>${escapeHtml(req.admin_notes || 'None')}</span></div>
     `;
 
     document.getElementById('rfpName').value = req.ready_for_purchase_name || '';
     document.getElementById('rfpPrice').value = req.ready_for_purchase_price || '';
+    document.getElementById('rfpShipping').value = req.ready_for_purchase_shipping || '0';
     document.getElementById('rfpQty').value = req.ready_for_purchase_qty || 1;
-    document.getElementById('rfpImage').value = req.ready_for_purchase_image || '';
+    if (req.ready_for_purchase_image) {
+      document.getElementById('rfpImagePreview').src = '../' + req.ready_for_purchase_image;
+      document.getElementById('rfpImagePreview').style.display = 'block';
+      document.getElementById('rfpImageName').textContent = 'Current: ' + req.ready_for_purchase_image.split('/').pop();
+    } else {
+      document.getElementById('rfpImagePreview').src = '';
+      document.getElementById('rfpImagePreview').style.display = 'none';
+      document.getElementById('rfpImageName').textContent = 'No file chosen';
+    }
 
     // Customization details
     document.getElementById('editMaterial').value = req.material || '';
@@ -474,8 +410,6 @@ async function openDetail(id) {
       }
     } catch(e) { /* proposal fetch failed silently */ }
 
-    document.getElementById('editStatus').value = req.status;
-    document.getElementById('editNotes').value = req.admin_notes || '';
   } catch (err) {
     alert('Failed to load details');
   }
@@ -556,202 +490,6 @@ async function rejectProposalFromCR(proposalId) {
   } catch (e) { showToast('Failed to reject proposal', 'error'); }
 }
 
-function openSendOrderForm() {
-  const row = document.querySelector('tr.cr-selected');
-  if (!row) return;
-  const cells = row.querySelectorAll('td');
-  if (cells.length < 3) return;
-  const customerEmail = cells[1]?.querySelector('small')?.textContent || '';
-  const serviceType = cells[2]?.textContent?.trim() || '';
-
-  // Reset form
-  document.getElementById('orderFormItems').innerHTML = `
-    <div class="cr-form-row" style="margin-bottom:0.5rem;">
-      <div class="cr-form-group" style="flex:2;">
-        <label>Item Name</label>
-        <input type="text" class="of-name" placeholder="e.g. ${serviceType || 'Custom Product'}">
-      </div>
-      <div class="cr-form-group" style="flex:1;">
-        <label>Qty</label>
-        <input type="number" class="of-qty" value="1" min="1">
-      </div>
-      <div class="cr-form-group" style="flex:1;">
-        <label>Unit Price (₱)</label>
-        <input type="number" class="of-price" step="0.01" min="0" placeholder="0.00">
-      </div>
-      <div style="display:flex;align-items:flex-end;padding-bottom:0.65rem;">
-        <button type="button" class="btn btn-danger btn-sm" onclick="removeOrderFormItem(this)" style="display:none;"><i class="fas fa-times"></i></button>
-      </div>
-    </div>
-  `;
-  document.getElementById('ofShippingFee').value = '0';
-  document.getElementById('ofAdminNotes').value = '';
-  document.getElementById('ofTotalDisplay').textContent = '0.00';
-  document.getElementById('ofError').style.display = 'none';
-  document.getElementById('orderFormModal').classList.add('active');
-
-  // Pre-fill with existing ready_for_purchase data
-  const rfpName = document.getElementById('rfpName').value.trim();
-  const rfpPrice = document.getElementById('rfpPrice').value;
-  const rfpQty = document.getElementById('rfpQty').value;
-  if (rfpName && rfpPrice) {
-    const nameInput = document.querySelector('.of-name');
-    const qtyInput = document.querySelector('.of-qty');
-    const priceInput = document.querySelector('.of-price');
-    if (nameInput) nameInput.value = rfpName;
-    if (qtyInput) qtyInput.value = rfpQty || 1;
-    if (priceInput) priceInput.value = rfpPrice;
-    updateOrderFormTotal();
-  }
-
-  // Attach input events for total calculation
-  document.querySelectorAll('.of-qty, .of-price').forEach(el => {
-    el.addEventListener('input', updateOrderFormTotal);
-  });
-  document.getElementById('ofShippingFee').addEventListener('input', updateOrderFormTotal);
-}
-
-function addOrderFormItem() {
-  const container = document.getElementById('orderFormItems');
-  const firstItem = container.querySelector('.cr-form-row');
-  const clone = firstItem.cloneNode(true);
-  clone.querySelector('.of-name').value = '';
-  clone.querySelector('.of-qty').value = '1';
-  clone.querySelector('.of-price').value = '';
-  const removeBtn = clone.querySelector('.btn-danger');
-  if (removeBtn) removeBtn.style.display = 'inline-flex';
-  container.appendChild(clone);
-
-  clone.querySelectorAll('.of-qty, .of-price').forEach(el => {
-    el.addEventListener('input', updateOrderFormTotal);
-  });
-  updateOrderFormTotal();
-}
-
-function removeOrderFormItem(btn) {
-  const row = btn.closest('.cr-form-row');
-  const container = document.getElementById('orderFormItems');
-  if (container.querySelectorAll('.cr-form-row').length > 1) {
-    row.remove();
-    updateOrderFormTotal();
-  }
-}
-
-function updateOrderFormTotal() {
-  let total = 0;
-  document.querySelectorAll('#orderFormItems .cr-form-row').forEach(row => {
-    const qty = parseFloat(row.querySelector('.of-qty')?.value) || 0;
-    const price = parseFloat(row.querySelector('.of-price')?.value) || 0;
-    total += qty * price;
-  });
-  const shipping = parseFloat(document.getElementById('ofShippingFee')?.value) || 0;
-  const grandTotal = total + shipping;
-  document.getElementById('ofTotalDisplay').textContent = grandTotal.toFixed(2);
-}
-
-async function submitOrderForm() {
-  const errorEl = document.getElementById('ofError');
-  const loadingEl = document.getElementById('ofLoading');
-  errorEl.style.display = 'none';
-
-  // Find customer ID from the selected request
-  const row = document.querySelector('tr.cr-selected');
-  if (!row) {
-    errorEl.textContent = 'No request selected';
-    errorEl.style.display = 'block';
-    return;
-  }
-  const requestId = parseInt(row.dataset.id);
-
-  // Fetch request data to get user_id
-  let customerId = null;
-  try {
-    const res = await fetch(`../api/custom-printing.php?action=all`, { credentials: 'include' });
-    const data = await res.json();
-    const reqs = data.requests || [];
-    const req = reqs.find(r => r.id == requestId);
-    if (req) customerId = req.user_id;
-  } catch(e) {}
-
-  if (!customerId) {
-    errorEl.textContent = 'Could not find customer';
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  // Build items array
-  const items = [];
-  document.querySelectorAll('#orderFormItems .cr-form-row').forEach(row => {
-    const name = row.querySelector('.of-name')?.value?.trim();
-    const qty = parseInt(row.querySelector('.of-qty')?.value) || 1;
-    const price = parseFloat(row.querySelector('.of-price')?.value) || 0;
-    if (name) {
-      items.push({ name, quantity: qty, unit_price: price });
-    }
-  });
-
-  if (items.length === 0) {
-    errorEl.textContent = 'Please add at least one item';
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  loadingEl.style.display = 'block';
-
-  try {
-    const res = await fetch('../api/order-proposals.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        action: 'create',
-        user_id: customerId,
-        request_id: requestId,
-        conversation_id: currentConvId,
-        items: items,
-        shipping_fee: parseFloat(document.getElementById('ofShippingFee').value) || 0,
-        admin_notes: document.getElementById('ofAdminNotes').value.trim()
-      })
-    });
-    const data = await res.json();
-    if (data.success) {
-      // Send chat message so customer sees the card in their conversation
-      if (currentConvId && data.proposal_id) {
-        try {
-          await fetch('../api/chat.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              action: 'send_message',
-              conversation_id: currentConvId,
-              message_type: 'order_form',
-              content: JSON.stringify({
-                proposal_id: data.proposal_id,
-                request_id: requestId,
-                title: 'Order Form'
-              })
-            })
-          });
-        } catch(e) {}
-      }
-      alert('Order form sent to customer!');
-      closeOrderFormModal();
-    } else {
-      errorEl.textContent = data.error || 'Failed to send';
-      errorEl.style.display = 'block';
-    }
-  } catch(e) {
-    errorEl.textContent = 'Network error';
-    errorEl.style.display = 'block';
-  } finally {
-    loadingEl.style.display = 'none';
-  }
-}
-
-function closeOrderFormModal() {
-  document.getElementById('orderFormModal').classList.remove('active');
-}
 
 async function loadChatMessages() {
   if (!currentConvId) return;
@@ -784,21 +522,18 @@ async function sendChatMsg() {
   } catch(e) { alert('Failed to send'); }
 }
 
-async function updateStatus() {
-  if (!currentRequestId) return;
-  const status = document.getElementById('editStatus').value;
-  const notes = document.getElementById('editNotes').value;
-  try {
-    const res = await fetch('../api/custom-printing.php', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-      body: JSON.stringify({ action: 'update_status', request_id: currentRequestId, status, admin_notes: notes })
-    });
-    const data = await res.json();
-    if (data.success) {
-      alert('Status updated!');
-      loadRequests(document.querySelector('.tab.active')?.dataset?.status || 'all');
-    } else { alert(data.error || 'Failed'); }
-  } catch(e) { alert('Error updating status'); }
+function previewRfpImage(input) {
+  const nameEl = document.getElementById('rfpImageName');
+  const previewEl = document.getElementById('rfpImagePreview');
+  if (input.files && input.files[0]) {
+    nameEl.textContent = input.files[0].name;
+    const reader = new FileReader();
+    reader.onload = function(e) { previewEl.src = e.target.result; previewEl.style.display = 'block'; };
+    reader.readAsDataURL(input.files[0]);
+  } else {
+    nameEl.textContent = 'No file chosen';
+    previewEl.style.display = 'none';
+  }
 }
 
 async function setReadyForPurchase() {
@@ -806,17 +541,29 @@ async function setReadyForPurchase() {
   const productName = document.getElementById('rfpName').value.trim();
   const price = parseFloat(document.getElementById('rfpPrice').value);
   const qty = parseInt(document.getElementById('rfpQty').value) || 1;
-  const image = document.getElementById('rfpImage').value.trim();
+  const shipping = parseFloat(document.getElementById('rfpShipping').value) || 0;
+  const fileInput = document.getElementById('rfpImageInput');
 
   if (!productName || !price || price <= 0) {
     alert('Please enter a product name and valid price');
     return;
   }
 
+  const formData = new FormData();
+  formData.append('action', 'set_ready_for_purchase');
+  formData.append('request_id', currentRequestId);
+  formData.append('product_name', productName);
+  formData.append('price', price);
+  formData.append('quantity', qty);
+  formData.append('shipping', shipping);
+  if (fileInput.files.length) {
+    formData.append('rfp_image', fileInput.files[0]);
+  }
+
   try {
     const res = await fetch('../api/custom-printing.php', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-      body: JSON.stringify({ action: 'set_ready_for_purchase', request_id: currentRequestId, product_name: productName, price, quantity: qty, image_url: image })
+      method: 'POST', credentials: 'include',
+      body: formData
     });
     const data = await res.json();
     if (data.success) {
@@ -837,23 +584,6 @@ function closeImgPreview() {
   if (overlay) overlay.style.display = 'none';
 }
 
-async function deleteRequest() {
-  if (!currentRequestId) return;
-  if (!confirm('Are you sure you want to delete this request? This action cannot be undone.')) return;
-  try {
-    const res = await fetch('../api/custom-printing.php', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-      body: JSON.stringify({ action: 'delete', request_id: currentRequestId })
-    });
-    const data = await res.json();
-    if (data.success) {
-      closeDetail();
-      loadRequests(document.querySelector('.tab.active')?.dataset?.status || 'all');
-      showToast('Request deleted successfully', 'success');
-    } else { alert(data.error || 'Failed to delete'); }
-  } catch(e) { alert('Error deleting request'); }
-}
-
 function adminRenderItems(items) {
   const container = document.getElementById('admin-items-container');
   container.innerHTML = '';
@@ -871,14 +601,8 @@ function adminRenderItems(items) {
         '<span class="ai-qty-value">' + (it.qty||1) + '</span>' +
         '<button type="button" class="ai-qty-btn" data-action="inc">+</button>' +
       '</div>' +
-      '<div class="ai-image-wrap">' +
-        '<input type="file" class="ai-image-input" accept="image/*" style="display:none;">' +
-        '<div class="ai-image-btn" onclick="this.previousElementSibling.click()" title="Upload reference image"' + (hasImg ? ' style="display:none;"' : '') + '><i class="fas fa-camera"></i></div>' +
-        '<img class="ai-image-preview"' + (hasImg ? ' src="' + escapeHtml(it.image) + '" onclick="openItemPreview(this)" style="display:block;"' : ' style="display:none;"') + '>' +
-      '</div>' +
-      '<button type="button" class="ai-remove" onclick="adminRemoveItem(this)" title="Remove"' + (parsed.length < 2 ? ' style="display:none;"' : '') + '><i class="fas fa-times"></i> Remove</button>';
+      '<button type="button" class="ai-remove" onclick="adminRemoveItem(this)" title="Remove"><i class="fas fa-times"></i> Remove</button>';
     container.appendChild(row);
-    if (!hasImg) attachAdminImageHandler(row.querySelector('.ai-image-input'));
   });
 }
 
@@ -889,15 +613,9 @@ function adminAddItem() {
   clone.querySelector('.ai-size').value = '';
   const qtyVal = clone.querySelector('.ai-qty-value');
   if (qtyVal) qtyVal.textContent = '1';
-  clone.querySelector('.ai-image-input').value = '';
-  const btn = clone.querySelector('.ai-image-btn');
-  if (btn) btn.style.display = 'flex';
-  const preview = clone.querySelector('.ai-image-preview');
-  if (preview) { preview.style.display = 'none'; preview.removeAttribute('src'); }
   const removeBtn = clone.querySelector('.ai-remove');
   removeBtn.style.display = 'inline-flex';
   container.appendChild(clone);
-  attachAdminImageHandler(clone.querySelector('.ai-image-input'));
 }
 
 function adminRemoveItem(btn) {
@@ -905,24 +623,6 @@ function adminRemoveItem(btn) {
   if (container.querySelectorAll('.admin-item-row').length > 1) {
     btn.closest('.admin-item-row').remove();
   }
-}
-
-function attachAdminImageHandler(input) {
-  if (!input) return;
-  input.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 20 * 1024 * 1024) { alert('Image must be less than 20MB'); return; }
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      const row = input.closest('.admin-item-row');
-      row.querySelector('.ai-image-btn').style.display = 'none';
-      const preview = row.querySelector('.ai-image-preview');
-      preview.src = ev.target.result;
-      preview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  });
 }
 
 document.addEventListener('keydown', function(e) {
@@ -968,6 +668,26 @@ function showToast(message, type) {
   t.textContent = message;
   document.body.appendChild(t);
   setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+async function deleteRequest(id) {
+  if (!confirm('Delete this custom request? This cannot be undone.')) return;
+  try {
+    const res = await fetch('../api/custom-printing.php', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', request_id: id })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('Custom request deleted');
+      loadRequests(document.querySelector('.tab.active')?.dataset?.status || 'all');
+    } else {
+      alert(data.error || 'Failed to delete');
+    }
+  } catch (e) {
+    alert('Failed to delete request');
+  }
 }
 
 // Init
