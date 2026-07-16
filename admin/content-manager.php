@@ -89,7 +89,6 @@ require_once __DIR__ . '/includes/admin-header.php';
             <input type="text" name="meta[button_link]" class="form-input" value="${escapeHtml(meta.button_link || 'customer/store-product.php')}">
           </div>
         </div>
-        ${renderImageUpload(section, data.image_url)}
       `;
     } else if (section === 'about_us') {
       html += `
@@ -107,7 +106,6 @@ require_once __DIR__ . '/includes/admin-header.php';
             <textarea name="content" class="form-input" rows="8">${escapeHtml(data.content || '')}</textarea>
           </div>
         </div>
-        ${renderImageUpload(section, data.image_url)}
       `;
     } else if (section === 'contact_info') {
       html += `
@@ -173,16 +171,6 @@ require_once __DIR__ . '/includes/admin-header.php';
     `;
     html += '</form></div>';
     document.getElementById('cm-content').innerHTML = html;
-  }
-
-  function renderImageUpload(section, currentUrl) {
-    let html = '<div class="form-group" style="margin-top:0.5rem;"><label>Image</label>';
-    if (currentUrl) {
-      html += `<div class="cm-preview"><img src="../${currentUrl}" alt="Current image" id="cm-current-img"></div>`;
-    }
-    html += `<input type="file" name="image" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" style="margin-top:0.5rem;">
-    <span style="font-size:0.75rem;color:var(--text-muted);">Leave empty to keep current image. Recommended size: 1200×600px. JPG, PNG, WebP, or GIF.</span></div>`;
-    return html;
   }
 
   function renderFaqItem(faq, i) {

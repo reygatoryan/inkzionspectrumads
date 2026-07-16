@@ -31,19 +31,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'conversations') {
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
         
+        $unreadSub = "(SELECT conversation_id, COUNT(*) as unread_count FROM chat_messages WHERE is_read = 0 AND sender_id != ? GROUP BY conversation_id)";
+        $lastMsgSub = "(SELECT conversation_id, content as last_message FROM chat_messages WHERE id IN (SELECT MAX(id) FROM chat_messages GROUP BY conversation_id))";
+        
         // Get list of conversations
         if ($userRole === 'admin') {
             $sql = "
                 SELECT cc.id, cc.user_id, cc.admin_id, cc.last_message_at, cc.request_id, cc.product_id,
                        u.name as user_name, u.is_online as user_online,
-                       (SELECT COUNT(*) FROM chat_messages WHERE conversation_id = cc.id AND is_read = 0 AND sender_id != ?) as unread_count,
-                       (SELECT content FROM chat_messages WHERE conversation_id = cc.id ORDER BY created_at DESC LIMIT 1) as last_message,
+                       COALESCE(uc.unread_count, 0) as unread_count,
+                       lm.last_message,
                        cpr.service_type as request_type, cpr.status as request_status,
                        p.name as product_name, p.image_url as product_image
                 FROM chat_conversations cc
                 JOIN users u ON cc.user_id = u.id
                 LEFT JOIN custom_printing_requests cpr ON cc.request_id = cpr.id
                 LEFT JOIN products p ON cc.product_id = p.id
+                LEFT JOIN $unreadSub uc ON uc.conversation_id = cc.id
+                LEFT JOIN $lastMsgSub lm ON lm.conversation_id = cc.id
                 WHERE cc.admin_id = ?
             ";
             $params = [$userId, $userId];
@@ -64,14 +69,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $sql = "
                 SELECT cc.id, cc.user_id, cc.admin_id, cc.last_message_at, cc.request_id, cc.product_id,
                        u.name as seller_name, u.is_online as seller_online,
-                       (SELECT COUNT(*) FROM chat_messages WHERE conversation_id = cc.id AND is_read = 0 AND sender_id != ?) as unread_count,
-                       (SELECT content FROM chat_messages WHERE conversation_id = cc.id ORDER BY created_at DESC LIMIT 1) as last_message,
+                       COALESCE(uc.unread_count, 0) as unread_count,
+                       lm.last_message,
                        cpr.service_type as request_type, cpr.status as request_status,
                        p.name as product_name, p.image_url as product_image
                 FROM chat_conversations cc
                 JOIN users u ON cc.admin_id = u.id
                 LEFT JOIN custom_printing_requests cpr ON cc.request_id = cpr.id
                 LEFT JOIN products p ON cc.product_id = p.id
+                LEFT JOIN $unreadSub uc ON uc.conversation_id = cc.id
+                LEFT JOIN $lastMsgSub lm ON lm.conversation_id = cc.id
                 WHERE cc.user_id = ?
             ";
             $params = [$userId, $userId];
@@ -279,18 +286,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($stmt->execute()) {
             $conversationId = $conn->insert_id;
-
-            // Auto-create custom printing request if starting with product_id
-            if ($productId && !$requestId) {
-                $prodQ = $conn->query("SELECT name FROM products WHERE id = $productId");
-                $prodName = $prodQ && $prodQ->num_rows ? $prodQ->fetch_assoc()['name'] : 'Custom Product';
-                $reqStmt = $conn->prepare("INSERT INTO custom_printing_requests (user_id, service_type, status) VALUES (?, ?, 'pending')");
-                $reqStmt->bind_param('is', $userId, $prodName);
-                $reqStmt->execute();
-                $newReqId = $conn->insert_id;
-                $reqStmt->close();
-                $conn->query("UPDATE chat_conversations SET request_id = $newReqId WHERE id = $conversationId");
-            }
 
             // Auto-response
             $arStmt = $conn->prepare("SELECT settings FROM shipping_settings WHERE section_key = 'shipping' LIMIT 1");
@@ -517,7 +512,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $notifStmt->execute();
             $notifStmt->close();
             
-            echo json_encode(['success' => true, 'message_id' => $messageId]);
+            $msgStmt = $conn->prepare("
+                SELECT m.id, m.sender_id, u.name as sender_name,
+                       m.message_type, m.content, m.file_url, m.file_name, m.file_type, m.created_at
+                FROM chat_messages m
+                LEFT JOIN users u ON m.sender_id = u.id
+                WHERE m.id = ?
+            ");
+            $msgStmt->bind_param('i', $messageId);
+            $msgStmt->execute();
+            $msgData = $msgStmt->get_result()->fetch_assoc();
+            $msgStmt->close();
+
+            echo json_encode(['success' => true, 'message' => $msgData]);
         } else {
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => 'Failed to send message']);

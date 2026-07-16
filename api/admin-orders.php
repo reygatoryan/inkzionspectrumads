@@ -49,7 +49,6 @@ if ($action === 'counts') {
 if ($action === 'list') {
     $tab = $_GET['tab'] ?? 'all';
     $search = $_GET['search'] ?? '';
-    $shippingChannel = $_GET['shipping_channel'] ?? '';
     $page = max(1, (int)($_GET['page'] ?? 1));
     $limit = 20;
     $offset = ($page - 1) * $limit;
@@ -110,7 +109,7 @@ if ($action === 'list') {
     $orders = [];
     while ($row = $result->fetch_assoc()) {
         // Get items for this order
-        $itemStmt = $conn->prepare("SELECT oi.quantity, oi.unit_price, COALESCE(p.name, oi.product_name) AS product_name, p.image_url 
+        $itemStmt = $conn->prepare("SELECT oi.quantity, oi.unit_price, COALESCE(p.name, oi.product_name) AS product_name, COALESCE(p.image_url, '') AS image_url 
                                      FROM order_items oi 
                                      LEFT JOIN products p ON oi.product_id = p.id 
                                      WHERE oi.order_id = ?");

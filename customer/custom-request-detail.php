@@ -42,6 +42,11 @@ $markNotif->bind_param('ii', $userId, $requestId);
 $markNotif->execute();
 $markNotif->close();
 
+$markViewed = $conn->prepare("UPDATE custom_printing_requests SET is_viewed = 1 WHERE id = ? AND user_id = ?");
+$markViewed->bind_param('ii', $requestId, $userId);
+$markViewed->execute();
+$markViewed->close();
+
 if (!$req) { echo '<html><body style="font-family:sans-serif;padding:3rem;text-align:center;color:#64748b;"><h2>Request not found</h2><p>This request does not exist or you do not have access.</p><a href="my-requests.php" style="color:#2B4C52;">Back to My Requests</a></body></html>'; $conn->close(); exit(); }
 
 // Fetch files
@@ -451,6 +456,14 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
           </div>
         </div>
 
+        <?php
+          $rfpPrice = (float)($req['ready_for_purchase_price'] ?? 0);
+          $rfpQty = (int)($req['ready_for_purchase_qty'] ?? 1);
+          $rfpShipping = (float)($req['ready_for_purchase_shipping'] ?? 0);
+          $rfpSubtotal = $rfpPrice * $rfpQty;
+          $rfpTotal = $rfpSubtotal + $rfpShipping;
+        ?>
+
         <!-- Customization Details -->
         <div class="detail-section">
           <h2><i class="fas fa-palette"></i> Customization Details</h2>
@@ -464,12 +477,12 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
               <span><?php echo htmlspecialchars($req['material'] ?? '--'); ?></span>
             </div>
             <div class="detail-field">
-              <label>Preferred Deadline</label>
-              <span><?php echo $req['preferred_deadline'] ? date('F j, Y', strtotime($req['preferred_deadline'])) : 'None'; ?></span>
+              <label>Unit Price</label>
+              <span><?php echo $rfpPrice > 0 ? '₱'.number_format($rfpPrice, 2) : '--'; ?></span>
             </div>
             <div class="detail-field">
-              <label>Design Assistance</label>
-              <span><?php echo !empty($req['need_design_assistance']) ? 'Yes' : 'No'; ?></span>
+              <label>Preferred Deadline</label>
+              <span><?php echo $req['preferred_deadline'] ? date('F j, Y', strtotime($req['preferred_deadline'])) : 'None'; ?></span>
             </div>
             <div class="detail-field full">
               <label>Note</label>
@@ -489,17 +502,12 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
         <div class="detail-section">
           <h2><i class="fas fa-tshirt"></i> Order Items</h2>
           <table class="items-table">
-            <thead><tr><th>Size</th><th>Quantity</th><th>Reference Image</th></tr></thead>
+            <thead><tr><th>Size</th><th>Quantity</th></tr></thead>
             <tbody>
               <?php foreach ($parsedItems as $it): ?>
               <tr>
                 <td><?php echo htmlspecialchars($it['size'] ?? '--'); ?></td>
                 <td><?php echo (int)($it['qty'] ?? 0); ?></td>
-                <td>
-                  <?php if (!empty($it['image']) && strlen($it['image']) > 100): ?>
-                    <img class="item-ref-img" src="<?php echo htmlspecialchars($it['image']); ?>" onclick="openImgPreview(this.src)" alt="Reference">
-                  <?php else: ?>--<?php endif; ?>
-                </td>
               </tr>
               <?php endforeach; ?>
             </tbody>
@@ -528,15 +536,6 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
           <div class="admin-notes-box"><?php echo nl2br(htmlspecialchars($req['admin_notes'])); ?></div>
         </div>
         <?php endif; ?>
-
-        <!-- Ready for Purchase -->
-        <?php
-          $rfpPrice = (float)($req['ready_for_purchase_price'] ?? 0);
-          $rfpQty = (int)($req['ready_for_purchase_qty'] ?? 1);
-          $rfpShipping = (float)($req['ready_for_purchase_shipping'] ?? 0);
-          $rfpSubtotal = $rfpPrice * $rfpQty;
-          $rfpTotal = $rfpSubtotal + $rfpShipping;
-        ?>
 
         <!-- Order Proposal -->
         <?php if ($proposal): ?>

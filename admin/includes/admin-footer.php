@@ -29,6 +29,20 @@ function showToast(msg, type) {
   clearTimeout(t._timer);
   t._timer = setTimeout(function(){ t.classList.add('hidden'); }, 3000);
 }
+function updateSidebarBadges() {
+  fetch('../api/notif-counts.php').then(function(r){return r.json();}).then(function(d){
+    var sb = function(id, c) {
+      var b = document.getElementById(id);
+      if (!b) return;
+      b.textContent = c > 0 ? c : '';
+    };
+    sb('sidebar-msg-badge', d.chat);
+    sb('sidebar-orders-badge', d.order);
+    sb('sidebar-requests-badge', d.custom_request);
+  }).catch(function(){});
+}
+updateSidebarBadges();
+setInterval(updateSidebarBadges, 10000);
 </script>
 </body>
 </html>

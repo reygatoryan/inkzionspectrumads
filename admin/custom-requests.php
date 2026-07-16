@@ -26,6 +26,9 @@ if (isset($userId)) {
     .cr-badge-ready_for_purchase { background: rgba(43, 76, 82,0.12); color: #3D5C42; }
     .cr-badge-rejected { background: rgba(239,68,68,0.12); color: #dc2626; }
     .cr-badge-completed { background: rgba(100,116,139,0.12); color: #475569; }
+    .cr-unviewed-dot { width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; display: inline-block; margin-right: 0.5rem; flex-shrink: 0; }
+    .cr-table tr.cr-unviewed td:first-child { position: relative; }
+    .cr-table tr.cr-unviewed td:first-child::before { content: ''; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; }
     .cr-empty { text-align: center; padding: 3rem; color: #94a3b8; }
     .cr-empty i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
     .cr-table-wrap { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); overflow: hidden; }
@@ -241,9 +244,9 @@ const statusLabels = {
 };
 const statusBadge = s => `cr-badge-${s}`;
 
-async function loadRequests(status = 'all') {
+async function loadRequests(status = 'all', silent = false) {
   const tbody = document.getElementById('requestsTableBody');
-  tbody.innerHTML = '<tr><td colspan="6" class="cr-empty"><i class="fas fa-spinner fa-spin"></i><br>Loading...</td></tr>';
+  if (!silent) tbody.innerHTML = '<tr><td colspan="6" class="cr-empty"><i class="fas fa-spinner fa-spin"></i><br>Loading...</td></tr>';
   try {
     const url = status === 'all' ? '../api/custom-printing.php?action=all' : `../api/custom-printing.php?action=all&status=${status}`;
     const res = await fetch(url, { credentials: 'include' });
@@ -255,7 +258,7 @@ async function loadRequests(status = 'all') {
       return;
     }
     tbody.innerHTML = reqs.map(r => `
-      <tr onclick="openDetail(${r.id})" style="cursor:pointer;" data-id="${r.id}">
+      <tr onclick="openDetail(${r.id})" style="cursor:pointer;" data-id="${r.id}" class="${r.is_viewed ? '' : 'cr-unviewed'}">
         <td><strong>#${r.id}</strong></td>
         <td>${escapeHtml(r.user_name)}<br><small style="color:#94a3b8;">${escapeHtml(r.user_email)}</small></td>
         <td>${escapeHtml(r.service_type)}</td>
@@ -293,14 +296,24 @@ async function openDetail(id) {
     if (!data.success || !data.request) { alert('Request not found'); return; }
     const req = data.request;
 
+    // Mark as viewed
+    if (!req.is_viewed) {
+      fetch('../api/custom-printing.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ action: 'mark_viewed', request_id: id })
+      }).catch(function(){});
+      if (row) row.classList.remove('cr-unviewed');
+    }
+
     const itemsHtml = function(){
       try {
         const parsed = typeof req.items === 'string' ? JSON.parse(req.items) : req.items;
         if (Array.isArray(parsed) && parsed.length) {
-          let h = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><tr style="background:#f1f5f9;"><th style="padding:0.35rem 0.5rem;text-align:left;">Size</th><th style="padding:0.35rem 0.5rem;text-align:left;">Qty</th><th style="padding:0.35rem 0.5rem;text-align:left;">Reference</th></tr>';
+          let h = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><tr style="background:#f1f5f9;"><th style="padding:0.35rem 0.5rem;text-align:left;">Size</th><th style="padding:0.35rem 0.5rem;text-align:left;">Qty</th></tr>';
           parsed.forEach(function(it){
-            const hasImg = it.image && it.image.length > 100;
-            h += '<tr><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + escapeHtml(it.size||'') + '</td><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + (it.qty||1) + '</td><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + (hasImg ? '<img src="' + escapeHtml(it.image) + '" onclick="openItemPreview(this)" style="width:40px;height:40px;border-radius:4px;object-fit:cover;cursor:pointer;border:1px solid #e2e8f0;">' : '--') + '</td></tr>';
+            h += '<tr><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + escapeHtml(it.size||'') + '</td><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + (it.qty||1) + '</td></tr>';
           });
           h += '</table>';
           return h;
@@ -312,26 +325,20 @@ async function openDetail(id) {
     document.getElementById('detailFields').innerHTML = `
       <div class="cr-detail-field"><label>Customer</label><span>${escapeHtml(req.user_name)} (${escapeHtml(req.user_email)})</span></div>
       <div class="cr-detail-field"><label>Service Type</label><span>${escapeHtml(req.service_type)}</span></div>
+      <div class="cr-detail-field"><label>Unit Price</label><span>${req.ready_for_purchase_price != null && req.ready_for_purchase_price !== '' ? '₱' + parseFloat(req.ready_for_purchase_price).toFixed(2) : '--'}</span></div>
       <div class="cr-detail-field"><label>Material</label><span>${req.material || '--'}</span></div>
       <div class="cr-detail-field"><label>Deadline</label><span>${req.preferred_deadline || '--'}</span></div>
       <div class="cr-detail-field" style="grid-column:1/-1;"><label>Order Items</label><span>${itemsHtml}</span></div>
       <div class="cr-detail-field" style="grid-column:1/-1;"><label>Note</label><span>${escapeHtml(req.special_requests || 'None')}</span></div>
-      <div class="cr-detail-field" style="grid-column:1/-1;"><label>Admin Notes</label><span>${escapeHtml(req.admin_notes || 'None')}</span></div>
     `;
 
     document.getElementById('rfpName').value = req.ready_for_purchase_name || '';
-    document.getElementById('rfpPrice').value = req.ready_for_purchase_price || '';
+    document.getElementById('rfpPrice').value = req.ready_for_purchase_price != null && req.ready_for_purchase_price !== '' ? req.ready_for_purchase_price : '';
     document.getElementById('rfpShipping').value = req.ready_for_purchase_shipping || '0';
     document.getElementById('rfpQty').value = req.ready_for_purchase_qty || 1;
-    if (req.ready_for_purchase_image) {
-      document.getElementById('rfpImagePreview').src = '../' + req.ready_for_purchase_image;
-      document.getElementById('rfpImagePreview').style.display = 'block';
-      document.getElementById('rfpImageName').textContent = 'Current: ' + req.ready_for_purchase_image.split('/').pop();
-    } else {
-      document.getElementById('rfpImagePreview').src = '';
-      document.getElementById('rfpImagePreview').style.display = 'none';
-      document.getElementById('rfpImageName').textContent = 'No file chosen';
-    }
+    document.getElementById('rfpImagePreview').src = '';
+    document.getElementById('rfpImagePreview').style.display = 'none';
+    document.getElementById('rfpImageName').textContent = 'No file chosen';
 
     // Customization details
     document.getElementById('editMaterial').value = req.material || '';
@@ -451,6 +458,7 @@ async function saveCustomization() {
     if (d.success) {
       alert('Customization details saved! Status set to In Review.');
       openDetail(currentRequestId);
+      loadRequests(document.querySelector('.tab.active')?.dataset?.status || 'all', true);
     } else { alert(d.error || 'Failed to save'); }
   } catch (e) { alert('Failed to save customization'); }
 }
@@ -568,7 +576,7 @@ async function setReadyForPurchase() {
     const data = await res.json();
     if (data.success) {
       alert('Request marked as ready for purchase! A Buy Now button will appear for the customer.');
-      loadRequests(document.querySelector('.tab.active')?.dataset?.status || 'all');
+      loadRequests(document.querySelector('.tab.active')?.dataset?.status || 'all', true);
     } else { alert(data.error || 'Failed'); }
   } catch(e) { alert('Error'); }
 }
@@ -681,7 +689,7 @@ async function deleteRequest(id) {
     const data = await res.json();
     if (data.success) {
       alert('Custom request deleted');
-      loadRequests(document.querySelector('.tab.active')?.dataset?.status || 'all');
+      loadRequests(document.querySelector('.tab.active')?.dataset?.status || 'all', true);
     } else {
       alert(data.error || 'Failed to delete');
     }
@@ -692,6 +700,7 @@ async function deleteRequest(id) {
 
 // Init
 loadRequests();
+setInterval(() => loadRequests(document.querySelector('.tab.active')?.dataset?.status || 'all', true), 10000);
 </script>
 
 <!-- Image Preview Modal -->

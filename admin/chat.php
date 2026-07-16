@@ -4,7 +4,7 @@ $pageSubtitle = 'Chat with customers about their orders and requests';
 require 'includes/admin-header.php';
 ?>
 <style>
-  .admin-chat-layout { display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; height: calc(100vh - 180px); min-height: 500px; }
+  .admin-chat-layout { display: grid; grid-template-columns: 300px 1fr; grid-template-rows: 1fr; gap: 1.5rem; height: calc(100vh - 180px); min-height: 500px; overflow: hidden; }
   .admin-chat-sidebar { background: white; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.04); display: flex; flex-direction: column; }
   .admin-chat-sidebar h3 { margin: 0; padding: 1rem 1.25rem; font-size: 0.95rem; font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0; }
   .conv-list { flex: 1; overflow-y: auto; }
@@ -105,7 +105,7 @@ let isLoadingMore = false;
 let autoScrollAdmin = true;
 let lastMsgId = 0;
 let emptyPollsAdmin = 0;
-let pollIntervalAdmin = 2000;
+let pollIntervalAdmin = 1000;
 let isTabVisibleAdmin = true;
 let adminSending = false;
 let adminLoadedMsgIds = new Set();
@@ -175,9 +175,25 @@ async function adminLoadConversations() {
   }catch(e){list.innerHTML='<p style="text-align:center;color:#dc2626;padding:1.5rem;">Failed to load.</p>';}
 }
 
+function adminUpdateConvPreview(newMsgs) {
+  if(!newMsgs.length||!currentConvId)return;
+  var last=newMsgs[newMsgs.length-1];
+  var item=document.querySelector('.conv-item[data-id="'+currentConvId+'"]');
+  if(!item)return;
+  var preview=item.querySelector('.conv-preview');
+  if(preview){
+    var text=last.content||'';
+    if(last.message_type==='image')text='Sent an image';
+    else if(last.message_type==='file')text='Sent a file';
+    else if(last.message_type==='custom_request')text='Sent a custom request';
+    else if(last.message_type==='order_form')text='Sent an order form';
+    preview.textContent=text;
+  }
+}
+
 function adminStartPolling() {
   if(pollTimer){clearTimeout(pollTimer);pollTimer=null;}
-  emptyPollsAdmin=0; pollIntervalAdmin=2000; adminDoPoll();
+  emptyPollsAdmin=0; pollIntervalAdmin=1000; adminDoPoll();
 }
 
 async function adminDoPoll() {
@@ -188,7 +204,7 @@ async function adminDoPoll() {
     var d=await r.json();if(!d.success)throw new Error(d.error);
     var newMsgs=d.messages||[];
     if(newMsgs.length>0){
-      lastMsgId=d.last_message_id||lastMsgId; emptyPollsAdmin=0; pollIntervalAdmin=2000;
+      lastMsgId=d.last_message_id||lastMsgId; emptyPollsAdmin=0; pollIntervalAdmin=1000;
       adminAppendMessages(newMsgs);
     }else{emptyPollsAdmin++;if(emptyPollsAdmin>3)pollIntervalAdmin=Math.min(pollIntervalAdmin+1000,10000);}
     var ti=document.getElementById('admin-typing-indicator');
@@ -196,7 +212,7 @@ async function adminDoPoll() {
       if(d.typing){ti.style.display='block';ti.textContent=d.typing.user_name+' is typing...';}
       else{ti.style.display='none';}
     }
-    if(newMsgs.length>0)adminLoadConversations();
+    if(newMsgs.length>0)adminUpdateConvPreview(newMsgs);
   }catch(e){}
   var ni=isTabVisibleAdmin?pollIntervalAdmin:Math.max(pollIntervalAdmin,8000);
   pollTimer=setTimeout(adminDoPoll,ni);
@@ -291,15 +307,15 @@ async function adminLoadChat(convId, silent) {
     if(msgs.length>0)lastMsgId=msgs[msgs.length-1].id;
     
     var prodBar='';
-    if(conv&&conv.product_name){var img=conv.product_image?'<img src="'+escapeHtml(conv.product_image)+'" alt="">':'<div style="width:36px;height:36px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#2B4C52;"><i class="fas fa-box"></i></div>';prodBar='<div class="chat-product-bar">'+img+'<div class="info">'+escapeHtml(conv.product_name)+'<small> &middot; Product</small></div></div>';}
+    if(conv&&conv.product_name){var img=conv.product_image?'<img src="'+escapeHtml(conv.product_image)+'" alt="" onerror="this.style.display=\'none\'">':'<div style="width:36px;height:36px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#2B4C52;"><i class="fas fa-box"></i></div>';prodBar='<div class="chat-product-bar">'+img+'<div class="info">'+escapeHtml(conv.product_name)+'<small> &middot; Product</small></div></div>';}
     var requestId=conv?conv.request_id:null, requestStatus=conv?conv.request_status:null;
     var hdrActions='';
     if(requestId){
-      if(requestStatus==='pending'){hdrActions='<button class="btn-action btn-send-request" disabled><i class="fas fa-clock"></i> Waiting for customer</button>';}
-      else if(requestStatus==='in_review'||requestStatus==='approved'){hdrActions='<button class="btn-action btn-send-order" onclick="adminSendOrderForm()"><i class="fas fa-file-invoice"></i> Send Order Form</button>';}
+      if(requestStatus==='pending'){hdrActions='<button class="btn-action btn-send-request" onclick="adminSendCustomRequest()"><i class="fas fa-paper-plane"></i> Make Request</button>';}
+      else if(requestStatus==='in_review'||requestStatus==='approved'){hdrActions='<button class="btn-action btn-send-request" onclick="adminSendCustomRequest()"><i class="fas fa-paper-plane"></i> Make Request</button>';}
       hdrActions+='<button class="btn-action btn-action-danger" onclick="adminDeleteCustomRequest('+requestId+')"><i class="fas fa-trash"></i> Delete</button>';
     }else{
-      hdrActions='<button class="btn-action btn-send-request" onclick="adminSendCustomRequest()"><i class="fas fa-paper-plane"></i> Send Custom Request</button>';
+      hdrActions='<button class="btn-action btn-send-request" onclick="adminSendCustomRequest()"><i class="fas fa-paper-plane"></i> Make Request</button>';
     }
     var customerName=conv?(conv.user_name||'Customer'):'Customer';
     
@@ -392,12 +408,19 @@ async function adminSendTextMsg() {
       if(content)fd.append('content',content);
       var r=await fetch('../api/chat.php',{method:'POST',credentials:'include',body:fd});
       var d=await r.json();
-      if(d.success){adminClearFilePreview();await adminLoadConversations();}
+      if(d.success){
+        adminClearFilePreview();
+        if(d.message){lastMsgId=Math.max(lastMsgId,d.message.id);adminAppendMessages([d.message]);}
+        adminLoadConversations();
+      }
       else showAdminNotification(d.error||'Failed to send','error');
     }else{
       var r=await fetch('../api/chat.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'send_message',conversation_id:currentConvId,message_type:'text',content})});
       var d=await r.json();
-      if(d.success){await adminLoadConversations();}
+      if(d.success){
+        if(d.message){lastMsgId=Math.max(lastMsgId,d.message.id);adminAppendMessages([d.message]);}
+        adminLoadConversations();
+      }
       else showAdminNotification(d.error||'Failed to send','error');
     }
   }catch(e){showAdminNotification('Failed to send message','error');}
@@ -406,13 +429,16 @@ async function adminSendTextMsg() {
 
 async function adminSendCustomRequest() {
   if(!currentConvId)return;
-  var title=prompt('Custom request title:','Custom Printing');if(!title)return;
   try{
-    var r=await fetch('../api/chat.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'send_message',conversation_id:currentConvId,message_type:'custom_request',content:JSON.stringify({title})})});
+    var r=await fetch('../api/custom-printing.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'admin_create_from_chat',conversation_id:currentConvId})});
     var d=await r.json();
-    if(d.success){await adminLoadConversations();}
+    if(d.success){
+      showAdminNotification('Custom request #'+d.request_id+' created','success');
+      if(currentConvId)adminLoadChat(currentConvId);
+      adminLoadConversations();
+    }
     else showAdminNotification(d.error||'Failed','error');
-  }catch(e){showAdminNotification('Failed to send request','error');}
+  }catch(e){showAdminNotification('Failed to create request','error');}
 }
 
 async function adminSendOrderForm() {
@@ -425,7 +451,10 @@ async function adminSendOrderForm() {
     var title=prompt('Order form title:','Order for '+(conv.product_name||'Custom Printing'));if(!title)return;
     var r=await fetch('../api/chat.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'send_message',conversation_id:currentConvId,message_type:'order_form',content:JSON.stringify({request_id:requestId,title})})});
     var d=await r.json();
-    if(d.success){await adminLoadConversations();}
+    if(d.success){
+      if(d.message){lastMsgId=Math.max(lastMsgId,d.message.id);adminAppendMessages([d.message]);}
+      adminLoadConversations();
+    }
     else showAdminNotification(d.error||'Failed','error');
   }catch(e){showAdminNotification('Failed to send order form','error');}
 }
@@ -473,7 +502,7 @@ document.addEventListener('keydown',function(e){
 document.addEventListener('visibilitychange',function(){
   isTabVisibleAdmin=!document.hidden;
   if(!document.hidden){
-    emptyPollsAdmin=0;pollIntervalAdmin=2000;
+    emptyPollsAdmin=0;pollIntervalAdmin=1000;
     if(currentConvId){
       if(pollTimer){clearTimeout(pollTimer);pollTimer=null;}
       adminLoadChat(currentConvId,true).then(function(){adminStartPolling();}).catch(function(){});
@@ -485,6 +514,7 @@ document.addEventListener('visibilitychange',function(){
 if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
 
 adminLoadConversations();
+setInterval(adminLoadConversations, 30000);
 
 (function(){
   var p=new URLSearchParams(window.location.search);

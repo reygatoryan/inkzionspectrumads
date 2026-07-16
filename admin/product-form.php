@@ -11,7 +11,7 @@ if (empty($_SESSION['user_id']) || empty($_SESSION['user_role']) || $_SESSION['u
 $adminId = (int)$_SESSION['user_id'];
 $editProduct = null;
 
-$uploadDir = __DIR__ . '/uploads/products';
+$uploadDir = __DIR__ . '/../uploads/products';
 if (!is_dir($uploadDir) && !mkdir($uploadDir, 0777, true) && !is_dir($uploadDir)) {
 }
 
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $errors[] = 'Unable to save the uploaded image. Check folder permissions.';
                 } else {
                     $newImageUploaded = true;
-                    $imageUrl = 'uploads/products/' . $filename;
+                    $imageUrl = '../uploads/products/' . $filename;
                 }
             }
         }
@@ -212,10 +212,7 @@ require_once __DIR__ . '/includes/admin-header.php';
               <label>Stock Quantity</label>
               <input type="number" name="stock" class="form-input" value="<?php echo htmlspecialchars($editProduct['stock'] ?? '0', ENT_QUOTES, 'UTF-8'); ?>" min="0" placeholder="0">
             </div>
-            <div class="form-group">
-              <label>Weight per Unit (kg)</label>
-              <input type="number" step="0.001" name="weight" class="form-input" value="<?php echo htmlspecialchars($editProduct['weight'] ?? '0', ENT_QUOTES, 'UTF-8'); ?>" min="0" placeholder="0.000">
-            </div>
+
             <div class="form-group full-width">
               <label>Product Image</label>
               <input type="file" name="image" class="form-input" accept="image/*" <?php echo empty($editProduct) ? 'required' : ''; ?>>

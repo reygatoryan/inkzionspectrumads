@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        $stmt = $conn->prepare("UPDATE custom_printing_requests SET status = ?, admin_notes = ? WHERE id = ?");
+        $stmt = $conn->prepare("UPDATE custom_printing_requests SET status = ?, admin_notes = ?, is_viewed = 0 WHERE id = ?");
         $stmt->bind_param('ssi', $newStatus, $adminNotes, $requestId);
         $stmt->execute();
         $stmt->close();
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $shipping = isset($data['shipping']) ? (float)$data['shipping'] : 0;
-        $stmt = $conn->prepare("UPDATE custom_printing_requests SET status = 'ready_for_purchase', ready_for_purchase_price = ?, ready_for_purchase_name = ?, ready_for_purchase_qty = ?, ready_for_purchase_image = ?, ready_for_purchase_shipping = ? WHERE id = ?");
+        $stmt = $conn->prepare("UPDATE custom_printing_requests SET status = 'ready_for_purchase', is_viewed = 0, ready_for_purchase_price = ?, ready_for_purchase_name = ?, ready_for_purchase_qty = ?, ready_for_purchase_image = ?, ready_for_purchase_shipping = ? WHERE id = ?");
         $stmt->bind_param('dsisid', $price, $productName, $qty, $image, $shipping, $requestId);
         $stmt->execute();
         $stmt->close();
@@ -141,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $itemsJson = json_encode([['name' => $productName, 'quantity' => $qty, 'unit_price' => $price]]);
                 $subtotal = $price * $qty;
                 $total = $subtotal + $shipping;
-                $insertProp = $conn->prepare("INSERT INTO order_proposals (user_id, admin_id, request_id, conversation_id, items, subtotal, shipping_fee, total_amount, admin_notes, status, created_at) VALUES (?, ?, ?, 0, ?, ?, ?, ?, '', 'converted', NOW())");
+                $insertProp = $conn->prepare("INSERT INTO order_proposals (user_id, admin_id, request_id, conversation_id, items, subtotal, shipping_fee, total_amount, admin_notes, status, created_at) VALUES (?, ?, ?, 0, ?, ?, ?, ?,             '', 'sent', NOW())");
                 $insertProp->bind_param('iiisddd', $customerId, $userId, $requestId, $itemsJson, $subtotal, $shipping, $total);
                 $insertProp->execute();
                 $insertProp->close();
@@ -149,6 +149,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         echo json_encode(['success' => true, 'message' => 'Request marked as ready for purchase']);
+        $conn->close();
+        exit;
+    }
+
+    // === MARK VIEWED (admin or customer) ===
+    if ($action === 'mark_viewed' && isset($data['request_id'])) {
+        $requestId = (int)$data['request_id'];
+
+        if ($userRole === 'admin') {
+            $stmt = $conn->prepare("UPDATE custom_printing_requests SET is_viewed = 1 WHERE id = ?");
+        } else {
+            $stmt = $conn->prepare("UPDATE custom_printing_requests SET is_viewed = 1 WHERE id = ? AND user_id = ?");
+            $stmt->bind_param('ii', $requestId, $userId);
+        }
+        if ($userRole === 'admin') {
+            $stmt->bind_param('i', $requestId);
+        }
+        $stmt->execute();
+        $stmt->close();
+
+        echo json_encode(['success' => true]);
         $conn->close();
         exit;
     }
@@ -204,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $specialRequests = trim($data['special_requests'] ?? '');
         $preferredDeadline = trim($data['preferred_deadline'] ?? '');
 
-        $stmt = $conn->prepare("UPDATE custom_printing_requests SET material = ?, items = ?, special_requests = ?, preferred_deadline = ?, status = 'in_review' WHERE id = ?");
+        $stmt = $conn->prepare("UPDATE custom_printing_requests SET material = ?, items = ?, special_requests = ?, preferred_deadline = ?, status = 'in_review', is_viewed = 0 WHERE id = ?");
         $stmt->bind_param('ssssi', $material, $items, $specialRequests, $preferredDeadline, $requestId);
         if (!$stmt->execute()) {
             http_response_code(500);
@@ -236,6 +257,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // === ADMIN: Create a custom request from chat (no message sent to customer) ===
+    if ($action === 'admin_create_from_chat') {
+        if (!in_array($userRole, ['admin', 'admin'])) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Admin access required']);
+            exit;
+        }
+        $conversationId = isset($data['conversation_id']) ? (int)$data['conversation_id'] : 0;
+        if (!$conversationId) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Conversation ID is required']);
+            exit;
+        }
+
+        // Look up conversation to get user_id and product info
+        $convStmt = $conn->prepare("
+            SELECT cc.user_id, cc.product_id, p.name as product_name, p.price as product_price
+            FROM chat_conversations cc
+            LEFT JOIN products p ON cc.product_id = p.id
+            WHERE cc.id = ?
+        ");
+        $convStmt->bind_param('i', $conversationId);
+        $convStmt->execute();
+        $convResult = $convStmt->get_result();
+        $convRow = $convResult->fetch_assoc();
+        $convStmt->close();
+
+        if (!$convRow) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Conversation not found']);
+            exit;
+        }
+
+        $customerId = (int)$convRow['user_id'];
+        $productId = $convRow['product_id'] ? (int)$convRow['product_id'] : 0;
+        $serviceType = $convRow['product_name'] ?: 'Custom Request';
+        $readyForPurchaseName = $convRow['product_name'] ?: '';
+        $readyForPurchasePrice = $convRow['product_price'] ? (float)$convRow['product_price'] : 0;
+
+        try {
+            $conn->begin_transaction();
+
+            $insertStmt = $conn->prepare("
+                INSERT INTO custom_printing_requests (user_id, product_id, service_type, ready_for_purchase_name, ready_for_purchase_price, status, created_at)
+                VALUES (?, ?, ?, ?, ?, 'pending', NOW())
+            ");
+            $insertStmt->bind_param('iissd', $customerId, $productId, $serviceType, $readyForPurchaseName, $readyForPurchasePrice);
+            $insertStmt->execute();
+            $newRequestId = $conn->insert_id;
+            $insertStmt->close();
+
+            // Link conversation to this request
+            $conn->query("UPDATE chat_conversations SET request_id = $newRequestId WHERE id = $conversationId");
+            $conn->query("UPDATE custom_printing_requests SET chat_conversation_id = $conversationId WHERE id = $newRequestId");
+
+            $conn->commit();
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Custom request created',
+                'request_id' => $newRequestId
+            ]);
+        } catch (Throwable $th) {
+            $conn->rollback();
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to create request: ' . $th->getMessage()]);
+        }
+        $conn->close();
+        exit;
+    }
+
     // === CUSTOMER: Submit details for an existing custom request ===
     if ($action === 'submit_details') {
         $requestId = isset($data['request_id']) ? (int)$data['request_id'] : 0;
@@ -252,7 +344,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $items = isset($data['items']) ? json_encode($data['items']) : '[]';
         $specialRequests = isset($data['special_requests']) ? trim($data['special_requests']) : '';
         $preferredDeadline = isset($data['preferred_deadline']) ? trim($data['preferred_deadline']) : null;
-        $stmt = $conn->prepare("UPDATE custom_printing_requests SET material = ?, items = ?, special_requests = ?, preferred_deadline = ?, status = 'in_review' WHERE id = ?");
+        $stmt = $conn->prepare("UPDATE custom_printing_requests SET material = ?, items = ?, special_requests = ?, preferred_deadline = ?, status = 'in_review', is_viewed = 0 WHERE id = ?");
         $stmt->bind_param('ssssi', $material, $items, $specialRequests, $preferredDeadline, $requestId);
         if (!$stmt->execute()) {
             http_response_code(500);
@@ -276,6 +368,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $preferredDeadline = isset($data['preferred_deadline']) ? trim($data['preferred_deadline']) : null;
     $referenceImages = isset($data['reference_images']) ? $data['reference_images'] : [];
     $files = isset($data['files']) ? $data['files'] : [];
+    $productId = isset($data['product_id']) ? (int)$data['product_id'] : 0;
+
+    $readyForPurchaseName = '';
+    $readyForPurchasePrice = 0;
+    if ($productId) {
+        $prodQ = $conn->query("SELECT name, price FROM products WHERE id = $productId");
+        if ($prodQ && $prodQ->num_rows) {
+            $prodRow = $prodQ->fetch_assoc();
+            $readyForPurchaseName = $prodRow['name'];
+            $readyForPurchasePrice = (float)$prodRow['price'];
+        }
+    }
 
     if (empty($serviceType)) {
         http_response_code(400);
@@ -289,15 +393,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Insert custom printing request
         $stmt = $conn->prepare("
             INSERT INTO custom_printing_requests 
-            (user_id, service_type, material, items, special_requests, need_design_assistance, preferred_deadline, reference_images)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (user_id, product_id, service_type, material, items, special_requests, need_design_assistance, preferred_deadline, reference_images, ready_for_purchase_name, ready_for_purchase_price)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         $referenceImagesJson = json_encode($referenceImages);
-        $stmt->bind_param('issssiss', 
-            $userId, $serviceType, $material, $items, 
+        $stmt->bind_param('iissssissd', 
+            $userId, $productId, $serviceType, $material, $items, 
             $specialRequests, $needDesignAssistance, 
-            $preferredDeadline, $referenceImagesJson
+            $preferredDeadline, $referenceImagesJson,
+            $readyForPurchaseName, $readyForPurchasePrice
         );
 
         if (!$stmt->execute()) {
@@ -418,9 +523,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     if ($action === 'my_requests') {
         $stmt = $conn->prepare("
-            SELECT cpr.*, 
+            SELECT cpr.*,
+                   COALESCE(cpr.ready_for_purchase_price, p.price) as ready_for_purchase_price,
+                   COALESCE(cpr.ready_for_purchase_name, p.name) as ready_for_purchase_name,
+                   COALESCE(cpr.ready_for_purchase_image, p.image_url) as ready_for_purchase_image,
                    (SELECT COUNT(*) FROM custom_request_files WHERE request_id = cpr.id) as file_count
             FROM custom_printing_requests cpr
+            LEFT JOIN products p ON cpr.product_id = p.id
             WHERE cpr.user_id = ?
             ORDER BY cpr.created_at DESC
         ");
@@ -453,11 +562,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
 
         $sql = "
-            SELECT cpr.id, cpr.user_id, cpr.service_type, cpr.material, cpr.quantity, cpr.need_design_assistance, cpr.preferred_deadline, cpr.`status`, cpr.chat_conversation_id, cpr.ready_for_purchase_price, cpr.ready_for_purchase_name, cpr.ready_for_purchase_qty, cpr.ready_for_purchase_image, cpr.created_at, cpr.updated_at,
+            SELECT cpr.id, cpr.user_id, cpr.product_id, cpr.service_type, cpr.material, cpr.quantity, cpr.need_design_assistance, cpr.preferred_deadline, cpr.`status`, cpr.chat_conversation_id,
+                   COALESCE(cpr.ready_for_purchase_price, p.price) as ready_for_purchase_price,
+                   COALESCE(cpr.ready_for_purchase_name, p.name) as ready_for_purchase_name,
+                   cpr.ready_for_purchase_qty,
+                   COALESCE(cpr.ready_for_purchase_image, p.image_url) as ready_for_purchase_image,
+                   cpr.is_viewed, cpr.created_at, cpr.updated_at,
                    u.name as user_name, u.email as user_email,
                    (SELECT COUNT(*) FROM custom_request_files WHERE request_id = cpr.id) as file_count
             FROM custom_printing_requests cpr
             JOIN users u ON cpr.user_id = u.id
+            LEFT JOIN products p ON cpr.product_id = p.id
             $where
             ORDER BY cpr.created_at DESC
         ";
@@ -483,10 +598,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'get' && isset($_GET['id'])) {
         $requestId = (int)$_GET['id'];
         $checkStmt = $conn->prepare("
-            SELECT cpr.*, u.name as user_name, u.email as user_email,
+            SELECT cpr.id, cpr.user_id, cpr.product_id, cpr.service_type, cpr.material, cpr.quantity, cpr.need_design_assistance, cpr.preferred_deadline, cpr.`status`, cpr.chat_conversation_id,
+                   COALESCE(cpr.ready_for_purchase_price, p.price) as ready_for_purchase_price,
+                   COALESCE(cpr.ready_for_purchase_name, p.name) as ready_for_purchase_name,
+                   cpr.ready_for_purchase_qty, cpr.ready_for_purchase_image, cpr.ready_for_purchase_shipping,
+                   cpr.is_viewed, cpr.created_at, cpr.updated_at,
+                   cpr.items, cpr.special_requests, cpr.admin_notes, cpr.reference_images,
+                   cpr.size, cpr.color, cpr.finish,
+                   u.name as user_name, u.email as user_email,
                    (SELECT COUNT(*) FROM custom_request_files WHERE request_id = cpr.id) as file_count
             FROM custom_printing_requests cpr
             JOIN users u ON cpr.user_id = u.id
+            LEFT JOIN products p ON cpr.product_id = p.id
             WHERE cpr.id = ? AND (cpr.user_id = ? OR ? IN ('admin', 'admin'))
         ");
         $checkStmt->bind_param('iis', $requestId, $userId, $userRole);

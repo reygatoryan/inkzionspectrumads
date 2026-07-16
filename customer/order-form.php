@@ -423,7 +423,7 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
               <i class="fas fa-check-circle"></i>
               <h2>Details Submitted!</h2>
               <p>${data.message}</p>
-              <a href="profile.php" class="btn-primary"><i class="fas fa-arrow-left"></i> Back to Account</a>
+              <a href="my-requests.php" class="btn-primary"><i class="fas fa-arrow-left"></i> Back to Requests</a>
             </div>
           `;
         } else {

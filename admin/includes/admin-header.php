@@ -54,9 +54,9 @@ $isAddProductPage = ($currentPage === 'product-form.php' && !isset($_GET['id']))
     <nav class="sidebar-menu">
       <div class="sidebar-section-title">Main</div>
       <a href="dashboard.php" class="sidebar-menu-item <?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>"><i class="fas fa-chart-pie"></i> Dashboard</a>
-      <a href="orders.php" class="sidebar-menu-item <?php echo $currentPage === 'orders.php' ? 'active' : ''; ?>"><i class="fas fa-shopping-cart"></i> Orders</a>
-      <a href="custom-requests.php" class="sidebar-menu-item <?php echo $currentPage === 'custom-requests.php' ? 'active' : ''; ?>"><i class="fas fa-paint-brush"></i> Customization Requests</a>
-      <a href="chat.php" class="sidebar-menu-item <?php echo $currentPage === 'chat.php' ? 'active' : ''; ?>"><i class="fas fa-comments"></i> Messages</a>
+      <a href="orders.php" class="sidebar-menu-item <?php echo $currentPage === 'orders.php' ? 'active' : ''; ?>"><i class="fas fa-shopping-cart"></i> Orders<span class="badge red" id="sidebar-orders-badge"></span></a>
+      <a href="custom-requests.php" class="sidebar-menu-item <?php echo $currentPage === 'custom-requests.php' ? 'active' : ''; ?>"><i class="fas fa-paint-brush"></i> Customization Requests<span class="badge red" id="sidebar-requests-badge"></span></a>
+      <a href="chat.php" class="sidebar-menu-item <?php echo $currentPage === 'chat.php' ? 'active' : ''; ?>"><i class="fas fa-comments"></i> Messages<span class="badge red" id="sidebar-msg-badge"></span></a>
 
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Products</div>
       <a href="products.php" class="sidebar-menu-item <?php echo ($currentPage === 'products.php' || ($currentPage === 'product-form.php' && isset($_GET['id']))) ? 'active' : ''; ?>"><i class="fas fa-box"></i> My Products</a>
@@ -66,7 +66,7 @@ $isAddProductPage = ($currentPage === 'product-form.php' && !isset($_GET['id']))
       <a href="content-manager.php" class="sidebar-menu-item <?php echo $currentPage === 'content-manager.php' ? 'active' : ''; ?>"><i class="fas fa-file-alt"></i> Content Manager</a>
       <a href="manage-customers.php" class="sidebar-menu-item <?php echo $currentPage === 'manage-customers.php' ? 'active' : ''; ?>"><i class="fas fa-users"></i> Manage Customers</a>
       <a href="users.php" class="sidebar-menu-item <?php echo $currentPage === 'users.php' ? 'active' : ''; ?>"><i class="fas fa-user-shield"></i> All Users</a>
-      <a href="shipping-settings.php" class="sidebar-menu-item <?php echo $currentPage === 'shipping-settings.php' ? 'active' : ''; ?>"><i class="fas fa-truck"></i> Shipping Settings</a>
+      <a href="settings.php" class="sidebar-menu-item <?php echo $currentPage === 'settings.php' ? 'active' : ''; ?>"><i class="fas fa-cog"></i> Settings</a>
 
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Insights</div>
       <a href="reports.php" class="sidebar-menu-item <?php echo $currentPage === 'reports.php' ? 'active' : ''; ?>"><i class="fas fa-chart-bar"></i> Reports</a>

@@ -351,16 +351,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Create order items
             $items = json_decode($proposal['items'], true) ?: [];
             if (empty($items)) throw new Exception("No items found in proposal to create order");
+
+            // Look up product_id from the custom printing request linked to this proposal
+            $productId = null;
+            if (!empty($proposal['request_id'])) {
+                $reqStmt = $conn->prepare("SELECT product_id FROM custom_printing_requests WHERE id = ?");
+                $reqStmt->bind_param('i', $proposal['request_id']);
+                $reqStmt->execute();
+                $reqResult = $reqStmt->get_result();
+                $reqRow = $reqResult->fetch_assoc();
+                $reqStmt->close();
+                if ($reqRow && $reqRow['product_id']) {
+                    $productId = (int)$reqRow['product_id'];
+                }
+            }
+
             $totalWeight = 0;
             foreach ($items as $item) {
                 $itemStmt = $conn->prepare("
-                    INSERT INTO order_items (order_id, product_name, quantity, unit_price)
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price)
+                    VALUES (?, ?, ?, ?, ?)
                 ");
                 $productName = $item['name'] ?? 'Product';
                 $qty = intval($item['quantity'] ?? 1);
                 $unitPrice = floatval($item['unit_price'] ?? 0);
-                $itemStmt->bind_param('isid', $orderId, $productName, $qty, $unitPrice);
+                $itemStmt->bind_param('iisid', $orderId, $productId, $productName, $qty, $unitPrice);
                 $itemStmt->execute();
                 if ($itemStmt->errno) throw new Exception("Order item insert failed: " . $itemStmt->error);
                 $itemStmt->close();

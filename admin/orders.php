@@ -105,12 +105,6 @@ require_once __DIR__ . '/includes/admin-header.php';
     <button class="so-filter-chip" data-priority="tomorrow">Ship Tomorrow</button>
   </div>
   <input type="text" class="so-search-input" id="search-input" placeholder="Search by Order ID..." onkeyup="debounceSearch()">
-  <select class="so-select" id="shipping-channel">
-    <option value="">All Channels</option>
-    <option value="jnt">J&T Express</option>
-    <option value="lbc">LBC Express</option>
-    <option value="pickup">Store Pickup</option>
-  </select>
   <button class="btn btn-outline btn-sm" onclick="applyFilters()"><i class="fas fa-search"></i> Apply</button>
   <button class="btn btn-ghost btn-sm" onclick="resetFilters()"><i class="fas fa-undo"></i> Reset</button>
 </div>
@@ -260,10 +254,8 @@ require_once __DIR__ . '/includes/admin-header.php';
     container.innerHTML = '<div class="so-loading"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>';
 
     const search = document.getElementById('search-input').value.trim();
-    const channel = document.getElementById('shipping-channel').value;
     let url = `../api/admin-orders.php?action=list&tab=${currentTab}&page=${currentPage}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
-    if (channel) url += `&shipping_channel=${encodeURIComponent(channel)}`;
 
     try {
       const res = await fetch(url);
@@ -321,7 +313,7 @@ require_once __DIR__ . '/includes/admin-header.php';
           <div class="so-order-body">
             ${items.map(item => `
               <div class="so-order-item">
-                <img src="${item.image_url || '../assets/products-demo.jpg'}" alt="${item.product_name}" onerror="this.src='../assets/products-demo.jpg'">
+                ${item.image_url ? '<img src="' + item.image_url + '" alt="' + item.product_name + '" onerror="this.style.display=\'none\'">' : '<div style="width:48px;height:48px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#94a3b8;"><i class="fas fa-box"></i></div>'}
                 <div class="so-order-item-info">
                   <div class="so-order-item-name">${item.product_name}</div>
                   <div class="so-order-item-meta">Qty: ${item.quantity} × ₱${parseFloat(item.unit_price).toFixed(2)}</div>
@@ -455,7 +447,6 @@ require_once __DIR__ . '/includes/admin-header.php';
 
   function resetFilters() {
     document.getElementById('search-input').value = '';
-    document.getElementById('shipping-channel').value = '';
     document.querySelectorAll('.so-filter-chip[data-filter]').forEach(c => c.classList.remove('active'));
     document.querySelector('.so-filter-chip[data-filter="all"]').classList.add('active');
     document.querySelectorAll('.so-filter-chip[data-priority]').forEach(c => c.classList.remove('active'));

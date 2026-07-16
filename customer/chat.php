@@ -124,7 +124,7 @@ $isSeller = $userRole === 'admin';
     .header-profile-dropdown-item.danger:hover { background: var(--danger-bg); color: var(--danger); }
     .header-profile-dropdown-item.danger:hover i { color: var(--danger); }
     
-    .content-area { padding: 1.5rem 2rem 2rem; flex: 1; display: flex; flex-direction: column; }
+    .content-area { padding: 1.5rem 2rem 2rem; flex: 1; min-height: 0; display: flex; flex-direction: column; }
     .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 99; }
     .sidebar-overlay.active { display: block; }
 
@@ -133,12 +133,12 @@ $isSeller = $userRole === 'admin';
     .toast-msg { background: #1e293b; color: white; padding: 0.85rem 1.25rem; border-radius: 14px; font-size: 0.85rem; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 0.6rem; max-width: 380px; animation: toastIn 0.3s ease; cursor: pointer; }
     .toast-msg i { color: var(--primary); font-size: 1rem; }
     @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    .chat-page { max-width: 900px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; }
+    .chat-page { max-width: 900px; margin: 0 auto; width: 100%; flex: 1; min-height: 0; display: flex; flex-direction: column; }
     .page-header { margin-bottom: 1.5rem; }
     .page-header h1 { font-size: 1.5rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.6rem; }
     .page-header h1 i { color: var(--primary); }
     .page-header p { color: var(--text-muted); margin-top: 0.15rem; }
-    .chat-layout { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; flex: 1; min-height: 0; }
+    .chat-layout { display: grid; grid-template-columns: 320px 1fr; grid-template-rows: 1fr; gap: 1.5rem; min-height: 0; height: calc(100vh - 200px); overflow: hidden; }
     .chat-sidebar { background: white; border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.04); display: flex; flex-direction: column; }
     .chat-sidebar-header { padding: 1.25rem; border-bottom: 1px solid var(--border-color); }
     .chat-sidebar-header h3 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--text-primary); }
@@ -434,7 +434,7 @@ $isSeller = $userRole === 'admin';
     let lastMessageId = 0;
     let emptyPolls = 0;
     let pollTimer = null;
-    let pollInterval = 2000;
+    let pollInterval = 1000;
     let isTabVisible = true;
     let isSending = false;
     let loadedMessageIds = new Set();
@@ -450,28 +450,6 @@ $isSeller = $userRole === 'admin';
     function updateTitleBadge() {
       let title = 'Messages | Inkzion Spectrum Ads';
       document.title = unreadTotal > 0 ? `(${unreadTotal}) ${title}` : title;
-    }
-
-    function showToast(message, senderName) {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = 'toast-msg';
-      toast.innerHTML = `<i class="fas fa-comment-dots"></i> <span><strong>${escapeHtml(senderName || 'Admin')}</strong>: ${escapeHtml(message)}</span>`;
-      toast.onclick = function() {
-        this.remove();
-        // Scroll to chat if on mobile
-        const chatMain = document.getElementById('chat-main');
-        if (chatMain) chatMain.scrollIntoView({ behavior: 'smooth' });
-      };
-      container.appendChild(toast);
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.style.opacity = '0';
-          toast.style.transform = 'translateX(100%)';
-          toast.style.transition = 'all 0.3s ease';
-          setTimeout(() => toast.remove(), 300);
-        }
-      }, 5000);
     }
 
     function showInlineNotification(message, type) {
@@ -611,10 +589,26 @@ $isSeller = $userRole === 'admin';
       return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
+    function updateConvPreview(newMsgs) {
+      if (!newMsgs.length || !currentConversation) return;
+      const last = newMsgs[newMsgs.length - 1];
+      const item = document.querySelector(`.conversation-item[data-id="${currentConversation}"]`);
+      if (!item) return;
+      const preview = item.querySelector('.conv-last-msg');
+      if (preview) {
+        let text = last.content || '';
+        if (last.message_type === 'image') text = 'Sent an image';
+        else if (last.message_type === 'file') text = 'Sent a file';
+        else if (last.message_type === 'custom_request') text = 'Sent a custom request';
+        else if (last.message_type === 'order_form') text = 'Sent an order form';
+        preview.textContent = text;
+      }
+    }
+
     function startPolling() {
       stopPolling();
       emptyPolls = 0;
-      pollInterval = 2000;
+      pollInterval = 1000;
       doPoll();
     }
 
@@ -639,7 +633,7 @@ $isSeller = $userRole === 'admin';
         if (newMsgs.length > 0) {
           lastMessageId = data.last_message_id || lastMessageId;
           emptyPolls = 0;
-          pollInterval = 2000; // Fast poll when active
+          pollInterval = 1000; // Fast poll when active
           await appendNewMessages(newMsgs);
         } else {
           emptyPolls++;
@@ -657,10 +651,10 @@ $isSeller = $userRole === 'admin';
           }
         }
 
-        // Update conversation list for unread changes
+        // Update sidebar preview and badge locally
         if (newMsgs.length > 0) {
           updateUnreadBadge();
-          loadConversations();
+          updateConvPreview(newMsgs);
         }
       } catch (e) {
         // Silently retry on error
@@ -713,9 +707,6 @@ $isSeller = $userRole === 'admin';
           else if (msg.message_type === 'image') body = 'Sent an image';
           else if (msg.message_type === 'file') body = 'Sent a file';
           else body = 'Sent a ' + (msg.message_type || 'message');
-
-          // Toast
-          showToast(body, msg.sender_name || 'Admin');
 
           // Browser notification (only if tab hidden)
           if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
@@ -985,20 +976,6 @@ $isSeller = $userRole === 'admin';
           });
         }
         
-        if (silent && prevMsgCount > 0 && messages.length > prevMsgCount) {
-          const newMsgs = messages.slice(prevMsgCount);
-          newMsgs.forEach(msg => {
-            if (msg.sender_id != <?= $userId ?>) {
-              let toastMsg = '';
-              if (msg.message_type === 'custom_request') toastMsg = 'Sent you a custom request form';
-              else if (msg.message_type === 'order_form') toastMsg = 'Sent you an order form';
-              else if (msg.message_type === 'text') toastMsg = msg.content;
-              else toastMsg = 'Sent you a ' + (msg.message_type || 'message');
-              showToast(toastMsg, msg.sender_name || 'Admin');
-            }
-          });
-        }
-        
         if (silent && messagesDiv && messages.length > prevMsgCount && autoScrollEnabled) {
           messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
@@ -1070,7 +1047,11 @@ $isSeller = $userRole === 'admin';
           if (data.success) {
             if (input) input.value = '';
             clearFilePreview();
-            await loadConversations();
+            if (data.message) {
+              lastMessageId = Math.max(lastMessageId, data.message.id);
+              appendNewMessages([data.message]);
+            }
+            loadConversations();
           } else {
             showInlineNotification(data.error || 'Failed to send message', 'error');
           }
@@ -1089,7 +1070,11 @@ $isSeller = $userRole === 'admin';
           const data = await res.json();
           if (data.success) {
             if (input) input.value = '';
-            await loadConversations();
+            if (data.message) {
+              lastMessageId = Math.max(lastMessageId, data.message.id);
+              appendNewMessages([data.message]);
+            }
+            loadConversations();
           } else {
             showInlineNotification(data.error || 'Failed to send message', 'error');
           }
@@ -1280,7 +1265,7 @@ $isSeller = $userRole === 'admin';
       } else {
         // Tab visible again, do an immediate poll and speed up
         emptyPolls = 0;
-        pollInterval = 2000;
+        pollInterval = 1000;
         if (currentConversation) {
           stopPolling();
           loadMessages(currentConversation, true).then(() => startPolling()).catch(() => {});
@@ -1291,6 +1276,7 @@ $isSeller = $userRole === 'admin';
     // Init
     loadConversations();
     autoSelectConversation();
+    setInterval(loadConversations, 30000);
 
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('open');

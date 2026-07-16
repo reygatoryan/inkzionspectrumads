@@ -8,6 +8,7 @@ if (empty($_SESSION['user_id'])) {
 }
 
 $user_id = (int)$_SESSION['user_id'];
+$user_role = $_SESSION['user_role'] ?? 'user';
 require_once '../db-config.php';
 
 $counts = [];
@@ -21,7 +22,11 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-$chatStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM chat_messages cm JOIN chat_conversations cc ON cm.conversation_id = cc.id WHERE cc.user_id = ? AND cm.sender_id != ? AND cm.is_read = 0");
+if ($user_role === 'admin') {
+    $chatStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM chat_messages cm JOIN chat_conversations cc ON cm.conversation_id = cc.id WHERE cc.admin_id = ? AND cm.sender_id != ? AND cm.is_read = 0");
+} else {
+    $chatStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM chat_messages cm JOIN chat_conversations cc ON cm.conversation_id = cc.id WHERE cc.user_id = ? AND cm.sender_id != ? AND cm.is_read = 0");
+}
 $chatStmt->bind_param("ii", $user_id, $user_id);
 $chatStmt->execute();
 $chatResult = $chatStmt->get_result();

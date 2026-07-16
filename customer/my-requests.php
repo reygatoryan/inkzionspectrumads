@@ -124,6 +124,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 
     .req-card { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 1.25rem; margin-bottom: 0.75rem; transition: var(--transition); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .req-card.cr-unviewed { border-left: 4px solid #3b82f6; }
     .req-card:hover { border-color: rgba(43, 76, 82,0.2); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
     .req-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; flex-wrap: wrap; }
     .req-card-info { flex: 1; min-width: 0; }
@@ -370,7 +371,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       const labels = { pending: 'Pending', in_review: 'In Review', approved: 'Approved', ready_for_purchase: 'Ready to Buy', rejected: 'Rejected', completed: 'Completed' };
       container.innerHTML = requests.map(r => {
         const hasChat = r.chat_conversation_id;
-        return '<div class="req-card">' +
+        return '<div class="req-card' + (r.is_viewed ? '' : ' cr-unviewed') + '">' +
           '<div class="req-card-top">' +
             '<div class="req-card-info">' +
               '<div class="req-card-id">#' + esc(r.id) + ' - ' + esc(r.service_type) + '</div>' +
@@ -433,6 +434,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
   function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   loadRequests();
+    setInterval(loadRequests, 10000);
     function toggleAccountMenu() {
       const toggle = document.getElementById('accountToggle');
       const submenu = document.getElementById('accountSubmenu');
