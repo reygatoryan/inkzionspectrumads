@@ -263,7 +263,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $requestId = isset($data['request_id']) ? (int)$data['request_id'] : null;
         $productId = isset($data['product_id']) ? (int)$data['product_id'] : null;
         
-        // Create new conversation (always creates fresh chat)
+        // Check if conversation already exists
+        if ($requestId) {
+            $checkStmt = $conn->prepare("SELECT id FROM chat_conversations WHERE user_id = ? AND admin_id = ? AND request_id = ? LIMIT 1");
+            $checkStmt->bind_param('iii', $userId, $sellerId, $requestId);
+        } elseif ($productId) {
+            $checkStmt = $conn->prepare("SELECT id FROM chat_conversations WHERE user_id = ? AND admin_id = ? AND product_id = ? LIMIT 1");
+            $checkStmt->bind_param('iii', $userId, $sellerId, $productId);
+        } else {
+            $checkStmt = $conn->prepare("SELECT id FROM chat_conversations WHERE user_id = ? AND admin_id = ? LIMIT 1");
+            $checkStmt->bind_param('ii', $userId, $sellerId);
+        }
+        $checkStmt->execute();
+        $existing = $checkStmt->get_result()->fetch_assoc();
+        $checkStmt->close();
+        if ($existing) {
+            echo json_encode(['success' => true, 'conversation_id' => (int)$existing['id']]);
+            $conn->close();
+            exit;
+        }
+        
+        // Create new conversation
         if ($requestId) {
             $stmt = $conn->prepare("
                 INSERT INTO chat_conversations (user_id, admin_id, request_id, product_id, last_message_at)
@@ -426,6 +446,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
             $messageId = $conn->insert_id;
             
+            // Fetch actual created_at from DB to ensure consistency with what's stored
+            $createdStmt = $conn->prepare("SELECT created_at FROM chat_messages WHERE id = ?");
+            $createdStmt->bind_param('i', $messageId);
+            $createdStmt->execute();
+            $createdAt = $createdStmt->get_result()->fetch_assoc()['created_at'] ?? date('Y-m-d H:i:s');
+            $createdStmt->close();
+            
             // Update conversation last_message_at
             $updateStmt = $conn->prepare("
                 UPDATE chat_conversations SET last_message_at = NOW() WHERE id = ?
@@ -512,19 +539,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $notifStmt->execute();
             $notifStmt->close();
             
-            $msgStmt = $conn->prepare("
-                SELECT m.id, m.sender_id, u.name as sender_name,
-                       m.message_type, m.content, m.file_url, m.file_name, m.file_type, m.created_at
-                FROM chat_messages m
-                LEFT JOIN users u ON m.sender_id = u.id
-                WHERE m.id = ?
-            ");
-            $msgStmt->bind_param('i', $messageId);
-            $msgStmt->execute();
-            $msgData = $msgStmt->get_result()->fetch_assoc();
-            $msgStmt->close();
+            $senderName = $_SESSION['user_name'] ?? ($userRole === 'admin' ? 'Admin' : 'User');
 
-            echo json_encode(['success' => true, 'message' => $msgData]);
+            echo json_encode(['success' => true, 'message' => [
+                'id' => $messageId,
+                'sender_id' => $userId,
+                'sender_name' => $senderName,
+                'message_type' => $messageType,
+                'content' => $content,
+                'file_url' => $fileUrl,
+                'file_name' => $fileName,
+                'file_type' => $fileType,
+                'created_at' => $createdAt
+            ]]);
         } else {
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => 'Failed to send message']);

@@ -20,7 +20,7 @@ $user_id = $_SESSION['user_id'];
 
 $orders = [];
 $orderStmt = $conn->prepare("
-  SELECT o.id, o.total_amount, o.status, o.created_at, o.updated_at,
+  SELECT o.id, o.order_reference, o.total_amount, o.status, o.created_at, o.updated_at,
          o.total_weight, o.shipping_fee,
          oi.quantity, oi.unit_price, oi.product_id,
          COALESCE(p.name, oi.product_name) as product_name, p.image_url
@@ -47,6 +47,7 @@ foreach ($orders as $row) {
   if (!isset($groupedOrders[$orderId])) {
     $groupedOrders[$orderId] = [
       'id' => $orderId,
+      'order_reference' => $row['order_reference'],
       'total_amount' => $row['total_amount'],
       'total_weight' => $row['total_weight'],
       'shipping_fee' => $row['shipping_fee'],
@@ -460,7 +461,7 @@ foreach ($groupedOrders as $o) {
           <div class="order-card" data-tab="<?= $tabCategory ?>">
             <div class="order-header">
               <div class="order-header-left">
-                <span class="order-id">Order #<?= str_pad($order['id'], 6, '0', STR_PAD_LEFT) ?></span>
+                <span class="order-id">Order #<?= htmlspecialchars($order['order_reference'] ?? 'INK-' . str_pad($order['id'], 6, '0', STR_PAD_LEFT)) ?></span>
                 <span class="order-date"><i class="fas fa-calendar-alt" style="margin-right:4px;"></i> <?= date('M d, Y \a\t h:i A', strtotime($order['created_at'])) ?></span>
               </div>
               <span class="order-status-badge badge-<?= $order['status'] ?>">

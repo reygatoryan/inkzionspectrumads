@@ -41,7 +41,7 @@ $changeConv = calcChange($thisWeekConv, $prevConv);
 
 // ===== RECENT CUSTOMER ACTIVITY =====
 $activity = [];
-$r1 = $conn->query("SELECT id, 'order' AS type, CONCAT('Order #', id) AS title, status, created_at, user_id FROM orders WHERE status = 'pending' ORDER BY created_at DESC LIMIT 10");
+$r1 = $conn->query("SELECT id, order_reference, 'order' AS type, CONCAT('Order #', COALESCE(order_reference, CONCAT('INK-', LPAD(id, 6, '0')))) AS title, status, created_at, user_id FROM orders WHERE status = 'pending' ORDER BY created_at DESC LIMIT 10");
 while ($row = $r1->fetch_assoc()) {
     $u = $conn->query("SELECT name FROM users WHERE id = {$row['user_id']}")->fetch_assoc();
     $row['customer'] = $u['name'] ?? 'Guest';

@@ -208,28 +208,6 @@ if (isset($userId)) {
     </div>
     <button class="btn btn-primary" onclick="setReadyForPurchase()"><i class="fas fa-check-circle"></i> Mark Ready for Purchase</button>
 
-    <!-- Order Proposal -->
-    <h3 style="margin: 1.5rem 0 0.75rem; font-size: 1rem; color: #0f172a;">Order Proposal</h3>
-    <div id="proposalStatus" style="display:none;margin-bottom:1rem;">
-      <div class="cr-detail-field"><label>Proposal Status</label><span id="proposalStatusText"></span></div>
-    </div>
-    <div id="proposalCustomerDetails" style="display:none;margin-bottom:1rem;">
-      <h4 style="margin: 1rem 0 0.5rem; font-size: 0.9rem; color: #334155;">Customer Details</h4>
-      <div class="cr-detail-grid">
-        <div class="cr-detail-field"><label>Full Name</label><span id="propName"></span></div>
-        <div class="cr-detail-field"><label>Email</label><span id="propEmail"></span></div>
-        <div class="cr-detail-field"><label>Phone</label><span id="propPhone"></span></div>
-        <div class="cr-detail-field"><label>Delivery Address</label><span id="propAddress"></span></div>
-        <div class="cr-detail-field"><label>City</label><span id="propCity"></span></div>
-        <div class="cr-detail-field"><label>Province</label><span id="propProvince"></span></div>
-        <div class="cr-detail-field"><label>ZIP</label><span id="propZip"></span></div>
-        <div class="cr-detail-field"><label>Payment Method</label><span id="propPayment"></span></div>
-        <div class="cr-detail-field"><label>Landmark</label><span id="propLandmark"></span></div>
-        <div class="cr-detail-field" style="grid-column:1/-1;"><label>Additional Notes</label><span id="propNotes"></span></div>
-      </div>
-    </div>
-    <div id="proposalActions" style="display:none;margin-top:0.75rem;margin-bottom:1.5rem;gap:0.75rem;"></div>
-
   </div>
 </div>
 
@@ -335,7 +313,14 @@ async function openDetail(id) {
     document.getElementById('rfpName').value = req.ready_for_purchase_name || '';
     document.getElementById('rfpPrice').value = req.ready_for_purchase_price != null && req.ready_for_purchase_price !== '' ? req.ready_for_purchase_price : '';
     document.getElementById('rfpShipping').value = req.ready_for_purchase_shipping || '0';
-    document.getElementById('rfpQty').value = req.ready_for_purchase_qty || 1;
+    let totalQty = 1;
+    try {
+      const items = typeof req.items === 'string' ? JSON.parse(req.items) : (req.items || []);
+      if (Array.isArray(items) && items.length > 0) {
+        totalQty = items.reduce(function(sum, it) { return sum + (parseInt(it.qty) || 1); }, 0);
+      }
+    } catch(e) {}
+    document.getElementById('rfpQty').value = req.ready_for_purchase_qty || totalQty;
     document.getElementById('rfpImagePreview').src = '';
     document.getElementById('rfpImagePreview').style.display = 'none';
     document.getElementById('rfpImageName').textContent = 'No file chosen';
@@ -373,49 +358,6 @@ async function openDetail(id) {
     } else {
       chatBox.style.display = 'none';
     }
-
-    // Load proposal
-    const propStatus = document.getElementById('proposalStatus');
-    const propDetails = document.getElementById('proposalCustomerDetails');
-    const propActions = document.getElementById('proposalActions');
-    propStatus.style.display = 'none';
-    propDetails.style.display = 'none';
-    propActions.style.display = 'none';
-    propActions.innerHTML = '';
-    try {
-      const pRes = await fetch(`../api/order-proposals.php?action=list&request_id=${id}`, { credentials: 'include' });
-      const pData = await pRes.json();
-      const proposals = pData.proposals || [];
-      if (proposals.length) {
-        const prop = proposals[proposals.length - 1];
-        const statusEl = document.getElementById('proposalStatusText');
-        const labels = { sent: 'Sent (Pending Customer)', filled: 'Filled (Awaiting Approval)', converted: 'Approved & Converted', rejected: 'Rejected' };
-        statusEl.textContent = labels[prop.status] || prop.status;
-        propStatus.style.display = 'block';
-
-        if (prop.status === 'filled' || prop.status === 'converted') {
-          document.getElementById('propName').textContent = prop.full_name || '--';
-          document.getElementById('propEmail').textContent = prop.email || '--';
-          document.getElementById('propPhone').textContent = prop.phone || '--';
-          document.getElementById('propAddress').textContent = prop.delivery_address || '--';
-          document.getElementById('propCity').textContent = prop.city || '--';
-          document.getElementById('propProvince').textContent = prop.province || '--';
-          document.getElementById('propZip').textContent = prop.zip || '--';
-          document.getElementById('propPayment').textContent = prop.payment_method || '--';
-          document.getElementById('propLandmark').textContent = prop.landmark || '--';
-          document.getElementById('propNotes').textContent = prop.additional_notes || '--';
-          propDetails.style.display = 'block';
-        }
-
-        if (prop.status === 'filled') {
-          const pid = prop.id;
-          propActions.style.display = 'flex';
-          propActions.innerHTML =
-            `<button class="btn btn-success" onclick="approveProposalFromCR(${pid})"><i class="fas fa-check"></i> Approve & Create Order</button>` +
-            `<button class="btn btn-danger" onclick="rejectProposalFromCR(${pid})"><i class="fas fa-times"></i> Reject</button>`;
-        }
-      }
-    } catch(e) { /* proposal fetch failed silently */ }
 
   } catch (err) {
     alert('Failed to load details');
@@ -462,42 +404,6 @@ async function saveCustomization() {
     } else { alert(d.error || 'Failed to save'); }
   } catch (e) { alert('Failed to save customization'); }
 }
-
-async function approveProposalFromCR(proposalId) {
-  try {
-    const r = await fetch('../api/order-proposals.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ action: 'approve', proposal_id: proposalId })
-    });
-    const d = await r.json();
-    if (d.success) {
-      showToast('Order approved! ' + (d.message || ''), 'success');
-      openDetail(currentRequestId);
-    } else { showToast(d.error || 'Failed to approve', 'error'); }
-  } catch (e) { showToast('Failed to approve proposal', 'error'); }
-}
-
-async function rejectProposalFromCR(proposalId) {
-  const reason = prompt('Rejection reason (will be visible to customer):');
-  if (reason === null) return;
-  if (!reason.trim()) { showToast('Please provide a reason', 'error'); return; }
-  try {
-    const r = await fetch('../api/order-proposals.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ action: 'reject', proposal_id: proposalId, rejection_reason: reason.trim() })
-    });
-    const d = await r.json();
-    if (d.success) {
-      showToast('Order form rejected. Customer will be notified.', 'success');
-      openDetail(currentRequestId);
-    } else { showToast(d.error || 'Failed to reject', 'error'); }
-  } catch (e) { showToast('Failed to reject proposal', 'error'); }
-}
-
 
 async function loadChatMessages() {
   if (!currentConvId) return;

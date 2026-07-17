@@ -7,7 +7,6 @@ require_once __DIR__ . '/includes/admin-header.php';
   .so-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
   .so-topbar h1 { font-size: 1.4rem; font-weight: 800; color: #1a1a2e; }
   .so-topbar p { font-size: 0.85rem; color: #64748b; margin-top: 0.2rem; }
-  .so-topbar-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 
   .btn-ghost { background: transparent; color: #475569; border: 1px solid transparent; }
   .btn-ghost:hover { background: #f1f5f9; }
@@ -45,11 +44,6 @@ require_once __DIR__ . '/includes/admin-header.php';
   .so-countdown { font-size: 0.7rem; font-weight: 700; color: #ef4444; display: inline-flex; align-items: center; gap: 0.25rem; }
 
   .so-filters { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
-  .so-filter-group { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
-  .so-filter-chip { padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid #e2e8f0; background: white; font-size: 0.75rem; font-weight: 600; color: #475569; cursor: pointer; transition: all 0.15s ease; }
-  .so-filter-chip:hover { border-color: #e91e8c; color: #e91e8c; }
-  .so-filter-chip.active { background: rgba(233,30,142,0.08); border-color: #e91e8c; color: #e91e8c; }
-  .so-filter-label { font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
   .so-search-input { padding: 0.45rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.8rem; outline: none; min-width: 180px; transition: border-color 0.2s; }
   .so-search-input:focus { border-color: #e91e8c; box-shadow: 0 0 0 3px rgba(233,30,142,0.08); }
   .so-select { padding: 0.45rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.8rem; outline: none; background: white; cursor: pointer; }
@@ -73,11 +67,6 @@ require_once __DIR__ . '/includes/admin-header.php';
     <h1>Order Management</h1>
     <p>View, filter, search, and process your orders.</p>
   </div>
-  <div class="so-topbar-actions">
-    <button class="btn btn-outline btn-sm" onclick="exportOrders()"><i class="fas fa-download"></i> Export</button>
-    <button class="btn btn-outline btn-sm" onclick="exportHistory()"><i class="fas fa-history"></i> Export History</button>
-    <button class="btn btn-primary btn-sm" onclick="massShip()"><i class="fas fa-ship"></i> Mass Ship</button>
-  </div>
 </div>
 
 <div class="tabs" id="order-tabs">
@@ -91,19 +80,6 @@ require_once __DIR__ . '/includes/admin-header.php';
 </div>
 
 <div class="so-filters">
-  <div class="so-filter-group">
-    <span class="so-filter-label">Status</span>
-    <button class="so-filter-chip active" data-filter="all">All</button>
-    <button class="so-filter-chip" data-filter="to_process">To Process</button>
-    <button class="so-filter-chip" data-filter="processed">Processed</button>
-  </div>
-  <div class="so-filter-group">
-    <span class="so-filter-label">Priority</span>
-    <button class="so-filter-chip active" data-priority="all">All</button>
-    <button class="so-filter-chip" data-priority="overdue">Overdue</button>
-    <button class="so-filter-chip" data-priority="today">Ship Today</button>
-    <button class="so-filter-chip" data-priority="tomorrow">Ship Tomorrow</button>
-  </div>
   <input type="text" class="so-search-input" id="search-input" placeholder="Search by Order ID..." onkeyup="debounceSearch()">
   <button class="btn btn-outline btn-sm" onclick="applyFilters()"><i class="fas fa-search"></i> Apply</button>
   <button class="btn btn-ghost btn-sm" onclick="resetFilters()"><i class="fas fa-undo"></i> Reset</button>
@@ -124,10 +100,6 @@ require_once __DIR__ . '/includes/admin-header.php';
       <div class="form-group">
         <label>Order ID</label>
         <input type="text" id="ship-order-id-display" disabled style="background:#f8fafc;font-weight:600;">
-      </div>
-      <div class="form-group" id="ship-weight-group" style="display:none;">
-        <label>Total Weight</label>
-        <input type="text" id="ship-total-weight" disabled style="background:#f8fafc;">
       </div>
       <div class="form-group">
         <label>Courier</label>
@@ -219,8 +191,6 @@ require_once __DIR__ . '/includes/admin-header.php';
 <script>
   let currentTab = 'all';
   let currentPage = 1;
-  let currentFilter = 'all';
-  let currentPriority = 'all';
   let searchTimeout = null;
   let totalPages = 1;
   let currentProposalId = null;
@@ -302,7 +272,7 @@ require_once __DIR__ . '/includes/admin-header.php';
         <div class="card so-order-card">
           <div class="card-header">
             <div>
-              <span class="so-order-id">#${order.id}</span>
+              <span class="so-order-id">${order.order_reference ? '#' + order.order_reference : '#INK-' + String(order.id).padStart(6, '0')}</span>
               <span class="so-order-date">${dateStr} ${timeStr}</span>
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;">
@@ -334,10 +304,6 @@ require_once __DIR__ . '/includes/admin-header.php';
             <div class="so-detail-item">
               <div class="so-detail-label">Buyer Payment</div>
               <div class="so-detail-value">₱${parseFloat(order.total_amount).toFixed(2)}</div>
-            </div>
-            <div class="so-detail-item">
-              <div class="so-detail-label">Shipping</div>
-              <div class="so-detail-value">${order.total_weight ? order.total_weight + ' kg' : 'N/A'}</div>
             </div>
             ${order.shipping_fee ? `
             <div class="so-detail-item">
@@ -423,23 +389,6 @@ require_once __DIR__ . '/includes/admin-header.php';
     });
   });
 
-  document.querySelectorAll('.so-filter-chip[data-filter]').forEach(chip => {
-    chip.addEventListener('click', function() {
-      document.querySelectorAll('.so-filter-chip[data-filter]').forEach(c => c.classList.remove('active'));
-      this.classList.add('active');
-      currentFilter = this.dataset.filter;
-      applyFilters();
-    });
-  });
-  document.querySelectorAll('.so-filter-chip[data-priority]').forEach(chip => {
-    chip.addEventListener('click', function() {
-      document.querySelectorAll('.so-filter-chip[data-priority]').forEach(c => c.classList.remove('active'));
-      this.classList.add('active');
-      currentPriority = this.dataset.priority;
-      applyFilters();
-    });
-  });
-
   function applyFilters() {
     currentPage = 1;
     loadOrders();
@@ -447,12 +396,6 @@ require_once __DIR__ . '/includes/admin-header.php';
 
   function resetFilters() {
     document.getElementById('search-input').value = '';
-    document.querySelectorAll('.so-filter-chip[data-filter]').forEach(c => c.classList.remove('active'));
-    document.querySelector('.so-filter-chip[data-filter="all"]').classList.add('active');
-    document.querySelectorAll('.so-filter-chip[data-priority]').forEach(c => c.classList.remove('active'));
-    document.querySelector('.so-filter-chip[data-priority="all"]').classList.add('active');
-    currentFilter = 'all';
-    currentPriority = 'all';
     currentPage = 1;
     loadOrders();
   }
@@ -464,7 +407,8 @@ require_once __DIR__ . '/includes/admin-header.php';
 
   function arrangeShipment(orderId) {
     document.getElementById('ship-order-id').value = orderId;
-    document.getElementById('ship-order-id-display').value = '#INK-' + String(orderId).padStart(6, '0');
+    const order = window._ordersData ? window._ordersData.find(o => o.id === orderId) : null;
+    document.getElementById('ship-order-id-display').value = (order && order.order_reference) ? '#' + order.order_reference : '#INK-' + String(orderId).padStart(6, '0');
     document.getElementById('ship-courier').value = '';
     document.getElementById('ship-tracking').value = '';
     document.getElementById('ship-estimated').value = '';
@@ -472,15 +416,9 @@ require_once __DIR__ . '/includes/admin-header.php';
     document.getElementById('ship-fee').value = '';
     document.getElementById('ship-loading').style.display = 'none';
     document.getElementById('ship-error').style.display = 'none';
-    // Show weight from the orders data
-    const order = window._ordersData ? window._ordersData.find(o => o.id === orderId) : null;
-    const weightEl = document.getElementById('ship-total-weight');
-    const weightGroup = document.getElementById('ship-weight-group');
-    if (order && order.total_weight) {
-      weightEl.value = order.total_weight + ' kg';
-      weightGroup.style.display = 'block';
-    } else {
-      weightGroup.style.display = 'none';
+    // Show shipping fee from the orders data
+    if (order && order.shipping_fee) {
+      document.getElementById('ship-fee').value = order.shipping_fee;
     }
     document.getElementById('ship-modal').classList.add('active');
   }
@@ -539,20 +477,25 @@ require_once __DIR__ . '/includes/admin-header.php';
     document.getElementById('ship-modal').classList.remove('active');
   }
 
+  function getOrderRef(orderId) {
+    const o = window._ordersData ? window._ordersData.find(r => r.id === orderId) : null;
+    return o && o.order_reference ? o.order_reference : 'INK-' + String(orderId).padStart(6, '0');
+  }
+
   function markShipped(orderId) {
-    if (confirm('Mark Order #' + orderId + ' as Out for Delivery?')) {
+    if (confirm('Mark Order #' + getOrderRef(orderId) + ' as Out for Delivery?')) {
       updateOrderStatus(orderId, 'shipped', 'Order is out for delivery.');
     }
   }
 
   function markDelivered(orderId) {
-    if (confirm('Mark Order #' + orderId + ' as Delivered?')) {
+    if (confirm('Mark Order #' + getOrderRef(orderId) + ' as Delivered?')) {
       updateOrderStatus(orderId, 'delivered', 'Order has been delivered.');
     }
   }
 
   function markCompleted(orderId) {
-    if (confirm('Mark Order #' + orderId + ' as Completed?')) {
+    if (confirm('Mark Order #' + getOrderRef(orderId) + ' as Completed?')) {
       updateOrderStatus(orderId, 'completed', 'Order completed successfully.');
     }
   }
@@ -608,7 +551,7 @@ require_once __DIR__ . '/includes/admin-header.php';
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem;margin-bottom:1rem;">
         <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
           <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Order ID</div>
-          <div style="font-size:1rem;font-weight:700;color:#0f172a;margin-top:0.2rem;">#${order.id}</div>
+          <div style="font-size:1rem;font-weight:700;color:#0f172a;margin-top:0.2rem;">${order.order_reference ? '#' + order.order_reference : '#INK-' + String(order.id).padStart(6, '0')}</div>
         </div>
         <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
           <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Status</div>
@@ -641,10 +584,6 @@ require_once __DIR__ . '/includes/admin-header.php';
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">
-        <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
-          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Weight</div>
-          <div style="font-size:0.95rem;font-weight:700;color:#0f172a;margin-top:0.2rem;">${order.total_weight ? `${parseFloat(order.total_weight).toFixed(3)} kg` : 'N/A'}</div>
-        </div>
         <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
           <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Shipping Fee</div>
           <div style="font-size:0.95rem;font-weight:700;color:#0f172a;margin-top:0.2rem;">₱${parseFloat(order.shipping_fee || 0).toFixed(2)}</div>

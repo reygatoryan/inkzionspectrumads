@@ -1050,8 +1050,9 @@ $isSeller = $userRole === 'admin';
             if (data.message) {
               lastMessageId = Math.max(lastMessageId, data.message.id);
               appendNewMessages([data.message]);
+              updateConvPreview([data.message]);
             }
-            loadConversations();
+            updateUnreadBadge();
           } else {
             showInlineNotification(data.error || 'Failed to send message', 'error');
           }
@@ -1073,8 +1074,9 @@ $isSeller = $userRole === 'admin';
             if (data.message) {
               lastMessageId = Math.max(lastMessageId, data.message.id);
               appendNewMessages([data.message]);
+              updateConvPreview([data.message]);
             }
-            loadConversations();
+            updateUnreadBadge();
           } else {
             showInlineNotification(data.error || 'Failed to send message', 'error');
           }

@@ -37,7 +37,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
   $seoKeywords = 'printing, advertising, business cards, marketing materials, signage, apparel, custom merchandise, promotional items';
   outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
   ?>
-  <link rel="stylesheet" href="styles.css?v=10">
+  <link rel="stylesheet" href="styles.css?v=12">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -306,15 +306,51 @@ $contactContent = $siteContent['contact_info'] ?? [];
             </div>
           </div>
           <div class="about-copy">
-            <?php if (!empty($aboutContent['content'])): ?>
-            <p style="white-space:pre-line;"><?php echo htmlspecialchars($aboutContent['content']); ?></p>
-            <?php else: ?>
-            <p>Inkzion Spectrum Ads is a full-service printing and advertising company based in Liloan, Cebu. We are dedicated to helping businesses, organizations, and individuals bring their creative visions to life through exceptional print quality and personalized service. From concept to completion, every project we handle reflects our passion for craftsmanship and attention to detail.</p>
-            <p>Our comprehensive range of services covers everything from sublimation apparel such as t-shirts, polo shirts, varsity jackets, and basketball jerseys, to essential marketing materials like business cards, brochures, flyers, and certificates. We also specialize in large format printing including banners, tarpaulins, panaflex, signage, and stand banners, as well as custom merchandise such as mugs, tumblers, caps, mouse pads, lanyards, and PVC IDs. Whether you need a single item or bulk orders, we have the capability to deliver consistent, high-quality results.</p>
-            <p>We take pride in using modern printing equipment and premium materials to ensure every output features vibrant colors, sharp details, and long-lasting durability. Our team continuously invests in the latest technology and techniques to stay at the forefront of the printing industry. From DTF transfers to full sublimation, every process is handled with precision and care to meet the highest standards of quality.</p>
-            <p>What sets us apart is our commitment to the customer experience. We begin every project with a free consultation and design review, ensuring that your vision is clearly understood before any work begins. Our team provides end-to-end support, guiding you through material selection, design refinement, and production timelines. We offer fast turnaround times without compromising on quality, and we maintain transparent pricing with no hidden fees.</p>
-            <p>Whether you are a student organizing a campus event, a startup launching your brand, a school outfitting a team, or an established business scaling your marketing efforts, Inkzion Spectrum Ads is here to deliver printing solutions that make a lasting impression. We believe that great printing tells a story, and we are honored to be part of yours. Let us create something extraordinary together.</p>
-            <?php endif; ?>
+            <p class="about-intro">We deliver premium printing and advertising solutions tailored to your needs. Here's what sets us apart:</p>
+            <div class="about-features">
+              <div class="about-feature">
+                <div class="about-feature-icon"><i class="fas fa-check"></i></div>
+                <div class="about-feature-text">
+                  <strong>Meticulous Quality</strong>
+                  <p>Every print job, big or small, meets the highest standards of craftsmanship.</p>
+                </div>
+              </div>
+              <div class="about-feature">
+                <div class="about-feature-icon"><i class="fas fa-check"></i></div>
+                <div class="about-feature-text">
+                  <strong>End-to-End Support</strong>
+                  <p>From consultation and design to production and delivery — we handle it all.</p>
+                </div>
+              </div>
+              <div class="about-feature">
+                <div class="about-feature-icon"><i class="fas fa-check"></i></div>
+                <div class="about-feature-text">
+                  <strong>Modern Equipment</strong>
+                  <p>Latest printing technology for vibrant colors, sharp details, and lasting durability.</p>
+                </div>
+              </div>
+              <div class="about-feature">
+                <div class="about-feature-icon"><i class="fas fa-check"></i></div>
+                <div class="about-feature-text">
+                  <strong>Fast Turnaround</strong>
+                  <p>Quick delivery times without compromising on quality.</p>
+                </div>
+              </div>
+              <div class="about-feature">
+                <div class="about-feature-icon"><i class="fas fa-check"></i></div>
+                <div class="about-feature-text">
+                  <strong>Transparent Pricing</strong>
+                  <p>No hidden fees — just honest quotes and cost-effective solutions.</p>
+                </div>
+              </div>
+              <div class="about-feature">
+                <div class="about-feature-icon"><i class="fas fa-check"></i></div>
+                <div class="about-feature-text">
+                  <strong>Free Design Review</strong>
+                  <p>Professional consultation to refine your vision before production begins.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

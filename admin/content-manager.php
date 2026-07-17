@@ -101,10 +101,6 @@ require_once __DIR__ . '/includes/admin-header.php';
             <label>Subtitle</label>
             <input type="text" name="subtitle" class="form-input" value="${escapeHtml(data.subtitle || '')}">
           </div>
-          <div class="form-group full-width">
-            <label>Content</label>
-            <textarea name="content" class="form-input" rows="8">${escapeHtml(data.content || '')}</textarea>
-          </div>
         </div>
       `;
     } else if (section === 'contact_info') {

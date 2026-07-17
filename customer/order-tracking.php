@@ -57,7 +57,7 @@ $timelineStmt->close();
 // Get order items
 $itemsStmt = $conn->prepare("
     SELECT oi.product_name, oi.quantity, oi.unit_price,
-           COALESCE(p.image_url, 'assets/products-demo.jpg') as image_url
+           CASE WHEN p.image_url IS NULL OR p.image_url = '' THEN 'assets/products-demo.jpg' ELSE p.image_url END as image_url
     FROM order_items oi
     LEFT JOIN products p ON oi.product_id = p.id
     WHERE oi.order_id = ?
@@ -440,6 +440,9 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         .order-item-name { font-size: 0.88rem; font-weight: 600; color: #111827; }
         .order-item-meta { font-size: 0.78rem; color: #64748b; margin-top: 0.15rem; }
         .order-item-total { font-size: 0.9rem; font-weight: 700; color: #2B4C52; white-space: nowrap; }
+        .order-summary { border-top: 1px solid #e2e8f0; margin-top: 0.75rem; padding-top: 0.75rem; }
+        .order-summary-row { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 0.85rem; color: #475569; }
+        .order-summary-row.total { font-weight: 700; font-size: 1rem; color: #111827; border-top: 1px solid #e2e8f0; margin-top: 0.25rem; padding-top: 0.5rem; }
         .timeline { position: relative; padding-left: 30px; }
         .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #e0e0e0; }
         .timeline-item { position: relative; padding-bottom: 25px; }
@@ -632,7 +635,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                 <?php endif; ?>
 
                 <div class="order-header-card">
-                    <h1 class="order-title">Order #<?php echo $order['order_reference'] ?? $order['id']; ?></h1>
+                    <h1 class="order-title">Order #<?php echo htmlspecialchars($order['order_reference'] ?? 'INK-' . str_pad($orderId, 6, '0', STR_PAD_LEFT)); ?></h1>
                     <div class="order-meta">
                         <span>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -666,6 +669,27 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                             <div class="order-item-total">₱<?php echo number_format((float)$item['unit_price'] * (int)$item['quantity'], 2); ?></div>
                         </div>
                         <?php endforeach; ?>
+                        <?php
+                        $subtotal = array_sum(array_map(fn($i) => (float)$i['unit_price'] * (int)$i['quantity'], $orderItems));
+                        $shipping = (float)($order['shipping_fee'] ?? 0);
+                        $grandTotal = $subtotal + $shipping;
+                        ?>
+                        <div class="order-summary">
+                            <div class="order-summary-row">
+                                <span>Subtotal</span>
+                                <span>₱<?php echo number_format($subtotal, 2); ?></span>
+                            </div>
+                            <?php if ($shipping > 0): ?>
+                            <div class="order-summary-row">
+                                <span>Shipping Fee</span>
+                                <span>₱<?php echo number_format($shipping, 2); ?></span>
+                            </div>
+                            <?php endif; ?>
+                            <div class="order-summary-row total">
+                                <span>Grand Total</span>
+                                <span>₱<?php echo number_format($grandTotal, 2); ?></span>
+                            </div>
+                        </div>
                     <?php else: ?>
                         <p style="color:#64748b;font-size:0.85rem;">No items found.</p>
                     <?php endif; ?>
