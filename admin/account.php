@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'My Account';
-$pageSubtitle = 'Manage your profile, security, and preferences.';
+$pageSubtitle = 'Manage your profile and preferences.';
 require 'includes/admin-header.php';
 
 $sellerName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin', ENT_QUOTES, 'UTF-8');
@@ -41,7 +41,7 @@ unset($_SESSION['success'], $_SESSION['error']);
   .pa-card-header h2 { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
   .pa-card-header h2 i { color: var(--pa-primary); }
   .pa-photo-section { display: flex; align-items: center; gap: 1.5rem; }
-  .pa-photo-preview { width: 100px; height: 100px; border-radius: 16px; background: linear-gradient(135deg, var(--pa-primary), #4A7C84); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; overflow: hidden; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-shrink: 0; }
+    .pa-photo-preview { width: 100px; height: 100px; border-radius: 16px; background: linear-gradient(135deg, var(--pa-primary), var(--pa-primary-light)); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; overflow: hidden; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-shrink: 0; }
   .pa-photo-preview img { width: 100%; height: 100%; object-fit: cover; }
   .pa-photo-actions { flex: 1; }
   .pa-photo-actions p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
@@ -64,7 +64,17 @@ unset($_SESSION['success'], $_SESSION['error']);
   .pa-notification.success { background: var(--pa-success); color: white; }
   .pa-notification.error { background: var(--pa-error); color: white; }
   @keyframes slideIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
-  @media (max-width: 768px) { .pa-form-grid { grid-template-columns: 1fr; } .pa-photo-section { flex-direction: column; align-items: flex-start; } .pa-actions { flex-direction: column; } .pa-btn { width: 100%; justify-content: center; } }
+  .pa-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; border-radius: 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s ease; border: none; font-family: inherit; white-space: nowrap; }
+  .pa-btn-outline { background: white; color: #475569; border: 1px solid #e2e8f0; }
+  .pa-btn-outline:hover { background: #f1f5f9; }
+  .pa-btn-ghost { background: transparent; color: #64748b; border: 1px solid transparent; }
+  .pa-btn-ghost:hover { background: #f1f5f9; color: #ef4444; }
+  @media (max-width: 768px) {
+    .pa-form-grid { grid-template-columns: 1fr; }
+    .pa-photo-section { flex-direction: column; align-items: flex-start; }
+    .pa-actions { flex-direction: column; }
+    .pa-btn { width: 100%; justify-content: center; }
+  }
 </style>
 
       <?php if ($successMessage): ?>
@@ -90,7 +100,7 @@ unset($_SESSION['success'], $_SESSION['error']);
           <div class="pa-photo-section">
             <div class="pa-photo-preview" id="photoPreview">
               <?php if (!empty($profileData['profile_photo'])): ?>
-                <img src="<?php echo htmlspecialchars($profileData['profile_photo'], ENT_QUOTES, 'UTF-8'); ?>" alt="Profile Photo">
+                <img src="../<?php echo htmlspecialchars($profileData['profile_photo'], ENT_QUOTES, 'UTF-8'); ?>" alt="Profile Photo">
               <?php else: ?>
                 <?php echo strtoupper(substr($sellerName, 0, 1)); ?>
               <?php endif; ?>
@@ -113,7 +123,7 @@ unset($_SESSION['success'], $_SESSION['error']);
           <div class="pa-form-grid">
             <div class="pa-form-group">
               <label class="pa-form-label">Username *</label>
-              <input type="text" name="username" class="pa-form-input" value="<?php echo htmlspecialchars($profileData['username'], ENT_QUOTES, 'UTF-8'); ?>" disabled>
+              <input type="text" name="username" class="pa-form-input" value="<?php echo htmlspecialchars($profileData['username'], ENT_QUOTES, 'UTF-8'); ?>" readonly>
               <p class="pa-form-hint">Username cannot be changed</p>
             </div>
             <div class="pa-form-group">
@@ -163,9 +173,6 @@ unset($_SESSION['success'], $_SESSION['error']);
         <div class="pa-actions">
           <button type="button" class="pa-btn pa-btn-ghost" onclick="resetForm()">
             <i class="fas fa-undo"></i> Reset
-          </button>
-          <button type="button" class="pa-btn pa-btn-outline" onclick="changePassword()">
-            <i class="fas fa-key"></i> Change Password
           </button>
           <button type="submit" class="btn btn-primary">
             <i class="fas fa-save"></i> Save Changes
@@ -247,21 +254,6 @@ unset($_SESSION['success'], $_SESSION['error']);
         submitBtn.disabled = false;
       });
     });
-
-    // Change password
-    function changePassword() {
-      const newPassword = prompt('Enter new password (minimum 6 characters):');
-      if (newPassword && newPassword.length >= 6) {
-        const confirmPassword = prompt('Confirm new password:');
-        if (newPassword === confirmPassword) {
-          showNotification('Password changed successfully!', 'success');
-        } else {
-          showNotification('Passwords do not match', 'error');
-        }
-      } else if (newPassword) {
-        showNotification('Password must be at least 6 characters', 'error');
-      }
-    }
 
     // Change email
     function changeEmail() {

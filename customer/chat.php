@@ -16,6 +16,7 @@ if ($userName !== '') {
 }
 if ($userInitials === '') $userInitials = 'U';
 $isSeller = $userRole === 'admin';
+session_write_close();
 ?>
 <!doctype html>
 <html lang="en">
@@ -311,6 +312,13 @@ $isSeller = $userRole === 'admin';
       line-height: 1;
     }
     .sidebar-badge.show { display: flex; }
+    .msg.sending { opacity: 0.65; }
+    .msg.failed .msg-bubble { background: #fef2f2 !important; color: #dc2626 !important; border-color: #fecaca !important; }
+    .msg.failed.sent .msg-bubble { background: #fef2f2 !important; border-color: #fecaca !important; }
+    .msg.failed.sent .msg-bubble, .msg.failed.sent .msg-bubble * { color: #dc2626 !important; }
+    .msg-sending-spinner { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.7rem; color: #94a3b8; }
+    .msg-retry-btn { display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.3rem; padding: 0.2rem 0.5rem; border-radius: 6px; border: 1px solid #dc2626; background: white; color: #dc2626; font-size: 0.7rem; font-weight: 500; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+    .msg-retry-btn:hover { background: #fef2f2; }
   </style>
 </head>
 <body>
@@ -432,13 +440,13 @@ $isSeller = $userRole === 'admin';
     let autoScrollEnabled = true;
     let unreadTotal = 0;
     let lastMessageId = 0;
-    let emptyPolls = 0;
-    let pollTimer = null;
-    let pollInterval = 1000;
+    let eventSource = null;
     let isTabVisible = true;
     let isSending = false;
     let loadedMessageIds = new Set();
+    let pendingMessageMap = new Map();
     let isLoadingConversation = false;
+    let cachedLastDate = null;
 
     function escapeHtml(text) {
       if (!text) return '';
@@ -605,86 +613,52 @@ $isSeller = $userRole === 'admin';
       }
     }
 
-    function startPolling() {
-      stopPolling();
-      emptyPolls = 0;
-      pollInterval = 1000;
-      doPoll();
-    }
-
-    function stopPolling() {
-      if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
-    }
-
-    async function doPoll() {
-      if (!currentConversation || !isTabVisible) {
-        pollTimer = setTimeout(doPoll, isTabVisible ? pollInterval : 10000);
-        return;
-      }
-
-      try {
-        const url = `../api/chat-poll.php?conversation_id=${currentConversation}&last_message_id=${lastMessageId}&check_typing=1`;
-        const res = await fetch(url, { credentials: 'include' });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-
-        // Handle new messages
-        const newMsgs = data.messages || [];
-        if (newMsgs.length > 0) {
-          lastMessageId = data.last_message_id || lastMessageId;
-          emptyPolls = 0;
-          pollInterval = 1000; // Fast poll when active
-          await appendNewMessages(newMsgs);
-        } else {
-          emptyPolls++;
-          if (emptyPolls > 3) pollInterval = Math.min(pollInterval + 1000, 10000);
-        }
-
-        // Handle typing indicator
-        const typingIndicator = document.getElementById('typing-indicator');
-        if (typingIndicator) {
-          if (data.typing) {
-            typingIndicator.style.display = 'block';
-            typingIndicator.textContent = data.typing.user_name + ' is typing...';
-          } else {
-            typingIndicator.style.display = 'none';
+    function startSSE() {
+      stopSSE();
+      if (!currentConversation) return;
+      eventSource = new EventSource(`../api/chat-sse.php?conversation_id=${currentConversation}&last_message_id=${lastMessageId}&check_typing=1`);
+      eventSource.onmessage = function(e) {
+        try {
+          var d = JSON.parse(e.data);
+          if (d.type === 'messages' && d.messages && d.messages.length) {
+            lastMessageId = d.last_message_id;
+            appendNewMessages(d.messages, true);
+            updateConvPreview(d.messages);
+          } else if (d.type === 'typing') {
+            var ti = document.getElementById('typing-indicator');
+            if (ti) {
+              if (d.typing) { ti.style.display = 'block'; ti.textContent = d.typing.user_name + ' is typing...'; }
+              else { ti.style.display = 'none'; }
+            }
           }
-        }
-
-        // Update sidebar preview and badge locally
-        if (newMsgs.length > 0) {
-          updateUnreadBadge();
-          updateConvPreview(newMsgs);
-        }
-      } catch (e) {
-        // Silently retry on error
-      }
-
-      // Adaptive scheduling: shorter interval if tab focused, longer if not
-      const nextInterval = isTabVisible ? pollInterval : Math.max(pollInterval, 8000);
-      pollTimer = setTimeout(doPoll, nextInterval);
+        } catch(_) {}
+      };
+      eventSource.onerror = function() {
+        stopSSE();
+        setTimeout(startSSE, 2000);
+      };
     }
 
-    async function appendNewMessages(newMsgs) {
+    function stopSSE() {
+      if (eventSource) { eventSource.close(); eventSource = null; }
+    }
+
+    async function appendNewMessages(newMsgs, fromPoll) {
       const messagesDiv = document.getElementById('chat-messages');
       if (!messagesDiv) return;
 
       const prevHeight = messagesDiv.scrollHeight;
-      let lastDate = null;
-
-      // Get the last date from current messages
-      const dateEls = messagesDiv.querySelectorAll('[data-date-label]');
-      if (dateEls.length > 0) {
-        lastDate = dateEls[dateEls.length - 1].getAttribute('data-date-label');
-      }
+      let lastDate = cachedLastDate;
 
       let html = '';
       newMsgs.forEach(msg => {
+        if (fromPoll && msg.sender_id == <?= $userId ?>) return;
         if (loadedMessageIds.has(msg.id)) return;
         const msgDate = getDateLabel(msg.created_at);
         if (msgDate !== lastDate) {
           html += `<div style="text-align:center;padding:0.5rem 0;font-size:0.75rem;color:#94a3b8;font-weight:500;" data-date-label="${msgDate}">${msgDate}</div>`;
           lastDate = msgDate;
+          cachedLastDate = msgDate;
         }
         html += renderMessage(msg);
         loadedMessageIds.add(msg.id);
@@ -730,7 +704,7 @@ $isSeller = $userRole === 'admin';
     async function selectConversation(convId) {
       if (isLoadingConversation) return;
       isLoadingConversation = true;
-      stopPolling();
+      stopSSE();
       try {
         currentConversation = convId;
         currentConvData = null;
@@ -740,6 +714,7 @@ $isSeller = $userRole === 'admin';
         autoScrollEnabled = true;
         lastMessageId = 0;
         loadedMessageIds = new Set();
+        cachedLastDate = null;
         
         // Update active state
         document.querySelectorAll('.conversation-item').forEach(item => {
@@ -758,8 +733,8 @@ $isSeller = $userRole === 'admin';
         // Load messages
         await loadMessages(convId);
         
-        // Start adaptive polling
-        startPolling();
+        // Start SSE for real-time updates
+        startSSE();
       } catch(e) {
         console.error('Failed to load conversation:', e);
       } finally {
@@ -819,13 +794,16 @@ $isSeller = $userRole === 'admin';
     function renderMessage(msg) {
       const isSent = msg.sender_id == <?= $userId ?>;
       const time = formatTime(msg.created_at);
+      const statusClass = msg._status === 'sending' ? ' sending' : msg._status === 'failed' ? ' failed' : '';
+      const tempAttr = msg.id < 0 ? ` data-temp-id="${msg.id}"` : '';
       
       let content = '';
       if (msg.message_type === 'text') {
         content = `<div class="msg-bubble">${escapeHtml(msg.content)}</div>`;
       } else if (msg.message_type === 'image') {
-        const imgUrl = (msg.file_url || '').startsWith('http') ? msg.file_url : '../' + (msg.file_url || '');
-        content = `<div class="msg-bubble"><img src="${escapeHtml(imgUrl)}" class="msg-image" onclick="openImageModal('${escapeHtml(imgUrl)}')" alt="Image" loading="lazy"></div>`;
+        const imgUrl = msg._localPreviewUrl || ((msg.file_url || '').startsWith('http') ? msg.file_url : '../' + (msg.file_url || ''));
+        const onclick = msg._status ? '' : `openImageModal('${escapeHtml(imgUrl)}')`;
+        content = `<div class="msg-bubble"><img src="${escapeHtml(imgUrl)}" class="msg-image"${onclick ? ` onclick="${onclick}"` : ''} alt="Image" loading="lazy"></div>`;
       } else if (msg.message_type === 'file') {
         const fileUrl = msg.file_url || '#';
         content = `<div class="msg-bubble"><div class="msg-file"><i class="fas fa-file"></i><div><div>${escapeHtml(msg.file_name || 'File')}</div><div style="font-size:0.75rem; opacity:0.8;">${escapeHtml(msg.file_type || '')}</div></div></div></div>`;
@@ -857,12 +835,25 @@ $isSeller = $userRole === 'admin';
         </div></div>`;
       }
       
+      let timeHtml = `<div class="msg-time">${time}</div>`;
+      if (msg._status === 'sending') {
+        timeHtml = `<div class="msg-time"><span class="msg-sending-spinner"><i class="fas fa-spinner fa-spin"></i> Sending...</span></div>`;
+      } else if (msg._status === 'failed') {
+        timeHtml = `<div class="msg-time"><span style="color:#dc2626;"><i class="fas fa-exclamation-circle"></i> Failed</span></div>`;
+      }
+      
+      let retryHtml = '';
+      if (msg._status === 'failed') {
+        retryHtml = `<button class="msg-retry-btn" onclick="retrySend(${msg.id})"><i class="fas fa-sync-alt"></i> Retry</button>`;
+      }
+      
       return `
-        <div class="message ${isSent ? 'sent' : 'received'}">
+        <div class="message ${isSent ? 'sent' : 'received'}${statusClass}"${tempAttr}>
           <div class="msg-avatar">${getInitials(msg.sender_name)}</div>
           <div>
             ${content}
-            <div class="msg-time">${time}</div>
+            ${timeHtml}
+            ${retryHtml}
           </div>
         </div>
       `;
@@ -945,6 +936,7 @@ $isSeller = $userRole === 'admin';
             }
             html += renderMessage(msg);
           });
+          cachedLastDate = lastDate;
           
           if (hasMoreMessages) {
             html = `<div style="text-align:center;padding:0.5rem;"><button onclick="loadMoreMessages()" style="background:none;border:1px solid #e2e8f0;border-radius:8px;padding:0.4rem 1rem;color:#2B4C52;font-size:0.78rem;font-weight:500;cursor:pointer;"><i class="fas fa-chevron-up"></i> Load older messages</button></div>` + html;
@@ -1022,6 +1014,43 @@ $isSeller = $userRole === 'admin';
       } catch(e) {}
     }
 
+    function replacePendingMessage(tempId, realMsg) {
+      var entry = pendingMessageMap.get(tempId);
+      if (!entry) return;
+      if (entry._localPreviewUrl) URL.revokeObjectURL(entry._localPreviewUrl);
+      loadedMessageIds.delete(tempId);
+      loadedMessageIds.add(realMsg.id);
+      lastMessageId = Math.max(lastMessageId, realMsg.id);
+      var el = document.querySelector('[data-temp-id="' + tempId + '"]');
+      if (el) el.outerHTML = renderMessage(realMsg);
+      updateConvPreview([realMsg]);
+      pendingMessageMap.delete(tempId);
+    }
+
+    function markMessageFailed(tempId, errorMsg) {
+      var entry = pendingMessageMap.get(tempId);
+      if (!entry) return;
+      if (entry._localPreviewUrl) URL.revokeObjectURL(entry._localPreviewUrl);
+      entry._status = 'failed';
+      entry._error = errorMsg || 'Failed to send';
+      var el = document.querySelector('[data-temp-id="' + tempId + '"]');
+      if (el) el.outerHTML = renderMessage(entry);
+    }
+
+    async function retrySend(tempId) {
+      var entry = pendingMessageMap.get(tempId);
+      if (!entry) return;
+      var content = entry._requestContent || '';
+      var file = entry._requestFile || null;
+      pendingMessageMap.delete(tempId);
+      var el = document.querySelector('[data-temp-id="' + tempId + '"]');
+      if (el) el.remove();
+      if (file) selectedFile = file;
+      var input = document.getElementById('message-input');
+      if (input) input.value = content;
+      sendMessage();
+    }
+
     async function sendMessage() {
       if (isSending) return;
       const input = document.getElementById('message-input');
@@ -1029,35 +1058,44 @@ $isSeller = $userRole === 'admin';
       
       if ((!content && !selectedFile) || !currentConversation) return;
       isSending = true;
-      
+      if (input) input.value = '';
+
+      var messageType = selectedFile ? (selectedFile.type.startsWith('image/') ? 'image' : 'file') : 'text';
+      var tempId = -(Date.now() + Math.floor(Math.random() * 1000));
+      var tempMsg = {
+        id: tempId,
+        sender_id: <?= $userId ?>,
+        sender_name: <?= json_encode($userName) ?> || 'You',
+        message_type: messageType,
+        content: content || '',
+        file_url: '',
+        file_name: selectedFile ? selectedFile.name : '',
+        file_type: selectedFile ? selectedFile.type : '',
+        created_at: new Date().toISOString(),
+        _status: 'sending',
+        _localPreviewUrl: messageType === 'image' && selectedFile ? URL.createObjectURL(selectedFile) : '',
+        _requestContent: content,
+        _requestFile: selectedFile || null
+      };
+      pendingMessageMap.set(tempId, tempMsg);
+      appendNewMessages([tempMsg]);
+
       try {
+        var data;
         if (selectedFile) {
-          const formData = new FormData();
-          formData.append('action', 'send_message');
-          formData.append('conversation_id', currentConversation);
-          formData.append('file', selectedFile);
-          if (content) formData.append('content', content);
-          
-          const res = await fetch('../api/chat.php', {
+          var fd = new FormData();
+          fd.append('action', 'send_message');
+          fd.append('conversation_id', currentConversation);
+          fd.append('file', selectedFile);
+          if (content) fd.append('content', content);
+          var res = await fetch('../api/chat.php', {
             method: 'POST',
             credentials: 'include',
-            body: formData
+            body: fd
           });
-          const data = await res.json();
-          if (data.success) {
-            if (input) input.value = '';
-            clearFilePreview();
-            if (data.message) {
-              lastMessageId = Math.max(lastMessageId, data.message.id);
-              appendNewMessages([data.message]);
-              updateConvPreview([data.message]);
-            }
-            updateUnreadBadge();
-          } else {
-            showInlineNotification(data.error || 'Failed to send message', 'error');
-          }
-        } else if (content) {
-          const res = await fetch('../api/chat.php', {
+          data = await res.json();
+        } else {
+          var res = await fetch('../api/chat.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -1068,21 +1106,17 @@ $isSeller = $userRole === 'admin';
               content: content
             })
           });
-          const data = await res.json();
-          if (data.success) {
-            if (input) input.value = '';
-            if (data.message) {
-              lastMessageId = Math.max(lastMessageId, data.message.id);
-              appendNewMessages([data.message]);
-              updateConvPreview([data.message]);
-            }
-            updateUnreadBadge();
-          } else {
-            showInlineNotification(data.error || 'Failed to send message', 'error');
-          }
+          data = await res.json();
+        }
+        if (data.success) {
+          clearFilePreview();
+          replacePendingMessage(tempId, data.message);
+          updateUnreadBadge();
+        } else {
+          markMessageFailed(tempId, data.error || 'Failed to send');
         }
       } catch (err) {
-        showInlineNotification('Failed to send message', 'error');
+        markMessageFailed(tempId, 'Network error');
       } finally {
         isSending = false;
       }
@@ -1259,18 +1293,14 @@ $isSeller = $userRole === 'admin';
       Notification.requestPermission();
     }
 
-    // Tab visibility: pause polling when hidden, refresh on return
+    // Tab visibility: pause SSE when hidden, refresh on return
     document.addEventListener('visibilitychange', function() {
       isTabVisible = !document.hidden;
       if (document.hidden) {
-        // Tab hidden, polling will slow down automatically
+        stopSSE();
       } else {
-        // Tab visible again, do an immediate poll and speed up
-        emptyPolls = 0;
-        pollInterval = 1000;
         if (currentConversation) {
-          stopPolling();
-          loadMessages(currentConversation, true).then(() => startPolling()).catch(() => {});
+          loadMessages(currentConversation, true).then(() => startSSE()).catch(() => {});
         }
       }
     });

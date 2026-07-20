@@ -59,7 +59,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
           <span class="brand-subtitle">SPECTRUM ADS</span>
         </div>
       </a>
-      <button id="nav-toggle" aria-expanded="false" aria-controls="nav-list">Menu</button>
+      <button id="nav-toggle" aria-expanded="false" aria-controls="nav-list" aria-label="Toggle navigation menu"><i class="fas fa-bars"></i></button>
       <nav>
         <ul id="nav-list" class="nav-list">
           <li><a href="customer/store-product.php">Products</a></li>
@@ -70,22 +70,6 @@ $contactContent = $siteContent['contact_info'] ?? [];
         </ul>
       </nav>
       <div class="header-action-set">
-      <div class="fb-dropdown">
-        <button id="fb-btn" class="facebook-button" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open Facebook menu">
-          <i class="fab fa-facebook-f"></i>
-          <span class="facebook-label">Facebook</span>
-          <i class="fas fa-caret-down"></i>
-        </button>
-        <ul class="fb-dropdown-menu" aria-labelledby="fb-btn" role="menu" aria-hidden="true">
-          <li role="none"><a role="menuitem" href="https://www.facebook.com/profile.php?id=61581351683926" target="_blank" rel="noopener noreferrer">Inkzion Spectrum Ads</a></li>
-          <li role="none"><a role="menuitem" href="https://www.facebook.com/profile.php?id=61588137340105" target="_blank" rel="noopener noreferrer">Inkzion Flyers Lab</a></li>
-          <li role="none"><a role="menuitem" href="https://www.facebook.com/profile.php?id=61587826864930" target="_blank" rel="noopener noreferrer">Inkzion Uniform & Sports Apparel Hub</a></li>
-        </ul>
-        </div>
-      <a href="https://shopee.ph/inkzionspectrumads?entryPoint=ShopBySearch&searchKeyword=inkzionspectrumads" class="shp-btn shopee-button" target="_blank" rel="noopener noreferrer" title="Visit our Shopee shop">
-        <i class="fas fa-bag-shopping"></i>
-        <span class="shp-label">Shopee</span>
-      </a>
       <?php if ($loggedIn): ?>
         <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
         <a href="admin/dashboard.php" class="btn auth-btn">
@@ -143,11 +127,6 @@ $contactContent = $siteContent['contact_info'] ?? [];
           <p style="font-size:0.95rem;margin-top:0.5rem;"><?php echo htmlspecialchars($heroContent['content']); ?></p>
           <?php endif; ?>
           <div class="hero-actions">
-            <?php 
-            $btnText = $heroContent['meta']['button_text'] ?? 'Explore Services';
-            $btnLink = $heroContent['meta']['button_link'] ?? '#services';
-            ?>
-            <a href="<?php echo htmlspecialchars($btnLink); ?>" class="btn primary"><?php echo htmlspecialchars($btnText); ?></a>
             <a href="customer/store-product.php" class="btn ghost">Shop Now</a>
           </div>
         </div>
@@ -451,16 +430,6 @@ $contactContent = $siteContent['contact_info'] ?? [];
         <p>Premium printing and advertising services for businesses and individuals.</p>
       </div>
       <div>
-        <h4>Services</h4>
-        <ul>
-          <li><a href="#services">Business Cards</a></li>
-          <li><a href="#services">Brochures</a></li>
-          <li><a href="#services">Banners</a></li>
-          <li><a href="#services">Merchandise</a></li>
-          <li><a href="#services">Design Services</a></li>
-        </ul>
-      </div>
-      <div>
         <h4>Company</h4>
         <ul>
           <li><a href="#about">About Us</a></li>
@@ -514,6 +483,12 @@ $contactContent = $siteContent['contact_info'] ?? [];
         showGToast('Sign-in failed. Please try again.', 'error');
       }
     }
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      var nav = document.getElementById('nav-list');
+      nav.classList.toggle('show');
+      var expanded = this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true';
+      this.setAttribute('aria-expanded', expanded);
+    });
   </script>
   <script>navigator.sendBeacon('../api/track-visit.php?url=' + encodeURIComponent(location.pathname + location.search) + '&_=' + Date.now());</script>
 </body>

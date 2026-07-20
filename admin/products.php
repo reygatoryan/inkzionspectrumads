@@ -131,7 +131,7 @@ if (!empty($categoryOptions)) {
       <button style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;color:var(--text-muted);cursor:pointer;" onclick="closeViewModal()">&times;</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
         <div style="background:#f8fafc;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:200px;">
-          <img id="viewModalImage" src="" alt="Product image">
+          <img id="viewModalImage" src="" alt="Product image" style="max-width:100%;height:auto;display:block;">
         </div>
         <div>
           <p style="font-size:0.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;" id="viewModalCategory">Category</p>

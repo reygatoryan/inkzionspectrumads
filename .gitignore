@@ -16,3 +16,11 @@ composer.lock
 .vscode/
 .idea/
 *.swp
+
+# Temp / session files
+tmp/sessions/
+.opencode/
+
+# Uploaded files (user-generated)
+uploads/chats/
+uploads/products/

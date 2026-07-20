@@ -54,7 +54,7 @@ body {
     radial-gradient(circle at top left, rgb(115, 126, 243), transparent 30%),
     var(--bg);
   background-size: 80px 80px, 80px 80px, 160px 160px, 160px 160px, 100% 100%, 100% 100%;
-  background-attachment: fixed, fixed, fixed, fixed, scroll, scroll;
+  background-attachment: scroll, scroll, scroll, scroll, scroll, scroll;
   animation: gridShiftBody 10s linear infinite;
   color: var(--text);
 }
@@ -78,6 +78,7 @@ body::before {
 
 img {
   max-width: 100%;
+  height: auto;
   display: block;
 }
 
@@ -205,8 +206,13 @@ textarea {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 0.95rem;
-  color: var(--text);
+  font-size: 1.3rem;
+  color: #0f172a;
+  padding: 0.4rem;
+  line-height: 1;
+}
+#nav-toggle:hover {
+  color: #2B4C52;
 }
 
 .btn.auth-btn {
@@ -261,14 +267,6 @@ textarea {
   position: relative;
 }
 
-/* Facebook dropdown button */
-.fb-dropdown {
-  position: relative;
-  display: inline-block;
-  margin-right: 0;
-  z-index: 80;
-}
-
 .password-input-wrapper {
   position: relative;
 }
@@ -304,148 +302,7 @@ textarea {
   color: #64748b;
 }
 
-/* Modern Facebook button */
-.facebook-button {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 12px;
-  min-width: 56px;
-  height: 44px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #1877f2, #145dbf) !important;
-  color: white !important;
-  border: none;
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 700;
-  box-shadow: 0 10px 30px rgba(20,40,80,0.15);
-  transition: transform 180ms ease, box-shadow 180ms ease, opacity 160ms ease;
-  z-index: 81;
-}
 
-.facebook-button i.fab {
-  font-size: 0.95rem;
-}
-
-.fb-btn .fa-caret-down {
-  transition: transform 200ms ease;
-}
-
-.facebook-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 44px rgba(20,40,80,0.18);
-}
-
-.facebook-button:focus {
-  outline: 3px solid rgba(24,119,242,0.18);
-  outline-offset: 2px;
-}
-
-.fb-dropdown.open .facebook-button .fa-caret-down {
-  transform: rotate(180deg);
-}
-
-.fb-dropdown-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 10px);
-  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.98));
-  border: 1px solid rgba(226,232,240,0.9);
-  border-radius: 12px;
-  min-width: 220px;
-  box-shadow: 0 20px 60px rgba(2,6,23,0.12);
-  padding: 6px 6px;
-  list-style: none;
-  margin: 0;
-  display: none;
-  z-index: 60;
-  backdrop-filter: blur(6px);
-}
-
-.fb-dropdown-menu li {
-  border-radius: 8px;
-  margin: 4px 0;
-}
-
-.fb-dropdown-menu li a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  color: var(--text);
-  text-decoration: none;
-  font-weight: 600;
-  border-radius: 8px;
-}
-
-.fb-dropdown-menu li a::before {
-  content: '\f09a';
-  font-family: 'Font Awesome 6 Brands';
-  font-weight: 400;
-  margin-right: 4px;
-  color: #1877f2;
-}
-
-.fb-dropdown-menu li a:hover {
-  background: linear-gradient(90deg, rgba(43, 76, 82,0.04), rgba(43, 76, 82,0.03));
-}
-
-/* Show menu when dropdown has .open */
-.fb-dropdown.open .fb-dropdown-menu {
-  display: block !important;
-}
-
-/* Shopee button (modern orange colorway) */
-.shopee-button, .shp-btn {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 10px;
-  padding: 0 14px;
-  min-width: 88px;
-  height: 44px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #ff7a3d, #ff4d00) !important;
-  color: white !important;
-  text-decoration: none;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  box-shadow: 0 12px 34px rgba(255,77,0,0.18);
-  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
-  border: 1px solid rgba(0,0,0,0.08);
-  z-index: 81;
-}
-
-.shopee-button i,
-.shp-btn i {
-  font-size: 1.05rem;
-  background: rgba(255,255,255,0.12);
-  padding: 8px;
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.shp-btn .shp-label,
-.shopee-button .shp-label {
-  display: inline-block;
-  font-size: 0.95rem;
-}
-
-.shopee-button:hover,
-.shp-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 24px 56px rgba(255,77,0,0.22);
-  filter: saturate(1.08);
-}
-
-.shopee-button:focus,
-.shp-btn:focus {
-  outline: 3px solid rgba(255,77,0,0.16);
-  outline-offset: 2px;
-}
 
 .flash-message {
   margin: 1rem auto;
@@ -471,6 +328,7 @@ textarea {
 .search-wrapper {
   position: relative;
   width: 200px;
+  max-width: 100%;
 }
 
 .search-input {
@@ -1567,8 +1425,10 @@ textarea {
 }
 
 .social-links a {
-  width: 40px;
-  height: 40px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(43, 76, 82, 0.2);
   color: #2B4C52;
@@ -1687,14 +1547,34 @@ textarea {
   }
 }
 
+@media (max-width: 1024px) {
+  .header-inner {
+    gap: 0.5rem;
+  }
+  .brand-title {
+    font-size: 1.6rem;
+  }
+  .nav-list {
+    gap: 1rem;
+  }
+  .nav-list a {
+    font-size: 0.85rem;
+  }
+
+}
+
 @media (max-width: 820px) {
   .header-inner {
     flex-wrap: wrap;
     justify-content: center;
+    position: relative;
   }
 
   #nav-toggle {
     display: inline-flex;
+    order: 1;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .nav-list {
@@ -1708,16 +1588,20 @@ textarea {
     flex-direction: column;
     padding: 1rem;
     display: none;
+    z-index: 100;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.08);
   }
 
   .nav-list.show {
     display: flex;
   }
 
-  .header-cta {
-    order: 3;
-    width: 100%;
-    justify-content: center;
+  .header-action-set {
+    order: 2;
+  }
+
+  .brand {
+    order: 0;
   }
 
   .hero h1 {
@@ -1735,24 +1619,67 @@ textarea {
 }
 
 @media (max-width: 640px) {
+  .brand-title {
+    font-size: 1.3rem;
+  }
+  .brand-subtitle {
+    font-size: 0.6rem;
+  }
+  .site-logo {
+    height: 40px;
+    width: 40px;
+  }
+  .btn.auth-btn {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+  }
   .hero h1 {
     font-size: 2.75rem;
   }
-
   .hero p,
   .section p {
     font-size: 1rem;
   }
-
   .tabs {
     flex-direction: column;
   }
 }
 
 @media (max-width: 480px) {
+  .hero-inner {
+    min-height: auto;
+  }
+  .header-inner {
+    gap: 0.4rem;
+    padding: 0.6rem 0;
+  }
+
   #nav-toggle {
     min-width: 44px;
     min-height: 44px;
+    font-size: 1.1rem;
+  }
+
+  .brand-title {
+    font-size: 1.1rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.55rem;
+  }
+
+  .site-logo {
+    height: 34px;
+    width: 34px;
+  }
+
+  .btn.auth-btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.78rem;
+  }
+
+  .header-action-set {
+    gap: 0.4rem;
   }
 
   .hero h1 {

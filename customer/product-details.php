@@ -99,6 +99,7 @@ if (is_numeric($displayPrice)) {
     .g-signin-wrapper { display: flex; align-items: center; }
     .g-signin-wrapper > div > iframe { max-width: 210px !important; }
     .g-signin-wrapper .g_id_signin { display: flex; align-items: center; }
+    .compact-login { display: none; font-size: 0.7rem; color: var(--primary); font-weight: 700; white-space: nowrap; text-decoration: none; align-items: center; gap: 0.25rem; }
   </style>
   <style>
     .product-details-section {
@@ -438,12 +439,62 @@ if (is_numeric($displayPrice)) {
         padding: 30px 20px;
       }
     }
+    @media (max-width: 640px) {
+      .product-details-section { padding: 40px 15px; }
+      .product-info-section h1 { font-size: 1.75rem; }
+      .related-products-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    }
+    @media (max-width: 576px) {
+      .product-details-section { padding: 30px 12px; }
+      .product-details-section .container { padding: 30px; }
+    }
     @media (max-width: 480px) {
       .product-info-section h1 { font-size: 1.5rem; }
       .product-details-container { gap: 20px; }
       .product-info-section .price { font-size: 1.5rem; }
       .related-products-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
       .testimonials-section { padding: 20px 15px; }
+    }
+    @media (max-width: 400px) {
+      .product-details-section { padding: 20px 10px; }
+      .product-details-section .container { padding: 20px; border-radius: 20px; }
+      .product-details-container { gap: 14px; }
+      .product-info-section h1 { font-size: 1.25rem; }
+      .product-info-section .price { font-size: 1.2rem; padding: 10px 12px; }
+      .product-actions { flex-direction: column; }
+      .product-actions .btn { width: 100%; justify-content: center; }
+      .feature-list li { padding: 10px 12px; font-size: 0.82rem; }
+      .quantity-controls button { width: 38px; height: 38px; }
+      .quantity-input { width: 60px; height: 38px; }
+      .related-products-grid { grid-template-columns: 1fr; gap: 10px; }
+      .related-products-section { margin-top: 40px; padding-top: 24px; }
+      .related-products-section h3 { font-size: 1.3rem; }
+      .testimonials-section { padding: 20px 12px; margin-top: 30px; }
+      .testimonial { padding: 16px; }
+      .compact-login { display: inline-flex; }
+      .g-signin-wrapper { display: none; }
+    }
+    @media (max-width: 360px) {
+      .product-details-section .container { padding: 14px; border-radius: 16px; }
+      .product-details-container { gap: 10px; }
+      .product-info-section h1 { font-size: 1.05rem; }
+      .product-info-section .price { font-size: 1rem; padding: 8px 10px; }
+      .feature-list li { padding: 8px 10px; font-size: 0.72rem; }
+      .quantity-controls button { width: 32px; height: 32px; font-size: 0.8rem; }
+      .quantity-input { width: 48px; height: 32px; font-size: 0.75rem; }
+      .product-actions .btn { font-size: 0.7rem; padding: 0.5rem; }
+      .related-products-grid { gap: 6px; }
+      .related-products-section { margin-top: 24px; padding-top: 16px; }
+      .related-products-section h3 { font-size: 1rem; }
+      .testimonials-section { padding: 14px 8px; margin-top: 20px; }
+      .testimonial { padding: 12px; font-size: 0.78rem; }
+      .compact-login { font-size: 0.55rem; gap: 0.15rem; }
+      .compact-login i { font-size: 0.65rem; }
+    }
+    @media (max-width: 768px) {
+      .hamburger-btn, .header-icon-btn { min-width: 44px; min-height: 44px; }
+      .modal-close { min-width: 44px; min-height: 44px; }
+      .notif-mark-all-btn { min-height: 44px; padding: 0.5rem 1rem; }
     }
   </style>
 </head>
@@ -477,6 +528,7 @@ if (is_numeric($displayPrice)) {
         <a href="../logout.php" class="btn auth-btn">Logout</a>
       </div>
       <?php else: ?>
+        <a href="../login.php" class="compact-login"><i class="fas fa-sign-in-alt"></i> Login</a>
         <a href="../index.php" class="btn auth-btn">Home</a>
         <div class="g-signin-wrapper">
           <div id="g_id_onload"

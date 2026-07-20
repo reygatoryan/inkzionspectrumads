@@ -29,7 +29,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 // Stats
 $totalToday = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE DATE(created_at)=CURDATE()")->fetch_assoc()['cnt'];
 $totalLogins = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE action LIKE '%login%'")->fetch_assoc()['cnt'];
-$totalSeller = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE action LIKE '%seller%' OR action LIKE '%store%'")->fetch_assoc()['cnt'];
 $totalCustomer = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs al JOIN users u ON al.user_id=u.id WHERE u.role='user'")->fetch_assoc()['cnt'];
 $totalAdmin = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE action LIKE '%admin%' OR action LIKE '%user%' OR action LIKE '%system%'")->fetch_assoc()['cnt'];
 $totalFailed = $conn->query("SELECT COUNT(*) as cnt FROM activity_logs WHERE action LIKE '%fail%' OR action LIKE '%error%'")->fetch_assoc()['cnt'];
@@ -214,14 +213,6 @@ $logs = $conn->query("SELECT al.*, COALESCE(u.name, 'System') as user_name, COAL
         </div>
         <div class="it-kpi-value"><?php echo $totalAdmin; ?></div>
         <div class="it-kpi-sub">Admin & system actions</div>
-      </div>
-      <div class="it-kpi">
-        <div class="it-kpi-header">
-          <span class="it-kpi-title">Seller Activities</span>
-          <div class="it-kpi-icon amber"><i class="fas fa-store"></i></div>
-        </div>
-        <div class="it-kpi-value" style="color:var(--warning);"><?php echo $totalSeller; ?></div>
-        <div class="it-kpi-sub">Seller & store actions</div>
       </div>
       <div class="it-kpi">
         <div class="it-kpi-header">
@@ -421,14 +412,6 @@ $logs = $conn->query("SELECT al.*, COALESCE(u.name, 'System') as user_name, COAL
       showToast('Exporting logs to CSV...', 'success');
       // Trigger CSV download
       window.location.href = 'activity-logs.php?export=csv' + window.location.search;
-    }
-
-    function showToast(message, type) {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.className = 'it-toast ' + (type || '');
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
 
     document.querySelectorAll('.it-modal-overlay').forEach(o => o.addEventListener('click', function(e) {

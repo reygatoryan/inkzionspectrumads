@@ -12,11 +12,18 @@ require_once __DIR__ . '/../../db-config.php';
 $userId = (int)$_SESSION['user_id'];
 $userName = $_SESSION['user_name'] ?? 'Admin';
 $userEmail = $_SESSION['user_email'] ?? '';
-$conn->query("UPDATE users SET last_seen = NOW(), is_online = 1 WHERE id = $userId");
 
 $nameParts = array_filter(preg_split('/\s+/', $userName));
 $initials = strtoupper(substr(reset($nameParts), 0, 1) . (count($nameParts) > 1 ? substr(next($nameParts), 0, 1) : ''));
 if ($initials === '') $initials = 'A';
+$userProfilePhoto = $_SESSION['user_profile_photo'] ?? '';
+
+if (empty($_SESSION['last_seen_written']) || $_SESSION['last_seen_written'] < time() - 60) {
+    $conn->query("UPDATE users SET last_seen = NOW(), is_online = 1 WHERE id = $userId");
+    $_SESSION['last_seen_written'] = time();
+}
+
+session_write_close();
 
 $currentPage = basename($_SERVER['PHP_SELF']);
 if (!isset($pageTitle)) $pageTitle = 'Dashboard';
@@ -33,6 +40,7 @@ $isAddProductPage = ($currentPage === 'product-form.php' && !isset($_GET['id']))
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css?v=2">
+  <style>.sidebar-avatar img,.header-profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}</style>
 </head>
 <body>
 <div class="dashboard-wrapper">
@@ -45,7 +53,7 @@ $isAddProductPage = ($currentPage === 'product-form.php' && !isset($_GET['id']))
       </div>
     </div>
     <div class="sidebar-profile">
-      <div class="sidebar-avatar"><?php echo htmlspecialchars($initials); ?></div>
+      <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($initials); ?><?php endif; ?></div>
       <div class="sidebar-profile-info">
         <h4><?php echo htmlspecialchars($userName); ?></h4>
         <p>Admin</p>
@@ -90,9 +98,24 @@ $isAddProductPage = ($currentPage === 'product-form.php' && !isset($_GET['id']))
         </div>
         <div class="top-header-right">
           <a href="../index.php" class="header-icon-btn" title="Home"><i class="fas fa-home"></i></a>
+          <div class="header-notif-wrapper" id="notifWrapper">
+            <button class="header-icon-btn" onclick="toggleNotifDropdown()" title="Notifications" aria-label="Notifications">
+              <i class="fas fa-bell"></i>
+              <span class="notif-bell-dot" id="notifBellDot" style="display:none;"></span>
+            </button>
+            <div class="notif-dropdown" id="notifDropdown">
+              <div class="notif-dropdown-header">
+                <span>Notifications</span>
+                <button class="notif-mark-all-btn" id="notifMarkAll" onclick="markAllNotifRead()">Mark all read</button>
+              </div>
+              <div class="notif-dropdown-list" id="notifList">
+                <div class="notif-loading">Loading...</div>
+              </div>
+            </div>
+          </div>
           <div class="header-profile-dropdown-wrapper">
             <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
-              <div class="header-profile-avatar"><?php echo htmlspecialchars($initials); ?></div>
+              <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($initials); ?><?php endif; ?></div>
               <span class="header-profile-name"><?php echo htmlspecialchars($userName); ?></span>
               <i class="fas fa-chevron-down header-profile-arrow"></i>
             </button>

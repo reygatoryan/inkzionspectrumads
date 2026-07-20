@@ -187,6 +187,45 @@ require_once __DIR__ . '/includes/admin-header.php';
         </div>
       </div>
     </div>
+    <div class="ss-card">
+      <div class="ss-card-header">
+        <h2><i class="fas fa-bolt"></i> PayMongo Online Payments</h2>
+        <span class="ss-badge info"><i class="fas fa-info-circle"></i> Accept GCash & Credit Card via PayMongo</span>
+      </div>
+      <div class="ss-toggle-wrapper">
+        <div class="ss-toggle-info">
+          <div class="ss-toggle-label">Enable PayMongo</div>
+          <div class="ss-toggle-desc">Allow customers to pay via GCash or Credit Card using PayMongo hosted checkout</div>
+        </div>
+        <div class="ss-toggle" data-key="payment.paymongo.enabled" onclick="toggleSwitch(this)"></div>
+      </div>
+      <div id="ss-paymongo-fields" style="margin-top:0.75rem;padding:0.75rem;background:#f8fafc;border-radius:10px;">
+        <p style="font-size:0.75rem;color:#64748b;margin-bottom:0.75rem;line-height:1.6;">
+          <i class="fas fa-lock" style="color:#2B4C52;"></i>
+          Your API keys are stored securely and only used server-side. Get your keys from the 
+          <a href="https://dashboard.paymongo.com" target="_blank" style="color:#2B4C52;font-weight:600;">PayMongo Dashboard</a>.
+          Use <strong>test keys</strong> for development, <strong>live keys</strong> for production.
+        </p>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Secret Key <span style="font-weight:400;color:#94a3b8;">(sk_xxx)</span></label>
+            <input type="password" class="form-input" data-key="payment.paymongo.secret_key" placeholder="sk_test_xxx or sk_live_xxx">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Public Key <span style="font-weight:400;color:#94a3b8;">(pk_xxx)</span></label>
+            <input type="password" class="form-input" data-key="payment.paymongo.public_key" placeholder="pk_test_xxx or pk_live_xxx">
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:0.5rem;">
+          <label class="form-label">Webhook Secret <span style="font-weight:400;color:#94a3b8;">(whsec_xxx)</span></label>
+          <input type="password" class="form-input" data-key="payment.paymongo.webhook_secret" placeholder="whsec_xxx">
+          <p style="font-size:0.72rem;color:#94a3b8;margin-top:0.3rem;">
+            Set this in your PayMongo Dashboard → Developers → Webhooks. 
+            Webhook URL: <code style="background:#f1f5f9;padding:0.1rem 0.3rem;border-radius:4px;font-size:0.7rem;"><?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . dirname(dirname($_SERVER['SCRIPT_NAME'])) . '/api/paymongo-webhook.php'; ?></code>
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ===== CHAT TAB ===== -->
@@ -209,7 +248,7 @@ require_once __DIR__ . '/includes/admin-header.php';
         </div>
         <div class="ss-toggle" data-key="chat.operating_hours.enabled" onclick="toggleSwitch(this)"></div>
       </div>
-      <div class="form-row" style="margin-top:0.75rem;">
+      <div id="ss-oh-fields" class="form-row" style="margin-top:0.75rem;">
         <div class="form-group">
           <label class="form-label">Weekday Start</label>
           <input type="time" class="form-input" data-key="chat.operating_hours.weekday_start">
@@ -314,6 +353,11 @@ let settings = {};
 
 // === HELPERS ===
 
+function toggleSwitch(el) {
+  el.classList.toggle('active');
+  updateConditionalVisibility();
+}
+
 function getVal(obj, path) {
   return path.split('.').reduce((o, k) => (o && o[k] !== undefined) ? o[k] : null, obj);
 }
@@ -354,6 +398,16 @@ function apply() {
     const val = getVal(settings, el.dataset.key);
     el.classList.toggle('active', !!val);
   });
+  updateConditionalVisibility();
+}
+
+function updateConditionalVisibility() {
+  var ohToggle = document.querySelector('.ss-toggle[data-key="chat.operating_hours.enabled"]');
+  var ohFields = document.getElementById('ss-oh-fields');
+  if (ohFields) ohFields.style.display = ohToggle && ohToggle.classList.contains('active') ? '' : 'none';
+  var pmToggle = document.querySelector('.ss-toggle[data-key="payment.paymongo.enabled"]');
+  var pmFields = document.getElementById('ss-paymongo-fields');
+  if (pmFields) pmFields.style.display = pmToggle && pmToggle.classList.contains('active') ? '' : 'none';
 }
 
 // === SAVE / LOAD ===
@@ -364,11 +418,12 @@ async function loadSettings() {
     const json = await res.json();
     if (json.success && json.settings) {
       settings = json.settings;
-      if (!settings.cod_enabled) settings.cod_enabled = true;
       apply();
+    } else {
+      document.querySelector('.ss-topbar').insertAdjacentHTML('afterbegin', '<div style="background:#fef2f2;color:#dc2626;padding:0.5rem 1rem;border-radius:8px;font-size:0.78rem;margin-bottom:0.75rem;"><i class="fas fa-exclamation-triangle"></i> Failed to load settings: ' + (json.error || 'Unknown') + '</div>');
     }
   } catch (e) {
-    console.error('Failed to load settings', e);
+    document.querySelector('.ss-topbar').insertAdjacentHTML('afterbegin', '<div style="background:#fef2f2;color:#dc2626;padding:0.5rem 1rem;border-radius:8px;font-size:0.78rem;margin-bottom:0.75rem;"><i class="fas fa-exclamation-triangle"></i> Could not load settings. Check your connection.</div>');
   }
 }
 
@@ -406,10 +461,29 @@ async function saveSettings() {
   }, 2000);
 }
 
-function resetSettings() {
-  if (confirm('Reset all settings to default?')) {
-    location.reload();
+async function resetSettings() {
+  if (!confirm('Reset all settings to default?')) return;
+  var btn = document.querySelector('.btn-outline');
+  var orig = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  btn.disabled = true;
+  try {
+    var res = await fetch('../api/save-shipping.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ settings: {} })
+    });
+    var json = await res.json();
+    if (json.success) {
+      location.reload();
+    } else {
+      alert('Reset failed: ' + (json.error || 'Unknown error'));
+    }
+  } catch (e) {
+    alert('Reset failed: ' + e.message);
   }
+  btn.innerHTML = orig;
+  btn.disabled = false;
 }
 
 // === TAB SWITCHING ===

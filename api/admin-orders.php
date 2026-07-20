@@ -92,7 +92,8 @@ if ($action === 'list') {
     $sql = "SELECT DISTINCT o.id, o.order_reference, o.total_amount, o.status, o.payment_method, o.payment_status, 
                    o.created_at, u.name AS customer_name, u.email AS customer_email, u.contact_number AS customer_phone,
                    o.delivery_address, o.delivery_city, o.delivery_province, o.contact_name,
-                   o.total_weight, o.shipping_fee, o.courier, o.tracking_number, o.estimated_delivery
+                   o.total_weight, o.shipping_fee, o.courier, o.tracking_number, o.estimated_delivery,
+                   o.paymongo_payment_id, o.checkout_session_id
             FROM orders o
             INNER JOIN users u ON o.user_id = u.id
             INNER JOIN order_items oi ON o.id = oi.order_id

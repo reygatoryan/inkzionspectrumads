@@ -112,6 +112,7 @@ if ($userName !== '') {
     $userInitials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
 }
 if ($userInitials === '') { $userInitials = 'U'; }
+$userProfilePhoto = $_SESSION['user_profile_photo'] ?? '';
 $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
 ?>
 <!DOCTYPE html>
@@ -192,6 +193,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             background: rgba(43, 76, 82, 0.03);
         }
         .sidebar-avatar { width: 30px; height: 30px; border-radius: 8px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.65rem; flex-shrink: 0; }
+        .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
         .sidebar-profile-info h4 { font-size: 0.75rem; font-weight: 600; color: var(--text-primary); }
         .sidebar-profile-info p { font-size: 0.6rem; color: var(--text-muted); }
         .sidebar-menu { flex: 1; padding: 0.75rem 0; }
@@ -308,6 +310,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         .header-profile-btn { display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem 0.75rem 0.35rem 0.35rem; border-radius: 50px; border: 1px solid var(--border-color); background: white; cursor: pointer; transition: var(--transition); text-decoration: none; color: inherit; }
         .header-profile-btn:hover { border-color: var(--primary); background: var(--primary-bg); }
         .header-profile-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.65rem; flex-shrink: 0; }
+        .header-profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
         .header-profile-name { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
         .header-profile-arrow { font-size: 0.65rem; color: var(--text-muted); margin-left: 0.15rem; }
         .header-profile-dropdown-wrapper { position: relative; }
@@ -501,8 +504,38 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         }
         @media (max-width: 480px) {
             .top-header-center { display: none; }
+            .top-header-title p { display: none; }
+            .top-header-title h1 { font-size: 1.1rem; }
+            .header-profile-name, .header-profile-arrow { display: none; }
+            .order-title { font-size: 1.125rem; }
+            .section-title { font-size: 1.125rem; }
         }
-
+        @media (max-width: 400px) {
+            .content-area { padding: 0.75rem; }
+            .top-header-title h1 { font-size: 1rem; }
+            .header-icon-btn { width: 38px; height: 38px; }
+            .hamburger-btn { width: 38px; height: 38px; }
+            .header-profile-name, .header-profile-arrow { display: none; }
+            .notif-dropdown { position: fixed; top: 64px; left: 0.75rem; right: 0.75rem; width: auto; }
+            .top-header-inner { gap: 0.5rem; }
+            .header-icon-btn[title="Home"] { display: none; }
+            .step-circle { width: 32px; height: 32px; font-size: 0.75rem; }
+            .step-label { font-size: 0.7rem; }
+            .files-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 360px) {
+            .top-header { padding: 0 0.5rem; }
+            .top-header-left { gap: 0.35rem; }
+            .top-header-title h1 { font-size: 0.8rem; }
+            .hamburger-btn { width: 34px; height: 34px; }
+            .header-icon-btn { width: 34px; height: 34px; }
+            .content-area { padding: 0.5rem; }
+            .step-circle { width: 24px; height: 24px; font-size: 0.6rem; }
+            .step-label { font-size: 0.6rem; }
+            .order-title { font-size: 1rem; }
+            .section-title { font-size: 0.875rem; }
+            .notif-dropdown { position: fixed; top: 60px; left: 0.5rem; right: 0.5rem; width: auto; }
+        }
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 1.5rem; }
         .modal-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
         .modal-box { background: white; border-radius: 24px; max-width: 640px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); animation: scaleIn 0.25s ease; }
@@ -541,6 +574,38 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
           line-height: 1;
         }
         .sidebar-badge.show { display: flex; }
+        .header-notif-wrapper { position: relative; }
+        .notif-bell-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; border: 2px solid white; }
+        .notif-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: white; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 12px 40px rgba(0,0,0,0.15); width: 360px; max-height: 480px; display: flex; flex-direction: column; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; }
+        .notif-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+        .notif-dropdown-header { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 700; color: #0f172a; flex-shrink: 0; }
+        .notif-mark-all-btn { background: none; border: none; color: #2B4C52; font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 6px; }
+        .notif-mark-all-btn:hover { background: rgba(43,76,82,0.08); }
+        .notif-dropdown-list { overflow-y: auto; flex: 1; max-height: 400px; }
+        .notif-item { display: flex; gap: 0.7rem; padding: 0.75rem 1rem; border-bottom: 1px solid #f8fafc; cursor: pointer; transition: background 0.15s; text-decoration: none; color: inherit; align-items: flex-start; }
+        .notif-item:hover { background: #f8fafc; }
+        .notif-item.unread { background: rgba(43,76,82,0.04); }
+        .notif-item.unread:hover { background: rgba(43,76,82,0.08); }
+        .notif-item-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+        .notif-item-icon.orange { background: rgba(245,158,11,0.12); color: #d97706; }
+        .notif-item-icon.green { background: rgba(16,185,129,0.12); color: #059669; }
+        .notif-item-icon.blue { background: rgba(43,76,82,0.12); color: #2B4C52; }
+        .notif-item-icon.purple { background: rgba(139,92,246,0.12); color: #7c3aed; }
+        .notif-item-icon.red { background: rgba(239,68,68,0.12); color: #dc2626; }
+        .notif-item-body { flex: 1; min-width: 0; }
+        .notif-item-title { font-size: 0.82rem; font-weight: 600; color: #0f172a; line-height: 1.3; }
+        .notif-item.unread .notif-item-title { font-weight: 700; }
+        .notif-item-text { font-size: 0.75rem; color: #64748b; margin-top: 0.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .notif-item-time { font-size: 0.68rem; color: #94a3b8; margin-top: 0.2rem; }
+        .notif-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #2B4C52; flex-shrink: 0; margin-top: 4px; }
+        .notif-loading, .notif-empty { text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.82rem; }
+        .notif-error { text-align: center; padding: 1rem; color: #dc2626; font-size: 0.78rem; }
+        @media (max-width: 768px) {
+          .hamburger-btn, .header-icon-btn { min-width: 44px; min-height: 44px; }
+          .modal-close { min-width: 44px; min-height: 44px; }
+          .sidebar-menu-item { padding: 0.75rem 1.25rem; }
+          .notif-mark-all-btn { min-height: 44px; padding: 0.5rem 1rem; }
+        }
       </style>
 </head>
 <body>
@@ -555,7 +620,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             </div>
         </div>
         <div class="sidebar-profile">
-            <div class="sidebar-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
+            <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
             <div class="sidebar-profile-info">
                 <h4><?php echo htmlspecialchars($userName); ?></h4>
                 <p><?php echo $isSeller ? 'admin' : 'Customer'; ?></p>
@@ -608,9 +673,24 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                     <a href="../index.php" class="header-icon-btn" title="Home">
                         <i class="fas fa-home"></i>
                     </a>
+                    <div class="header-notif-wrapper" id="notifWrapper">
+                      <button class="header-icon-btn" onclick="toggleNotifDropdown()" title="Notifications" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notif-bell-dot" id="notifBellDot" style="display:none;"></span>
+                      </button>
+                      <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-dropdown-header">
+                          <span>Notifications</span>
+                          <button class="notif-mark-all-btn" id="notifMarkAll" onclick="markAllNotifRead()">Mark all read</button>
+                        </div>
+                        <div class="notif-dropdown-list" id="notifList">
+                          <div class="notif-loading">Loading...</div>
+                        </div>
+                      </div>
+                    </div>
                     <div class="header-profile-dropdown-wrapper">
                         <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
-                            <div class="header-profile-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
+                            <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
                             <span class="header-profile-name"><?php echo htmlspecialchars($userName); ?></span>
                             <i class="fas fa-chevron-down header-profile-arrow"></i>
                         </button>
@@ -762,6 +842,14 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                                 <?php echo ucfirst($order['payment_status']); ?>
                             </div>
                         </div>
+                        <?php if ($order['payment_status'] !== 'paid' && in_array($order['payment_method'], ['gcash', 'credit_card'])): ?>
+                            <div class="info-item" style="grid-column:1/-1;">
+                                <button onclick="payWithPayMongo(<?php echo (int)$orderId; ?>)" class="btn btn-primary" style="width:100%;padding:0.75rem;font-size:0.95rem;border:none;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,#2B4C52,#4A7C84);color:white;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all 0.2s;">
+                                    <i class="fas fa-credit-card"></i> Pay Now — ₱<?php echo number_format((float)$order['total_amount'], 2); ?>
+                                </button>
+                                <div id="paymongo-loading" style="display:none;text-align:center;padding:0.75rem;color:#64748b;font-size:0.85rem;"><i class="fas fa-spinner fa-pulse"></i> Redirecting to payment...</div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -983,16 +1071,151 @@ function toggleAccountMenu() {
     submenu.classList.toggle('open');
   }
 }
+function toggleNotifDropdown() {
+  var dd = document.getElementById('notifDropdown');
+  if (!dd) return;
+  var wasActive = dd.classList.contains('active');
+  dd.classList.toggle('active');
+  if (!wasActive) loadNotifs();
+}
+function closeNotifDropdown() { var dd = document.getElementById('notifDropdown'); if (dd) dd.classList.remove('active'); }
+var notifFetching = false;
+function loadNotifs() {
+  if (notifFetching) return;
+  notifFetching = true;
+  var list = document.getElementById('notifList');
+  if (!list) { notifFetching = false; return; }
+  list.innerHTML = '<div class="notif-loading">Loading...</div>';
+  fetch('../api/notifications.php?limit=20').then(function(r){return r.json();}).then(function(d){
+    notifFetching = false;
+        if (!d.success) { list.innerHTML = '<div class="notif-error">' + (d.error ? esc(d.error) : 'Failed to load') + '</div>'; return; }
+        var notifs = d.notifications || [];
+        if (!notifs.length) { list.innerHTML = '<div class="notif-empty">No notifications yet</div>'; updateNotifBellDot(0); return; }
+        var html = '';
+        notifs.forEach(function(n){ html += renderNotifItem(n); });
+        list.innerHTML = html;
+        updateNotifBellDot(d.unread_count);
+      }).catch(function(){ notifFetching = false; list.innerHTML = '<div class="notif-error">Connection error. Check console for details.</div>'; });
+}
+function renderNotifItem(n) {
+  var icon = notifTypeIcon(n.related_type || n.type);
+  var link = notifTypeLinkCustomer(n);
+  var timeAgo = notifTimeAgo(n.created_at);
+  var unread = !n.is_read;
+  return '<a href="'+link+'" class="notif-item'+(unread?' unread':'')+'" onclick="notifItemClick('+n.id+',\''+link+'\')">'+
+    '<div class="notif-item-icon '+icon.color+'">'+icon.icon+'</div>'+
+    '<div class="notif-item-body"><div class="notif-item-title">'+esc(n.title)+'</div>'+
+    '<div class="notif-item-text">'+esc(n.body)+'</div><div class="notif-item-time">'+timeAgo+'</div></div>'+
+    (unread?'<div class="notif-unread-dot"></div>':'')+'</a>';
+}
+function notifTypeIcon(t) {
+  if (t==='order') return {icon:'<i class="fas fa-shopping-cart"></i>',color:'orange'};
+  if (t==='order_proposal') return {icon:'<i class="fas fa-file-invoice"></i>',color:'green'};
+  if (t==='custom_request') return {icon:'<i class="fas fa-paint-brush"></i>',color:'purple'};
+  if (t==='chat') return {icon:'<i class="fas fa-comment-dots"></i>',color:'blue'};
+  return {icon:'<i class="fas fa-bell"></i>',color:'blue'};
+}
+function notifTypeLinkCustomer(n) {
+  var rt=n.related_type, ri=n.related_id;
+  if (rt==='order'&&ri) return 'order-tracking.php?id='+ri;
+  if (rt==='order_proposal'&&ri) return 'order-form.php?id='+ri;
+  if (rt==='custom_request'&&ri) return 'my-requests.php';
+  if (rt==='chat'&&ri) return 'chat.php?conversation='+ri;
+  return '#';
+}
+function notifTimeAgo(ds) {
+  var n=new Date(),d=new Date(ds),diff=Math.floor((n-d)/1000);
+  if(diff<60)return'Just now';if(diff<3600)return Math.floor(diff/60)+'m ago';
+  if(diff<86400)return Math.floor(diff/3600)+'h ago';if(diff<172800)return'Yesterday';
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function notifItemClick(id, link) {
+  fetch('../api/notifications.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'mark_read',id:id})}).catch(function(){});
+  closeNotifDropdown();
+  updateSidebarBadges();
+}
+function markAllNotifRead() {
+  fetch('../api/notifications.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'mark_read_all'})})
+  .then(function(r){return r.json();}).then(function(d){if(d.success){loadNotifs();updateSidebarBadges();}}).catch(function(){});
+}
+function updateNotifBellDot(count) {
+  var dot = document.getElementById('notifBellDot');
+  if (dot) dot.style.display = count > 0 ? 'block' : 'none';
+}
 function updateSidebarBadges() {
   fetch('../api/notif-counts.php').then(r=>r.json()).then(d=>{
     const sb = (id, c) => { const b = document.getElementById(id); if(b){ b.textContent = c||''; b.classList.toggle('show', c>0); } };
     sb('sidebar-msg-badge', d.chat);
     sb('sidebar-orders-badge', d.order);
     sb('sidebar-requests-badge', d.custom_request);
+    var total = (d.chat||0) + (d.order||0) + (d.custom_request||0) + (d.order_proposal||0);
+    updateNotifBellDot(total);
   }).catch(()=>{});
 }
 updateSidebarBadges();
 setInterval(updateSidebarBadges, 10000);
+
+// ========= PAYMONGO PAYMENT =========
+function payWithPayMongo(orderId) {
+    var btn = event.target.closest('button');
+    var loading = document.getElementById('paymongo-loading');
+    btn.style.display = 'none';
+    loading.style.display = 'block';
+
+    fetch('../api/paymongo.php?action=create_session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success && d.checkout_url) {
+            window.location.href = d.checkout_url;
+        } else {
+            btn.style.display = 'flex';
+            loading.style.display = 'none';
+            alert(d.error || 'Failed to create payment session');
+        }
+    })
+    .catch(function(){
+        btn.style.display = 'flex';
+        loading.style.display = 'none';
+        alert('Network error. Please try again.');
+    });
+}
+
+(function() {
+    var params = new URLSearchParams(window.location.search);
+    var paymentStatus = params.get('payment');
+    if (paymentStatus === 'success') {
+        var checkInterval = setInterval(function() {
+            fetch('../api/paymongo.php?action=check_status&order_id=' + orderId)
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+                if (d.success && d.payment_status === 'paid') {
+                    clearInterval(checkInterval);
+                    var toast = document.createElement('div');
+                    toast.style.cssText = 'position:fixed;top:1rem;right:1rem;background:#10b981;color:white;padding:1rem 1.5rem;border-radius:12px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.2);animation:slideIn 0.3s ease;display:flex;align-items:center;gap:0.5rem;';
+                    toast.innerHTML = '<i class="fas fa-check-circle"></i> Payment successful! Thank you for your order.';
+                    document.body.appendChild(toast);
+                    setTimeout(function(){ location.reload(); }, 2000);
+                }
+            }).catch(function(){});
+        }, 2000);
+        setTimeout(function(){ clearInterval(checkInterval); }, 30000);
+    }
+    if (paymentStatus === 'cancelled') {
+        var toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:1rem;right:1rem;background:#f59e0b;color:white;padding:1rem 1.5rem;border-radius:12px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.2);animation:slideIn 0.3s ease;display:flex;align-items:center;gap:0.5rem;';
+        toast.innerHTML = '<i class="fas fa-times-circle"></i> Payment was cancelled. You can try again.';
+        document.body.appendChild(toast);
+        setTimeout(function(){ toast.remove(); }, 5000);
+    }
+})();
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.header-notif-wrapper') && !e.target.closest('.notif-dropdown')) closeNotifDropdown();
+});
 </script>
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal-box">

@@ -141,6 +141,9 @@ try {
     // Update session variables
     $_SESSION['user_name'] = $updateFields['name'];
     $_SESSION['user_email'] = $updateFields['email'];
+    if ($profilePhotoPath) {
+        $_SESSION['user_profile_photo'] = $profilePhotoPath;
+    }
 
     // Log activity
     $logStmt = $conn->prepare("INSERT INTO activity_logs (user_id, action, description, ip_address) VALUES (?, 'profile_update', 'Seller updated profile information', ?)");

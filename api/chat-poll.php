@@ -91,15 +91,7 @@ $updateStmt->close();
 $newMessages = [];
 $hasMore = false;
 if ($lastMessageId > 0) {
-    // Check if there are more older messages (beyond what's loaded)
-    $countStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM chat_messages WHERE conversation_id = ? AND id < ?");
-    $countStmt->bind_param('ii', $conversationId, $lastMessageId);
-    $countStmt->execute();
-    $cntResult = $countStmt->get_result()->fetch_assoc();
-    $hasMore = (int)($cntResult['cnt'] ?? 0) > 0;
-    $countStmt->close();
-
-    // Fetch only new messages since the last known ID
+    // Poll only fetches messages newer than lastMessageId — has_more not needed here
     $msgStmt = $conn->prepare("
         SELECT cm.*, u.name as sender_name, u.role as sender_role
         FROM chat_messages cm
@@ -130,14 +122,12 @@ $msgStmt->close();
 // Reverse to chronological for initial load
 if ($lastMessageId === 0) {
     $newMessages = array_reverse($newMessages);
-    // Check has_more for initial load
-    $countStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM chat_messages WHERE conversation_id = ?");
-    $countStmt->bind_param('i', $conversationId);
-    $countStmt->execute();
-    $cntResult = $countStmt->get_result()->fetch_assoc();
-    $totalMsgs = (int)($cntResult['cnt'] ?? 0);
-    $hasMore = $totalMsgs > 50;
-    $countStmt->close();
+    // Check if there are more than 50 messages (our initial fetch limit)
+    $existsStmt = $conn->prepare("SELECT EXISTS(SELECT 1 FROM chat_messages WHERE conversation_id = ? LIMIT 1 OFFSET 50) as has_more");
+    $existsStmt->bind_param('i', $conversationId);
+    $existsStmt->execute();
+    $hasMore = (bool)$existsStmt->get_result()->fetch_assoc()['has_more'];
+    $existsStmt->close();
 }
 
 // Get typing status

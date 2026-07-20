@@ -12,6 +12,7 @@ if ($userName !== '') {
     $userInitials = strtoupper(substr(reset($parts), 0, 1) . (count($parts) > 1 ? substr(next($parts), 0, 1) : ''));
 }
 if ($userInitials === '') $userInitials = 'U';
+$userProfilePhoto = $_SESSION['user_profile_photo'] ?? '';
 $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
 
 require_once '../db-config.php';
@@ -140,6 +141,7 @@ foreach ($groupedOrders as $o) {
     .sidebar-brand-sub { font-size: 0.6rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
     .sidebar-profile { padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.65rem; border-bottom: 1px solid rgba(43, 76, 82, 0.08); background: rgba(43, 76, 82, 0.03); }
     .sidebar-avatar { width: 30px; height: 30px; border-radius: 8px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.65rem; flex-shrink: 0; }
+    .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
     .sidebar-profile-info h4 { font-size: 0.75rem; font-weight: 600; color: var(--text-primary); }
     .sidebar-profile-info p { font-size: 0.6rem; color: var(--text-muted); }
     .sidebar-menu { flex: 1; padding: 0.75rem 0; }
@@ -171,6 +173,7 @@ foreach ($groupedOrders as $o) {
     .header-profile-btn { display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem 0.75rem 0.35rem 0.35rem; border-radius: 50px; border: 1px solid var(--border-color); background: white; cursor: pointer; transition: var(--transition); text-decoration: none; color: inherit; }
     .header-profile-btn:hover { border-color: var(--primary); background: var(--primary-bg); }
     .header-profile-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.65rem; flex-shrink: 0; }
+    .header-profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
     .header-profile-name { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
     .header-profile-arrow { font-size: 0.65rem; color: var(--text-muted); margin-left: 0.15rem; }
     .header-profile-dropdown-wrapper { position: relative; }
@@ -250,6 +253,12 @@ foreach ($groupedOrders as $o) {
     .orders-empty h3 { color: #111827; margin: 0 0 0.5rem; font-size: 1.2rem; }
     .orders-empty p { color: #64748b; margin: 0 0 1.5rem; font-size: 0.92rem; }
 
+    @media (max-width: 1024px) {
+      .products-sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+      .products-sidebar.open { transform: translateX(0); }
+      .hamburger-btn { display: flex; }
+      .products-main { margin-left: 0; }
+    }
     @media (max-width: 768px) {
       .products-sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
       .products-sidebar.open { transform: translateX(0); }
@@ -258,6 +267,14 @@ foreach ($groupedOrders as $o) {
       .content-area { padding: 1rem; }
       .order-tabs { overflow-x: auto; }
     }
+    @media (max-width: 640px) {
+      .content-area { padding: 0.85rem; }
+      .top-header-title h1 { font-size: 1.05rem; }
+    }
+    @media (max-width: 576px) {
+      .content-area { padding: 0.75rem; }
+      .order-card { padding: 0.85rem; }
+    }
     @media (max-width: 480px) {
       .top-header-title p { display: none; }
       .top-header-title h1 { font-size: 1.1rem; }
@@ -265,6 +282,48 @@ foreach ($groupedOrders as $o) {
       .progress-tracker { overflow-x: auto; gap: 0.5rem; padding-bottom: 0.5rem; }
       .order-card { padding: 1rem; }
       .order-header { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 400px) {
+      .content-area { padding: 0.75rem; }
+      .top-header-title h1 { font-size: 1rem; }
+      .header-icon-btn { width: 38px; height: 38px; }
+      .hamburger-btn { width: 38px; height: 38px; }
+      .header-profile-name, .header-profile-arrow { display: none; }
+      .notif-dropdown { position: fixed; top: 64px; left: 0.75rem; right: 0.75rem; width: auto; }
+      .order-card { padding: 0.85rem; }
+      .order-header { font-size: 0.85rem; }
+      .progress-tracker { gap: 0.15rem; padding: 0; margin: 0.75rem 0; font-size: 0.6rem; }
+      .progress-tracker::before { left: 10px; right: 10px; }
+      .step-circle { width: 24px; height: 24px; font-size: 0.6rem; }
+      .step-circle i { font-size: 0.6rem; }
+      .step-label { font-size: 0.55rem; }
+      .order-tabs { gap: 0.2rem; padding: 0.25rem; font-size: 0.7rem; }
+      .order-tab { padding: 0.4rem 0.25rem; font-size: 0.6rem; }
+      .order-tab .tab-count { font-size: 0.5rem; }
+      .order-item { gap: 0.5rem; padding: 0.4rem; }
+      .order-item-img { width: 40px; height: 40px; }
+      .order-item-name { font-size: 0.78rem; }
+      .order-item-price { font-size: 0.78rem; }
+      .top-header-inner { gap: 0.5rem; }
+      .header-icon-btn[title="Home"] { display: none; }
+    }
+    @media (max-width: 360px) {
+      .top-header { padding: 0 0.5rem; }
+      .top-header-left { gap: 0.35rem; }
+      .top-header-title h1 { font-size: 0.8rem; }
+      .hamburger-btn { width: 34px; height: 34px; }
+      .header-icon-btn { width: 34px; height: 34px; }
+      .content-area { padding: 0.5rem; }
+      .order-card { padding: 0.65rem; }
+      .order-header { font-size: 0.75rem; }
+      .order-item { gap: 0.35rem; padding: 0.3rem; }
+      .order-item-img { width: 32px; height: 32px; }
+      .order-item-name { font-size: 0.7rem; }
+      .order-item-price { font-size: 0.7rem; }
+      .progress-tracker { margin: 0.4rem 0; }
+      .step-circle { width: 20px; height: 20px; font-size: 0.5rem; }
+      .order-tab { padding: 0.3rem 0.2rem; font-size: 0.55rem; }
+      .notif-dropdown { position: fixed; top: 60px; left: 0.5rem; right: 0.5rem; width: auto; }
     }
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 1.5rem; }
     .modal-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
@@ -347,6 +406,38 @@ foreach ($groupedOrders as $o) {
       line-height: 1;
     }
     .sidebar-badge.show { display: flex; }
+    .header-notif-wrapper { position: relative; }
+    .notif-bell-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; border: 2px solid white; }
+    .notif-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: white; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 12px 40px rgba(0,0,0,0.15); width: 360px; max-height: 480px; display: flex; flex-direction: column; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; }
+    .notif-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+    .notif-dropdown-header { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 700; color: #0f172a; flex-shrink: 0; }
+    .notif-mark-all-btn { background: none; border: none; color: #2B4C52; font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 6px; }
+    .notif-mark-all-btn:hover { background: rgba(43,76,82,0.08); }
+    .notif-dropdown-list { overflow-y: auto; flex: 1; max-height: 400px; }
+    .notif-item { display: flex; gap: 0.7rem; padding: 0.75rem 1rem; border-bottom: 1px solid #f8fafc; cursor: pointer; transition: background 0.15s; text-decoration: none; color: inherit; align-items: flex-start; }
+    .notif-item:hover { background: #f8fafc; }
+    .notif-item.unread { background: rgba(43,76,82,0.04); }
+    .notif-item.unread:hover { background: rgba(43,76,82,0.08); }
+    .notif-item-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+    .notif-item-icon.orange { background: rgba(245,158,11,0.12); color: #d97706; }
+    .notif-item-icon.green { background: rgba(16,185,129,0.12); color: #059669; }
+    .notif-item-icon.blue { background: rgba(43,76,82,0.12); color: #2B4C52; }
+    .notif-item-icon.purple { background: rgba(139,92,246,0.12); color: #7c3aed; }
+    .notif-item-icon.red { background: rgba(239,68,68,0.12); color: #dc2626; }
+    .notif-item-body { flex: 1; min-width: 0; }
+    .notif-item-title { font-size: 0.82rem; font-weight: 600; color: #0f172a; line-height: 1.3; }
+    .notif-item.unread .notif-item-title { font-weight: 700; }
+    .notif-item-text { font-size: 0.75rem; color: #64748b; margin-top: 0.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .notif-item-time { font-size: 0.68rem; color: #94a3b8; margin-top: 0.2rem; }
+    .notif-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #2B4C52; flex-shrink: 0; margin-top: 4px; }
+    .notif-loading, .notif-empty { text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.82rem; }
+    .notif-error { text-align: center; padding: 1rem; color: #dc2626; font-size: 0.78rem; }
+    @media (max-width: 768px) {
+      .hamburger-btn, .header-icon-btn { min-width: 44px; min-height: 44px; }
+      .modal-close { min-width: 44px; min-height: 44px; }
+      .sidebar-menu-item { padding: 0.75rem 1.25rem; }
+      .notif-mark-all-btn { min-height: 44px; padding: 0.5rem 1rem; }
+    }
   </style>
 </head>
 <body>
@@ -360,7 +451,7 @@ foreach ($groupedOrders as $o) {
       </div>
     </div>
     <div class="sidebar-profile">
-      <div class="sidebar-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
+      <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
       <div class="sidebar-profile-info">
         <h4><?php echo htmlspecialchars($userName); ?></h4>
         <p><?php echo $isSeller ? 'admin' : 'Customer'; ?></p>
@@ -402,9 +493,24 @@ foreach ($groupedOrders as $o) {
         </div>
         <div class="top-header-right">
           <a href="../index.php" class="header-icon-btn" title="Home"><i class="fas fa-home"></i></a>
+          <div class="header-notif-wrapper" id="notifWrapper">
+            <button class="header-icon-btn" onclick="toggleNotifDropdown()" title="Notifications" aria-label="Notifications">
+              <i class="fas fa-bell"></i>
+              <span class="notif-bell-dot" id="notifBellDot" style="display:none;"></span>
+            </button>
+            <div class="notif-dropdown" id="notifDropdown">
+              <div class="notif-dropdown-header">
+                <span>Notifications</span>
+                <button class="notif-mark-all-btn" id="notifMarkAll" onclick="markAllNotifRead()">Mark all read</button>
+              </div>
+              <div class="notif-dropdown-list" id="notifList">
+                <div class="notif-loading">Loading...</div>
+              </div>
+            </div>
+          </div>
           <div class="header-profile-dropdown-wrapper">
             <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
-              <div class="header-profile-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
+              <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
               <span class="header-profile-name"><?php echo htmlspecialchars($userName); ?></span>
               <i class="fas fa-chevron-down header-profile-arrow"></i>
             </button>
@@ -647,16 +753,92 @@ function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
         submenu.classList.toggle('open');
       }
     }
+    function toggleNotifDropdown() {
+      var dd = document.getElementById('notifDropdown');
+      if (!dd) return;
+      var wasActive = dd.classList.contains('active');
+      dd.classList.toggle('active');
+      if (!wasActive) loadNotifs();
+    }
+    function closeNotifDropdown() { var dd = document.getElementById('notifDropdown'); if (dd) dd.classList.remove('active'); }
+    var notifFetching = false;
+    function loadNotifs() {
+      if (notifFetching) return;
+      notifFetching = true;
+      var list = document.getElementById('notifList');
+      if (!list) { notifFetching = false; return; }
+      list.innerHTML = '<div class="notif-loading">Loading...</div>';
+      fetch('../api/notifications.php?limit=20').then(function(r){return r.json();}).then(function(d){
+        notifFetching = false;
+        if (!d.success) { list.innerHTML = '<div class="notif-error">' + (d.error ? esc(d.error) : 'Failed to load') + '</div>'; return; }
+        var notifs = d.notifications || [];
+        if (!notifs.length) { list.innerHTML = '<div class="notif-empty">No notifications yet</div>'; updateNotifBellDot(0); return; }
+        var html = '';
+        notifs.forEach(function(n){ html += renderNotifItem(n); });
+        list.innerHTML = html;
+        updateNotifBellDot(d.unread_count);
+      }).catch(function(){ notifFetching = false; list.innerHTML = '<div class="notif-error">Connection error. Check console for details.</div>'; });
+    }
+    function renderNotifItem(n) {
+      var icon = notifTypeIcon(n.related_type || n.type);
+      var link = notifTypeLinkCustomer(n);
+      var timeAgo = notifTimeAgo(n.created_at);
+      var unread = !n.is_read;
+      return '<a href="'+link+'" class="notif-item'+(unread?' unread':'')+'" onclick="notifItemClick('+n.id+',\''+link+'\')">'+
+        '<div class="notif-item-icon '+icon.color+'">'+icon.icon+'</div>'+
+        '<div class="notif-item-body"><div class="notif-item-title">'+esc(n.title)+'</div>'+
+        '<div class="notif-item-text">'+esc(n.body)+'</div><div class="notif-item-time">'+timeAgo+'</div></div>'+
+        (unread?'<div class="notif-unread-dot"></div>':'')+'</a>';
+    }
+    function notifTypeIcon(t) {
+      if (t==='order') return {icon:'<i class="fas fa-shopping-cart"></i>',color:'orange'};
+      if (t==='order_proposal') return {icon:'<i class="fas fa-file-invoice"></i>',color:'green'};
+      if (t==='custom_request') return {icon:'<i class="fas fa-paint-brush"></i>',color:'purple'};
+      if (t==='chat') return {icon:'<i class="fas fa-comment-dots"></i>',color:'blue'};
+      return {icon:'<i class="fas fa-bell"></i>',color:'blue'};
+    }
+    function notifTypeLinkCustomer(n) {
+      var rt=n.related_type, ri=n.related_id;
+      if (rt==='order'&&ri) return 'order-tracking.php?id='+ri;
+      if (rt==='order_proposal'&&ri) return 'order-form.php?id='+ri;
+      if (rt==='custom_request'&&ri) return 'my-requests.php';
+      if (rt==='chat'&&ri) return 'chat.php?conversation='+ri;
+      return '#';
+    }
+    function notifTimeAgo(ds) {
+      var n=new Date(),d=new Date(ds),diff=Math.floor((n-d)/1000);
+      if(diff<60)return'Just now';if(diff<3600)return Math.floor(diff/60)+'m ago';
+      if(diff<86400)return Math.floor(diff/3600)+'h ago';if(diff<172800)return'Yesterday';
+      return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    }
+    function notifItemClick(id, link) {
+      fetch('../api/notifications.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'mark_read',id:id})}).catch(function(){});
+      closeNotifDropdown();
+      updateSidebarBadges();
+    }
+    function markAllNotifRead() {
+      fetch('../api/notifications.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'mark_read_all'})})
+      .then(function(r){return r.json();}).then(function(d){if(d.success){loadNotifs();updateSidebarBadges();}}).catch(function(){});
+    }
+    function updateNotifBellDot(count) {
+      var dot = document.getElementById('notifBellDot');
+      if (dot) dot.style.display = count > 0 ? 'block' : 'none';
+    }
     function updateSidebarBadges() {
       fetch('../api/notif-counts.php').then(r=>r.json()).then(d=>{
         const sb = (id, c) => { const b = document.getElementById(id); if(b){ b.textContent = c||''; b.classList.toggle('show', c>0); } };
         sb('sidebar-msg-badge', d.chat);
         sb('sidebar-orders-badge', d.order);
         sb('sidebar-requests-badge', d.custom_request);
+        var total = (d.chat||0) + (d.order||0) + (d.custom_request||0) + (d.order_proposal||0);
+        updateNotifBellDot(total);
       }).catch(()=>{});
     }
     updateSidebarBadges();
     setInterval(updateSidebarBadges, 10000);
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.header-notif-wrapper') && !e.target.closest('.notif-dropdown')) closeNotifDropdown();
+    });
   </script>
 </body>
 </html>

@@ -572,18 +572,6 @@ document.querySelectorAll('.tab').forEach(btn => {
   });
 });
 
-function showToast(message, type) {
-  const existing = document.querySelector('.cr-toast');
-  if (existing) existing.remove();
-  const t = document.createElement('div');
-  t.className = 'cr-toast';
-  t.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:12px;font-size:0.88rem;font-weight:600;color:#fff;z-index:9999;transition:opacity 0.3s;box-shadow:0 8px 24px rgba(0,0,0,0.15);';
-  t.style.background = type === 'error' ? '#ef4444' : '#10b981';
-  t.textContent = message;
-  document.body.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
-}
-
 async function deleteRequest(id) {
   if (!confirm('Delete this custom request? This cannot be undone.')) return;
   try {

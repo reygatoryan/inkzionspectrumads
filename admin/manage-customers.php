@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div style="display:flex;align-items:center;gap:0.65rem;">
               <div class="mc-avatar">
                 <?php if (!empty($c['avatar'])): ?>
-                <img src="<?php echo htmlspecialchars($c['avatar']); ?>" alt="">
+                <img src="<?php echo htmlspecialchars($c['avatar']); ?>" alt="" referrerpolicy="no-referrer" loading="lazy">
                 <?php else: ?>
                 <?php echo $initial; ?>
                 <?php endif; ?>

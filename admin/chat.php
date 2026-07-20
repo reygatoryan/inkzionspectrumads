@@ -73,6 +73,13 @@ require 'includes/admin-header.php';
   .admin-file-preview .btn-clear-file { position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:none;background:#ef4444;color:white;cursor:pointer;font-size:0.65rem;display:flex;align-items:center;justify-content:center; }
   .btn-attach { width:40px;height:40px;border-radius:10px;border:2px solid #e2e8f0;background:white;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.15s;flex-shrink:0; }
   .btn-attach:hover { border-color:#2B4C52;color:#2B4C52; }
+  .msg.sending { opacity: 0.65; }
+  .msg.failed .msg-bubble { background: #fef2f2 !important; color: #dc2626 !important; border-color: #fecaca !important; }
+  .msg.failed.sent .msg-bubble { background: #fef2f2 !important; border-color: #fecaca !important; }
+  .msg.failed.sent .msg-bubble, .msg.failed.sent .msg-bubble * { color: #dc2626 !important; }
+  .admin-msg-sending-spinner { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.7rem; color: #94a3b8; }
+  .admin-msg-retry-btn { display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.3rem; padding: 0.2rem 0.5rem; border-radius: 6px; border: 1px solid #dc2626; background: white; color: #dc2626; font-size: 0.7rem; font-weight: 500; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .admin-msg-retry-btn:hover { background: #fef2f2; }
 </style>
 
 <div class="admin-chat-layout">
@@ -96,7 +103,7 @@ require 'includes/admin-header.php';
 
 <script>
 let currentConvId = null;
-let pollTimer = null;
+let adminEventSource = null;
 let lastMsgLen = 0;
 let allAdminConvs = [];
 let msgOffset = 0;
@@ -104,13 +111,13 @@ let hasMoreMsgs = false;
 let isLoadingMore = false;
 let autoScrollAdmin = true;
 let lastMsgId = 0;
-let emptyPollsAdmin = 0;
-let pollIntervalAdmin = 1000;
 let isTabVisibleAdmin = true;
+let adminLastDateLabel = null;
 let adminSending = false;
 let adminLoadedMsgIds = new Set();
 let isLoadingAdminConv = false;
 let adminSelectedFile = null;
+let adminPendingMessageMap = new Map();
 
 function escapeHtml(t) { if(!t)return''; var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
 
@@ -191,42 +198,38 @@ function adminUpdateConvPreview(newMsgs) {
   }
 }
 
-function adminStartPolling() {
-  if(pollTimer){clearTimeout(pollTimer);pollTimer=null;}
-  emptyPollsAdmin=0; pollIntervalAdmin=1000; adminDoPoll();
+function adminStartSSE() {
+  adminStopSSE();
+  if(!currentConvId)return;
+  adminEventSource=new EventSource('../api/chat-sse.php?conversation_id='+currentConvId+'&last_message_id='+lastMsgId+'&check_typing=1');
+  adminEventSource.onmessage=function(e){
+    try{
+      var d=JSON.parse(e.data);
+      if(d.type==='messages'&&d.messages&&d.messages.length){
+        lastMsgId=d.last_message_id;
+        adminAppendMessages(d.messages,true);
+        adminUpdateConvPreview(d.messages);
+      }else if(d.type==='typing'){
+        var ti=document.getElementById('admin-typing-indicator');
+        if(ti){if(d.typing){ti.style.display='block';ti.textContent=d.typing.user_name+' is typing...';}else{ti.style.display='none';}}
+      }
+    }catch(_){}
+  };
+  adminEventSource.onerror=function(){adminStopSSE();setTimeout(adminStartSSE,2000);};
 }
 
-async function adminDoPoll() {
-  if(!currentConvId||!isTabVisibleAdmin){pollTimer=setTimeout(adminDoPoll,isTabVisibleAdmin?pollIntervalAdmin:10000);return;}
-  try{
-    var url='../api/chat-poll.php?conversation_id='+currentConvId+'&last_message_id='+lastMsgId+'&check_typing=1';
-    var r=await fetch(url,{credentials:'include'});
-    var d=await r.json();if(!d.success)throw new Error(d.error);
-    var newMsgs=d.messages||[];
-    if(newMsgs.length>0){
-      lastMsgId=d.last_message_id||lastMsgId; emptyPollsAdmin=0; pollIntervalAdmin=1000;
-      adminAppendMessages(newMsgs);
-    }else{emptyPollsAdmin++;if(emptyPollsAdmin>3)pollIntervalAdmin=Math.min(pollIntervalAdmin+1000,10000);}
-    var ti=document.getElementById('admin-typing-indicator');
-    if(ti){
-      if(d.typing){ti.style.display='block';ti.textContent=d.typing.user_name+' is typing...';}
-      else{ti.style.display='none';}
-    }
-    if(newMsgs.length>0)adminUpdateConvPreview(newMsgs);
-  }catch(e){}
-  var ni=isTabVisibleAdmin?pollIntervalAdmin:Math.max(pollIntervalAdmin,8000);
-  pollTimer=setTimeout(adminDoPoll,ni);
+function adminStopSSE() {
+  if(adminEventSource){adminEventSource.close();adminEventSource=null;}
 }
 
-function adminAppendMessages(msgs) {
+function adminAppendMessages(msgs, fromPoll) {
   var div=document.getElementById('chatMsgs');if(!div)return;
-  var lastDt=null;var html='';
-  var dateEls=div.querySelectorAll('[data-date-label]');
-  if(dateEls.length>0)lastDt=dateEls[dateEls.length-1].getAttribute('data-date-label');
+  var lastDt=adminLastDateLabel;var html='';
   msgs.forEach(function(m){
+    if(fromPoll&&m.sender_id==<?= $userId ?>)return;
     if(adminLoadedMsgIds.has(m.id))return;
     var dt=getDateLabel(m.created_at);
-    if(dt!==lastDt){html+='<div style="text-align:center;padding:0.35rem 0;font-size:0.7rem;color:#94a3b8;font-weight:500;" data-date-label="'+dt+'">'+dt+'</div>';lastDt=dt;}
+    if(dt!==lastDt){html+='<div style="text-align:center;padding:0.35rem 0;font-size:0.7rem;color:#94a3b8;font-weight:500;" data-date-label="'+dt+'">'+dt+'</div>';lastDt=dt;adminLastDateLabel=dt;}
     html+=adminRenderMsg(m);
     adminLoadedMsgIds.add(m.id);
   });
@@ -245,12 +248,12 @@ function adminAppendMessages(msgs) {
 async function adminSelectConversation(convId) {
   if(isLoadingAdminConv)return;
   isLoadingAdminConv=true;
-  if(pollTimer){clearTimeout(pollTimer);pollTimer=null;}
+  adminStopSSE();
   try{
-    currentConvId=convId; msgOffset=0; hasMoreMsgs=false; isLoadingMore=false; lastMsgLen=0; autoScrollAdmin=true; lastMsgId=0; adminLoadedMsgIds=new Set();
+    currentConvId=convId; msgOffset=0; hasMoreMsgs=false; isLoadingMore=false; lastMsgLen=0; autoScrollAdmin=true; lastMsgId=0; adminLoadedMsgIds=new Set(); adminLastDateLabel=null;
     document.querySelectorAll('.conv-item').forEach(function(el){el.classList.toggle('active',parseInt(el.dataset.id)===convId);});
     await adminLoadChat(convId);
-    adminStartPolling();
+    adminStartSSE();
   }catch(e){console.error('Failed to load conversation:',e);}
   finally{isLoadingAdminConv=false;}
 }
@@ -260,13 +263,26 @@ function parseMsgContent(str) { try{return JSON.parse(str);}catch(e){return null
 function adminRenderMsg(m) {
   var isSent=m.sender_id==<?= $userId ?>;
   var time=fmtTime(m.created_at);
+  var statusClass=m._status==='sending'?' sending':m._status==='failed'?' failed':'';
+  var tempAttr=m.id<0?' data-admin-temp-id="'+m.id+'"':'';
   var content='';
   if(m.message_type==='text'){content='<div class="msg-bubble">'+escapeHtml(m.content)+'</div>';}
   else if(m.message_type==='custom_request'){var rd=parseMsgContent(m.content);var rt=rd?(rd.title||'Custom Request'):'Custom Request';var ri=rd?rd.request_id:null;var lk=ri?'../customer/request-form.php?id='+ri:'#';content='<div class="msg-bubble"><div class="request-card"><div class="title"><i class="fas fa-paint-brush"></i> '+escapeHtml(rt)+'</div><a href="'+lk+'" class="btn-fill" target="_blank"><i class="fas fa-external-link-alt"></i> View Request</a></div></div>';}
   else if(m.message_type==='order_form'){var rd=parseMsgContent(m.content);var pt=rd?(rd.title||'Order Form'):'Order Form';var pi=rd?rd.proposal_id:null;var lk=pi?'../customer/order-form.php?id='+pi:'#';content='<div class="msg-bubble"><div class="request-card"><div class="title"><i class="fas fa-file-invoice"></i> '+escapeHtml(pt)+'</div><a href="'+lk+'" class="btn-fill" target="_blank"><i class="fas fa-external-link-alt"></i> View Order Form</a></div></div>';}
-  else if(m.message_type==='image'){var url=(m.file_url||'').startsWith('http')?m.file_url:'../'+(m.file_url||'');content='<div class="msg-bubble"><img src="'+escapeHtml(url)+'" style="max-width:200px;border-radius:8px;cursor:pointer;" onclick="openImageModal(\''+escapeHtml(url)+'\')"></div>';}
+  else if(m.message_type==='image'){
+    var imgUrl;
+    if(m._localPreviewUrl){imgUrl=m._localPreviewUrl;}
+    else{imgUrl=(m.file_url||'').startsWith('http')?m.file_url:'../'+(m.file_url||'');}
+    var onclick=m._status?'':'onclick="openImageModal(\''+escapeHtml(imgUrl)+'\')"';
+    content='<div class="msg-bubble"><img src="'+escapeHtml(imgUrl)+'" style="max-width:200px;border-radius:8px;cursor:pointer;" '+onclick+'></div>';
+  }
   else if(m.message_type==='file'){content='<div class="msg-bubble"><i class="fas fa-file"></i> '+escapeHtml(m.file_name||'File')+'</div>';}
-  return '<div class="msg '+(isSent?'sent':'received')+'"><div class="msg-avatar">'+getInitials(m.sender_name)+'</div><div>'+content+'<div class="msg-time">'+time+'</div></div></div>';
+  var timeHtml='<div class="msg-time">'+time+'</div>';
+  if(m._status==='sending'){timeHtml='<div class="msg-time"><span class="admin-msg-sending-spinner"><i class="fas fa-spinner fa-spin"></i> Sending...</span></div>';}
+  else if(m._status==='failed'){timeHtml='<div class="msg-time"><span style="color:#dc2626;"><i class="fas fa-exclamation-circle"></i> Failed</span></div>';}
+  var retryHtml='';
+  if(m._status==='failed'){retryHtml='<button class="admin-msg-retry-btn" onclick="adminRetrySend('+m.id+')"><i class="fas fa-sync-alt"></i> Retry</button>';}
+  return '<div class="msg '+(isSent?'sent':'received')+statusClass+'"'+tempAttr+'><div class="msg-avatar">'+getInitials(m.sender_name)+'</div><div>'+content+timeHtml+retryHtml+'</div></div>';
 }
 
 async function adminLoadMoreMsgs() {
@@ -295,9 +311,9 @@ async function adminLoadChat(convId, silent) {
     main.innerHTML='<div class="chat-header" id="chatHdr"><h4>Loading...</h4></div><div class="chat-messages" id="chatMsgs"><p style="text-align:center;color:#94a3b8;padding:1.5rem;">Loading...</p></div><div class="chat-input-area" id="chatInputArea"></div>';
   }
   try{
-    var convRes=await fetch('../api/chat.php?action=conversations',{credentials:'include'});
+    var convRes=await fetch('../api/chat.php?action=conversations&conversation_id='+convId,{credentials:'include'});
     var convData=await convRes.json();
-    var conv=(convData.conversations||[]).find(function(c){return c.id==convId;});
+    var conv=(convData.conversations||[])[0];
     
     var r=await fetch('../api/chat.php?action=messages&conversation_id='+convId+'&limit=50&offset=0',{credentials:'include'});
     var d=await r.json();if(!d.success)throw new Error(d.error);
@@ -320,7 +336,7 @@ async function adminLoadChat(convId, silent) {
     var customerName=conv?(conv.user_name||'Customer'):'Customer';
     
     var msgsHtml='';
-    if(msgs.length){msgsHtml='';var lastDt=null;msgs.forEach(function(m){var dt=getDateLabel(m.created_at);if(dt!==lastDt){msgsHtml+='<div style="text-align:center;padding:0.35rem 0;font-size:0.7rem;color:#94a3b8;font-weight:500;">'+dt+'</div>';lastDt=dt;}msgsHtml+=adminRenderMsg(m);});if(hasMoreMsgs){msgsHtml='<div style="text-align:center;padding:0.4rem;"><button onclick="adminLoadMoreMsgs()" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.8rem;color:#2B4C52;font-size:0.72rem;font-weight:500;cursor:pointer;"><i class="fas fa-chevron-up"></i> Load older</button></div>'+msgsHtml;}}
+    if(msgs.length){msgsHtml='';var lastDt=null;msgs.forEach(function(m){var dt=getDateLabel(m.created_at);if(dt!==lastDt){msgsHtml+='<div style="text-align:center;padding:0.35rem 0;font-size:0.7rem;color:#94a3b8;font-weight:500;">'+dt+'</div>';lastDt=dt;}msgsHtml+=adminRenderMsg(m);});adminLastDateLabel=lastDt;if(hasMoreMsgs){msgsHtml='<div style="text-align:center;padding:0.4rem;"><button onclick="adminLoadMoreMsgs()" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.8rem;color:#2B4C52;font-size:0.72rem;font-weight:500;cursor:pointer;"><i class="fas fa-chevron-up"></i> Load older</button></div>'+msgsHtml;}}
     else{msgsHtml='<p style="text-align:center;color:#94a3b8;padding:1.5rem;">No messages yet.</p>';adminLoadedMsgIds=new Set();}
     
     main.innerHTML=prodBar+'<div class="chat-header" id="chatHdr"><h4><i class="fas fa-user" style="color:#2B4C52;margin-right:0.35rem;"></i>'+escapeHtml(customerName)+'</h4><div class="chat-header-actions">'+hdrActions+'</div></div>'+
@@ -392,6 +408,43 @@ document.addEventListener('change', function(e) {
   }
 });
 
+function adminReplacePendingMessage(tempId, realMsg) {
+  var entry=adminPendingMessageMap.get(tempId);
+  if(!entry)return;
+  if(entry._localPreviewUrl)URL.revokeObjectURL(entry._localPreviewUrl);
+  adminLoadedMsgIds.delete(tempId);
+  adminLoadedMsgIds.add(realMsg.id);
+  lastMsgId=Math.max(lastMsgId,realMsg.id);
+  var el=document.querySelector('[data-admin-temp-id="'+tempId+'"]');
+  if(el)el.outerHTML=adminRenderMsg(realMsg);
+  adminUpdateConvPreview([realMsg]);
+  adminPendingMessageMap.delete(tempId);
+}
+
+function adminMarkMessageFailed(tempId, errorMsg) {
+  var entry=adminPendingMessageMap.get(tempId);
+  if(!entry)return;
+  if(entry._localPreviewUrl)URL.revokeObjectURL(entry._localPreviewUrl);
+  entry._status='failed';
+  entry._error=errorMsg||'Failed to send';
+  var el=document.querySelector('[data-admin-temp-id="'+tempId+'"]');
+  if(el)el.outerHTML=adminRenderMsg(entry);
+}
+
+async function adminRetrySend(tempId) {
+  var entry=adminPendingMessageMap.get(tempId);
+  if(!entry)return;
+  var content=entry._requestContent||'';
+  var file=entry._requestFile||null;
+  adminPendingMessageMap.delete(tempId);
+  var el=document.querySelector('[data-admin-temp-id="'+tempId+'"]');
+  if(el)el.remove();
+  if(file)adminSelectedFile=file;
+  var input=document.getElementById('msgInput');
+  if(input)input.value=content;
+  adminSendTextMsg();
+}
+
 async function adminSendTextMsg() {
   if(adminSending)return;
   var input=document.getElementById('msgInput');
@@ -399,7 +452,30 @@ async function adminSendTextMsg() {
   if(!content&&!adminSelectedFile)return;
   if(!currentConvId)return;
   adminSending=true;if(input)input.value='';
+
+  var messageType=adminSelectedFile?(adminSelectedFile.type.startsWith('image/')?'image':'file'):'text';
+  var tempId=-(Date.now()+Math.floor(Math.random()*1000));
+  var adminName=<?= json_encode($_SESSION['user_name'] ?? 'Admin') ?>||'Admin';
+  var tempMsg={
+    id:tempId,
+    sender_id:<?= $userId ?>,
+    sender_name:adminName,
+    message_type:messageType,
+    content:content||'',
+    file_url:'',
+    file_name:adminSelectedFile?adminSelectedFile.name:'',
+    file_type:adminSelectedFile?adminSelectedFile.type:'',
+    created_at:new Date().toISOString(),
+    _status:'sending',
+    _localPreviewUrl:messageType==='image'&&adminSelectedFile?URL.createObjectURL(adminSelectedFile):'',
+    _requestContent:content,
+    _requestFile:adminSelectedFile||null
+  };
+  adminPendingMessageMap.set(tempId,tempMsg);
+  adminAppendMessages([tempMsg]);
+
   try{
+    var d;
     if(adminSelectedFile){
       var fd=new FormData();
       fd.append('action','send_message');
@@ -407,23 +483,19 @@ async function adminSendTextMsg() {
       fd.append('file',adminSelectedFile);
       if(content)fd.append('content',content);
       var r=await fetch('../api/chat.php',{method:'POST',credentials:'include',body:fd});
-      var d=await r.json();
-      if(d.success){
-        adminClearFilePreview();
-        if(d.message){lastMsgId=Math.max(lastMsgId,d.message.id);adminAppendMessages([d.message]);}
-        adminLoadConversations();
-      }
-      else showAdminNotification(d.error||'Failed to send','error');
+      d=await r.json();
     }else{
       var r=await fetch('../api/chat.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'send_message',conversation_id:currentConvId,message_type:'text',content})});
-      var d=await r.json();
-      if(d.success){
-        if(d.message){lastMsgId=Math.max(lastMsgId,d.message.id);adminAppendMessages([d.message]);}
-        adminLoadConversations();
-      }
-      else showAdminNotification(d.error||'Failed to send','error');
+      d=await r.json();
     }
-  }catch(e){showAdminNotification('Failed to send message','error');}
+    if(d.success){
+      adminClearFilePreview();
+      adminReplacePendingMessage(tempId,d.message);
+      adminLoadConversations();
+    }else{
+      adminMarkMessageFailed(tempId,d.error||'Failed to send');
+    }
+  }catch(e){adminMarkMessageFailed(tempId,'Network error');}
   finally{adminSending=false;}
 }
 
@@ -501,11 +573,11 @@ document.addEventListener('keydown',function(e){
 // Tab visibility for admin
 document.addEventListener('visibilitychange',function(){
   isTabVisibleAdmin=!document.hidden;
-  if(!document.hidden){
-    emptyPollsAdmin=0;pollIntervalAdmin=1000;
+  if(document.hidden){
+    adminStopSSE();
+  }else{
     if(currentConvId){
-      if(pollTimer){clearTimeout(pollTimer);pollTimer=null;}
-      adminLoadChat(currentConvId,true).then(function(){adminStartPolling();}).catch(function(){});
+      adminLoadChat(currentConvId,true).then(function(){adminStartSSE();}).catch(function(){});
     }
   }
 });

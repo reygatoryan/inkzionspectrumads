@@ -30,9 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     
     if ($action === 'conversations') {
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+        $convFilterId = isset($_GET['conversation_id']) ? (int)$_GET['conversation_id'] : 0;
         
         $unreadSub = "(SELECT conversation_id, COUNT(*) as unread_count FROM chat_messages WHERE is_read = 0 AND sender_id != ? GROUP BY conversation_id)";
-        $lastMsgSub = "(SELECT conversation_id, content as last_message FROM chat_messages WHERE id IN (SELECT MAX(id) FROM chat_messages GROUP BY conversation_id))";
         
         // Get list of conversations
         if ($userRole === 'admin') {
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 SELECT cc.id, cc.user_id, cc.admin_id, cc.last_message_at, cc.request_id, cc.product_id,
                        u.name as user_name, u.is_online as user_online,
                        COALESCE(uc.unread_count, 0) as unread_count,
-                       lm.last_message,
+                       (SELECT content FROM chat_messages WHERE conversation_id = cc.id ORDER BY id DESC LIMIT 1) as last_message,
                        cpr.service_type as request_type, cpr.status as request_status,
                        p.name as product_name, p.image_url as product_image
                 FROM chat_conversations cc
@@ -48,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 LEFT JOIN custom_printing_requests cpr ON cc.request_id = cpr.id
                 LEFT JOIN products p ON cc.product_id = p.id
                 LEFT JOIN $unreadSub uc ON uc.conversation_id = cc.id
-                LEFT JOIN $lastMsgSub lm ON lm.conversation_id = cc.id
                 WHERE cc.admin_id = ?
             ";
             $params = [$userId, $userId];
@@ -62,7 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $types .= 'ss';
             }
             
-            $sql .= " ORDER BY cc.last_message_at DESC";
+            if ($convFilterId > 0) {
+                $sql .= " AND cc.id = ?";
+                $params[] = $convFilterId;
+                $types .= 'i';
+            }
+            
+            $sql .= " ORDER BY cc.last_message_at DESC LIMIT 50";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param($types, ...$params);
         } else {
@@ -70,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 SELECT cc.id, cc.user_id, cc.admin_id, cc.last_message_at, cc.request_id, cc.product_id,
                        u.name as seller_name, u.is_online as seller_online,
                        COALESCE(uc.unread_count, 0) as unread_count,
-                       lm.last_message,
+                       (SELECT content FROM chat_messages WHERE conversation_id = cc.id ORDER BY id DESC LIMIT 1) as last_message,
                        cpr.service_type as request_type, cpr.status as request_status,
                        p.name as product_name, p.image_url as product_image
                 FROM chat_conversations cc
@@ -78,7 +83,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 LEFT JOIN custom_printing_requests cpr ON cc.request_id = cpr.id
                 LEFT JOIN products p ON cc.product_id = p.id
                 LEFT JOIN $unreadSub uc ON uc.conversation_id = cc.id
-                LEFT JOIN $lastMsgSub lm ON lm.conversation_id = cc.id
                 WHERE cc.user_id = ?
             ";
             $params = [$userId, $userId];
@@ -92,7 +96,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $types .= 'ss';
             }
             
-            $sql .= " ORDER BY cc.last_message_at DESC";
+            if ($convFilterId > 0) {
+                $sql .= " AND cc.id = ?";
+                $params[] = $convFilterId;
+                $types .= 'i';
+            }
+            
+            $sql .= " ORDER BY cc.last_message_at DESC LIMIT 50";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param($types, ...$params);
         }

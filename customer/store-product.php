@@ -18,6 +18,7 @@ if ($loggedIn && $userName !== '') {
 if ($loggedIn && $userInitials === '') {
     $userInitials = 'ME';
 }
+$userProfilePhoto = $_SESSION['user_profile_photo'] ?? '';
 
 $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
 $flash = $_SESSION['flash'] ?? null;
@@ -152,6 +153,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .g-signin-wrapper { display: flex; align-items: center; }
     .g-signin-wrapper > div > iframe { max-width: 210px !important; }
     .g-signin-wrapper .g_id_signin { display: flex; align-items: center; }
+    .compact-login { display: none; font-size: 0.7rem; color: var(--primary); font-weight: 700; white-space: nowrap; text-decoration: none; align-items: center; gap: 0.25rem; }
   </style>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -246,6 +248,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       font-size: 0.65rem;
       flex-shrink: 0;
     }
+    .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
     .sidebar-profile-info h4 { font-size: 0.75rem; font-weight: 600; color: var(--text-primary); }
     .sidebar-profile-info p { font-size: 0.6rem; color: var(--text-muted); }
 
@@ -575,6 +578,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       font-size: 0.65rem;
       flex-shrink: 0;
     }
+    .header-profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
     .header-profile-name {
       font-size: 0.8rem;
       font-weight: 600;
@@ -990,9 +994,108 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .header-profile-name { display: none; }
       .header-profile-arrow { display: none; }
     }
+    @media (max-width: 640px) {
+      .content-area { padding: 0.85rem; }
+      .top-header-title h1 { font-size: 1.05rem; }
+    }
+    @media (max-width: 576px) {
+      .content-area { padding: 0.75rem; }
+      .products-grid { gap: 0.75rem; }
+    }
     @media (max-width: 480px) {
       .products-grid { grid-template-columns: 1fr; }
       .top-header-center { max-width: 100%; }
+    }
+    @media (max-width: 400px) {
+      .content-area { padding: 0.75rem; }
+      .top-header-title h1 { font-size: 1rem; }
+      .header-icon-btn { width: 38px; height: 38px; }
+      .hamburger-btn { width: 38px; height: 38px; }
+      .header-profile-name, .header-profile-arrow { display: none; }
+      .notif-dropdown { position: fixed; top: 64px; left: 0.75rem; right: 0.75rem; width: auto; }
+      .product-card-body { padding: 0.85rem; }
+      .product-price { font-size: 1.1rem; }
+      .product-card-image { height: 150px; }
+      .header-icon-btn[title="Home"] { display: none; }
+      .qv-close { width: 40px; height: 40px; }
+      .filter-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.5rem; }
+      .filter-chip { flex-shrink: 0; }
+      .compact-login { display: inline-flex; }
+      .g-signin-wrapper { display: none; }
+      .top-header-inner { gap: 0.5rem; }
+      .top-header-center { min-width: 0; }
+      .top-header-title { white-space: nowrap; }
+      .header-search-input { padding-left: 1.8rem; padding-right: 0.5rem; font-size: 0.75rem; }
+      .qv-overlay { padding: 0.75rem; }
+      .qv-spec-grid { grid-template-columns: 1fr; }
+      .skeleton-grid { gap: 0.75rem; }
+      .top-header-left { gap: 0.5rem; }
+      .top-header-title h1 { font-size: 0.9rem; }
+      .header-search-input { font-size: 0.7rem; }
+      .header-search-wrapper i { left: 0.7rem; font-size: 0.75rem; }
+      .product-card-title { font-size: 0.85rem; }
+      .product-card-desc { font-size: 0.72rem; }
+      .product-price { font-size: 0.95rem; }
+      .product-card-image { height: 130px; }
+      .product-card-footer { padding: 0.5rem 0.85rem 0.85rem; }
+      .product-card-footer .btn { font-size: 0.68rem; padding: 0.4rem 0.5rem; white-space: normal; word-break: break-word; }
+      .filter-chip { padding: 0.4rem 0.75rem; font-size: 0.72rem; }
+      .why-card { padding: 0.85rem; }
+      .section-header h2 { font-size: 0.95rem; }
+      .faq-question { font-size: 0.75rem; padding: 0.65rem 0.75rem; }
+      .printing-banner { padding: 1.25rem !important; }
+      .printing-banner h2 { font-size: 1.15rem !important; }
+      .printing-banner > div:nth-child(2) > div:last-child { gap: 0.75rem !important; justify-content: center; }
+      .printing-banner > div:nth-child(2) > div:last-child > div { padding: 0.5rem 0.7rem !important; }
+      .printing-banner > div:nth-child(2) > div:last-child > div > div:first-child { font-size: 1.1rem !important; }
+    }
+    @media (max-width: 360px) {
+      .top-header { padding: 0 0.5rem; }
+      .top-header-center { display: none; }
+      .top-header-left { gap: 0.35rem; }
+      .top-header-title h1 { font-size: 0.8rem; }
+      .hamburger-btn { width: 34px; height: 34px; }
+      .header-icon-btn { width: 34px; height: 34px; }
+      .compact-login { font-size: 0.55rem; gap: 0.15rem; }
+      .compact-login i { font-size: 0.65rem; }
+      .content-area { padding: 0.5rem; }
+      .products-grid { display: flex !important; flex-direction: column; gap: 0.75rem; }
+      .product-card { min-width: 0; }
+      .product-card-body { min-width: 0; padding: 0.6rem 0.7rem; }
+      .product-card-title { font-size: 0.8rem; word-break: break-word; }
+      .product-card-desc { font-size: 0.68rem; word-break: break-word; }
+      .product-price { font-size: 0.85rem; }
+      .product-card-image { height: 110px; }
+      .product-card-footer { min-width: 0; padding: 0.35rem 0.7rem 0.7rem; }
+      .product-card-footer .btn { font-size: 0.6rem; padding: 0.3rem 0.35rem; white-space: normal; word-break: break-word; }
+      .card-category-badge { padding: 0.15rem 0.4rem; font-size: 0.5rem; top: 6px; left: 6px; }
+      .filter-chip { padding: 0.3rem 0.6rem; font-size: 0.65rem; }
+      .skeleton-card .skeleton-img { height: 140px; }
+      .skeleton-grid { gap: 0.5rem; }
+      .qty-popup { padding: 1.25rem; }
+      .printing-banner { padding: 0.85rem !important; }
+      .printing-banner h2 { font-size: 0.95rem !important; }
+      .printing-banner h2 i { font-size: 0.85rem; }
+      .printing-banner > div:nth-child(2) { flex-direction: column; align-items: flex-start; }
+      .printing-banner > div:nth-child(2) > div:last-child { gap: 0.5rem !important; justify-content: flex-start; flex-wrap: nowrap; }
+      .printing-banner > div:nth-child(2) > div:last-child > div { padding: 0.4rem 0.5rem !important; }
+      .printing-banner > div:nth-child(2) > div:last-child > div > div:first-child { font-size: 0.95rem !important; }
+      .printing-banner > div:nth-child(2) > div:last-child > div > div:last-child { font-size: 0.6rem !important; }
+      .qv-overlay { padding: 0.5rem; }
+      .qv-gallery { padding: 0.75rem; }
+      .qv-info { padding: 0.75rem; }
+      .qv-info h2 { font-size: 0.95rem; }
+      .qv-price { font-size: 1.2rem; }
+      .qv-spec-grid { grid-template-columns: 1fr; }
+      .modal-header { padding: 0.85rem 1rem; }
+      .modal-body { padding: 1rem; }
+      .modal-body p { font-size: 0.82rem; }
+      .modal-contact-item { gap: 0.5rem; }
+      .modal-contact-icon { width: 28px; height: 28px; font-size: 0.75rem; }
+      .why-card { padding: 0.65rem; }
+      .section-header h2 { font-size: 0.85rem; }
+      .faq-question { font-size: 0.7rem; padding: 0.55rem 0.65rem; }
+      .notif-dropdown { position: fixed; top: 60px; left: 0.5rem; right: 0.5rem; width: auto; }
     }
     
     .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 99; }
@@ -1356,6 +1459,38 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       line-height: 1;
     }
     .sidebar-badge.show { display: flex; }
+    .header-notif-wrapper { position: relative; }
+    .notif-bell-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; border: 2px solid white; }
+    .notif-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: white; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 12px 40px rgba(0,0,0,0.15); width: 360px; max-height: 480px; display: flex; flex-direction: column; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; }
+    .notif-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+    .notif-dropdown-header { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 700; color: #0f172a; flex-shrink: 0; }
+    .notif-mark-all-btn { background: none; border: none; color: #2B4C52; font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 6px; }
+    .notif-mark-all-btn:hover { background: rgba(43,76,82,0.08); }
+    .notif-dropdown-list { overflow-y: auto; flex: 1; max-height: 400px; }
+    .notif-item { display: flex; gap: 0.7rem; padding: 0.75rem 1rem; border-bottom: 1px solid #f8fafc; cursor: pointer; transition: background 0.15s; text-decoration: none; color: inherit; align-items: flex-start; }
+    .notif-item:hover { background: #f8fafc; }
+    .notif-item.unread { background: rgba(43,76,82,0.04); }
+    .notif-item.unread:hover { background: rgba(43,76,82,0.08); }
+    .notif-item-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+    .notif-item-icon.orange { background: rgba(245,158,11,0.12); color: #d97706; }
+    .notif-item-icon.green { background: rgba(16,185,129,0.12); color: #059669; }
+    .notif-item-icon.blue { background: rgba(43,76,82,0.12); color: #2B4C52; }
+    .notif-item-icon.purple { background: rgba(139,92,246,0.12); color: #7c3aed; }
+    .notif-item-icon.red { background: rgba(239,68,68,0.12); color: #dc2626; }
+    .notif-item-body { flex: 1; min-width: 0; }
+    .notif-item-title { font-size: 0.82rem; font-weight: 600; color: #0f172a; line-height: 1.3; }
+    .notif-item.unread .notif-item-title { font-weight: 700; }
+    .notif-item-text { font-size: 0.75rem; color: #64748b; margin-top: 0.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .notif-item-time { font-size: 0.68rem; color: #94a3b8; margin-top: 0.2rem; }
+    .notif-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #2B4C52; flex-shrink: 0; margin-top: 4px; }
+    .notif-loading, .notif-empty { text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.82rem; }
+    .notif-error { text-align: center; padding: 1rem; color: #dc2626; font-size: 0.78rem; }
+    @media (max-width: 768px) {
+      .hamburger-btn, .header-icon-btn { min-width: 44px; min-height: 44px; }
+      .modal-close { min-width: 44px; min-height: 44px; }
+      .sidebar-menu-item { padding: 0.75rem 1.25rem; }
+      .notif-mark-all-btn { min-height: 44px; padding: 0.5rem 1rem; }
+    }
   </style>
 </head>
 <body>
@@ -1371,7 +1506,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       </div>
       
       <div class="sidebar-profile">
-        <div class="sidebar-avatar"><?php echo $loggedIn ? htmlspecialchars($userInitials) : '<i class="fas fa-user" style="font-size:0.7rem;"></i>'; ?></div>
+        <div class="sidebar-avatar"><?php if ($loggedIn && $userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php elseif ($loggedIn): ?><?php echo htmlspecialchars($userInitials); ?><?php else: ?><i class="fas fa-user" style="font-size:0.7rem;"></i><?php endif; ?></div>
         <div class="sidebar-profile-info">
           <h4><?php echo $loggedIn ? htmlspecialchars($userName) : 'Guest'; ?></h4>
           <p><?php echo $loggedIn ? ($isSeller ? 'admin' : 'Customer') : 'Not logged in'; ?></p>
@@ -1414,6 +1549,9 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         <div class="top-header-inner">
           <div class="top-header-left">
             <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
+            <?php if (!$loggedIn): ?>
+            <a href="../login.php" class="compact-login"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <?php endif; ?>
             <div class="top-header-title">
               <h1>Products</h1>
               <p>Premium printing services & products</p>
@@ -1432,9 +1570,24 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
               <i class="fas fa-home"></i>
             </a>
             <?php if ($loggedIn): ?>
+            <div class="header-notif-wrapper" id="notifWrapper">
+              <button class="header-icon-btn" onclick="toggleNotifDropdown()" title="Notifications" aria-label="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notif-bell-dot" id="notifBellDot" style="display:none;"></span>
+              </button>
+              <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-dropdown-header">
+                  <span>Notifications</span>
+                  <button class="notif-mark-all-btn" id="notifMarkAll" onclick="markAllNotifRead()">Mark all read</button>
+                </div>
+                <div class="notif-dropdown-list" id="notifList">
+                  <div class="notif-loading">Loading...</div>
+                </div>
+              </div>
+            </div>
             <div class="header-profile-dropdown-wrapper">
               <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
-                <div class="header-profile-avatar"><?php echo htmlspecialchars($userInitials); ?></div>
+                <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
                 <span class="header-profile-name"><?php echo htmlspecialchars($userName); ?></span>
                 <i class="fas fa-chevron-down header-profile-arrow"></i>
               </button>
@@ -1467,7 +1620,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       <div class="content-area">
         <!-- Printing Services Banner -->
         <?php if ($isPrintingServices): ?>
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; color: white; position: relative; overflow: hidden;">
+        <div class="printing-banner" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; color: white; position: relative; overflow: hidden;">
           <div style="position: absolute; top: -50%; right: -10%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); border-radius: 50%;"></div>
           <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
@@ -1526,6 +1679,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             <?php foreach ($products as $product): ?>
             <?php
               $imageSrc = htmlspecialchars($product['image_url'] ?? ($product['image'] ?? 'assets/logo.png'), ENT_QUOTES, 'UTF-8');
+              if (strpos($imageSrc, '../../uploads/') === 0) $imageSrc = substr($imageSrc, 3);
               $priceRaw = $product['price'] ?? '';
               if (is_numeric($priceRaw)) {
                   $priceText = '₱' . number_format((float)$priceRaw, 2);
@@ -2077,16 +2231,92 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         submenu.classList.toggle('open');
       }
     }
+    function toggleNotifDropdown() {
+      var dd = document.getElementById('notifDropdown');
+      if (!dd) return;
+      var wasActive = dd.classList.contains('active');
+      dd.classList.toggle('active');
+      if (!wasActive) loadNotifs();
+    }
+    function closeNotifDropdown() { var dd = document.getElementById('notifDropdown'); if (dd) dd.classList.remove('active'); }
+    var notifFetching = false;
+    function loadNotifs() {
+      if (notifFetching) return;
+      notifFetching = true;
+      var list = document.getElementById('notifList');
+      if (!list) { notifFetching = false; return; }
+      list.innerHTML = '<div class="notif-loading">Loading...</div>';
+      fetch('../api/notifications.php?limit=20').then(function(r){return r.json();}).then(function(d){
+        notifFetching = false;
+        if (!d.success) { list.innerHTML = '<div class="notif-error">' + (d.error ? esc(d.error) : 'Failed to load') + '</div>'; return; }
+        var notifs = d.notifications || [];
+        if (!notifs.length) { list.innerHTML = '<div class="notif-empty">No notifications yet</div>'; updateNotifBellDot(0); return; }
+        var html = '';
+        notifs.forEach(function(n){ html += renderNotifItem(n); });
+        list.innerHTML = html;
+        updateNotifBellDot(d.unread_count);
+      }).catch(function(){ notifFetching = false; list.innerHTML = '<div class="notif-error">Connection error. Check console for details.</div>'; });
+    }
+    function renderNotifItem(n) {
+      var icon = notifTypeIcon(n.related_type || n.type);
+      var link = notifTypeLinkCustomer(n);
+      var timeAgo = notifTimeAgo(n.created_at);
+      var unread = !n.is_read;
+      return '<a href="'+link+'" class="notif-item'+(unread?' unread':'')+'" onclick="notifItemClick('+n.id+',\''+link+'\')">'+
+        '<div class="notif-item-icon '+icon.color+'">'+icon.icon+'</div>'+
+        '<div class="notif-item-body"><div class="notif-item-title">'+esc(n.title)+'</div>'+
+        '<div class="notif-item-text">'+esc(n.body)+'</div><div class="notif-item-time">'+timeAgo+'</div></div>'+
+        (unread?'<div class="notif-unread-dot"></div>':'')+'</a>';
+    }
+    function notifTypeIcon(t) {
+      if (t==='order') return {icon:'<i class="fas fa-shopping-cart"></i>',color:'orange'};
+      if (t==='order_proposal') return {icon:'<i class="fas fa-file-invoice"></i>',color:'green'};
+      if (t==='custom_request') return {icon:'<i class="fas fa-paint-brush"></i>',color:'purple'};
+      if (t==='chat') return {icon:'<i class="fas fa-comment-dots"></i>',color:'blue'};
+      return {icon:'<i class="fas fa-bell"></i>',color:'blue'};
+    }
+    function notifTypeLinkCustomer(n) {
+      var rt=n.related_type, ri=n.related_id;
+      if (rt==='order'&&ri) return 'order-tracking.php?id='+ri;
+      if (rt==='order_proposal'&&ri) return 'order-form.php?id='+ri;
+      if (rt==='custom_request'&&ri) return 'my-requests.php';
+      if (rt==='chat'&&ri) return 'chat.php?conversation='+ri;
+      return '#';
+    }
+    function notifTimeAgo(ds) {
+      var n=new Date(),d=new Date(ds),diff=Math.floor((n-d)/1000);
+      if(diff<60)return'Just now';if(diff<3600)return Math.floor(diff/60)+'m ago';
+      if(diff<86400)return Math.floor(diff/3600)+'h ago';if(diff<172800)return'Yesterday';
+      return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    }
+    function notifItemClick(id, link) {
+      fetch('../api/notifications.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'mark_read',id:id})}).catch(function(){});
+      closeNotifDropdown();
+      updateSidebarBadges();
+    }
+    function markAllNotifRead() {
+      fetch('../api/notifications.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'mark_read_all'})})
+      .then(function(r){return r.json();}).then(function(d){if(d.success){loadNotifs();updateSidebarBadges();}}).catch(function(){});
+    }
+    function updateNotifBellDot(count) {
+      var dot = document.getElementById('notifBellDot');
+      if (dot) dot.style.display = count > 0 ? 'block' : 'none';
+    }
     function updateSidebarBadges() {
       fetch('../api/notif-counts.php').then(r=>r.json()).then(d=>{
         const sb = (id, c) => { const b = document.getElementById(id); if(b){ b.textContent = c||''; b.classList.toggle('show', c>0); } };
         sb('sidebar-msg-badge', d.chat);
         sb('sidebar-orders-badge', d.order);
         sb('sidebar-requests-badge', d.custom_request);
+        var total = (d.chat||0) + (d.order||0) + (d.custom_request||0) + (d.order_proposal||0);
+        updateNotifBellDot(total);
       }).catch(()=>{});
     }
     updateSidebarBadges();
     setInterval(updateSidebarBadges, 10000);
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.header-notif-wrapper') && !e.target.closest('.notif-dropdown')) closeNotifDropdown();
+    });
   </script>
   <script>navigator.sendBeacon('../api/track-visit.php?url=' + encodeURIComponent(location.pathname + location.search) + '&_=' + Date.now());</script>
   <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">

@@ -60,6 +60,7 @@ require_once __DIR__ . '/includes/admin-header.php';
     .so-filters { flex-direction: column; align-items: stretch; }
     .so-search-input { min-width: 0; width: 100%; }
   }
+  .tab .tab-count.badge-active { background: #fef2f2; color: #dc2626; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.68rem; opacity: 1; font-weight: 600; }
 </style>
 
 <div class="so-topbar">
@@ -206,7 +207,6 @@ require_once __DIR__ . '/includes/admin-header.php';
         document.getElementById('count-shipping').textContent = data.counts.shipping;
         document.getElementById('count-completed').textContent = data.counts.completed;
         document.getElementById('count-returns').textContent = data.counts.returns;
-        document.getElementById('sidebar-order-count').textContent = data.counts.pending;
       }
     } catch (e) {}
 
@@ -214,7 +214,9 @@ require_once __DIR__ . '/includes/admin-header.php';
       const pRes = await fetch('../api/order-proposals.php?action=list&status=filled');
       const pData = await pRes.json();
       if (pData.success && pData.proposals) {
-        document.getElementById('count-forms').textContent = pData.proposals.length;
+        var cf = document.getElementById('count-forms');
+        cf.textContent = pData.proposals.length;
+        cf.classList.toggle('badge-active', pData.proposals.length > 0);
       }
     } catch (e) {}
   }
@@ -328,6 +330,16 @@ require_once __DIR__ . '/includes/admin-header.php';
               <div class="so-detail-label">Order Ref</div>
               <div class="so-detail-value">${order.order_reference || 'INK-' + String(order.id).padStart(6, '0')}</div>
             </div>
+            ${order.paymongo_payment_id ? `
+            <div class="so-detail-item">
+              <div class="so-detail-label">PayMongo Ref</div>
+              <div class="so-detail-value" style="font-size:0.7rem;word-break:break-all;">${order.paymongo_payment_id}</div>
+            </div>` : ''}
+            ${order.checkout_session_id ? `
+            <div class="so-detail-item">
+              <div class="so-detail-label">Checkout Session</div>
+              <div class="so-detail-value" style="font-size:0.7rem;word-break:break-all;">${order.checkout_session_id}</div>
+            </div>` : ''}
           </div>
           <div class="so-order-footer">
             <div class="so-order-total">Total: <strong>₱${parseFloat(order.total_amount).toFixed(2)}</strong></div>
@@ -336,6 +348,7 @@ require_once __DIR__ . '/includes/admin-header.php';
               ${order.status === 'confirmed' ? `<button class="btn btn-primary btn-sm" onclick="markShipped(${order.id})"><i class="fas fa-shipping-fast"></i> Mark as Shipped</button>` : ''}
               ${order.status === 'shipped' ? `<button class="btn btn-primary btn-sm" onclick="markDelivered(${order.id})"><i class="fas fa-check-circle"></i> Mark as Delivered</button>` : ''}
               ${order.status === 'delivered' ? `<button class="btn btn-primary btn-sm" onclick="markCompleted(${order.id})"><i class="fas fa-check-double"></i> Mark as Completed</button>` : ''}
+              ${order.payment_status === 'pending' && ['gcash','credit_card'].includes(String(order.payment_method || '')) ? `<button class="btn btn-success btn-sm" onclick="markPaid(${order.id})"><i class="fas fa-check-circle"></i> Mark as Paid</button>` : ''}
               <button class="btn btn-outline btn-sm" onclick="viewOrder(${order.id})"><i class="fas fa-eye"></i> View</button>
             </div>
           </div>
@@ -497,6 +510,27 @@ require_once __DIR__ . '/includes/admin-header.php';
   function markCompleted(orderId) {
     if (confirm('Mark Order #' + getOrderRef(orderId) + ' as Completed?')) {
       updateOrderStatus(orderId, 'completed', 'Order completed successfully.');
+    }
+  }
+
+  async function markPaid(orderId) {
+    if (!confirm('Mark this order as Paid? This will confirm the payment manually.')) return;
+    try {
+      const res = await fetch('../api/paymongo.php?action=mark_paid', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        loadOrders();
+        loadCounts();
+      } else {
+        showToast(data.error || 'Failed to mark as paid', 'error');
+      }
+    } catch (e) {
+      showToast('Network error', 'error');
     }
   }
 
@@ -683,7 +717,9 @@ require_once __DIR__ . '/includes/admin-header.php';
         `;
       }).join('');
 
-      document.getElementById('count-forms').textContent = proposalsData.length;
+      var cf = document.getElementById('count-forms');
+      cf.textContent = proposalsData.length;
+      cf.classList.toggle('badge-active', proposalsData.length > 0);
     } catch (e) {
       container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>Network error</h3></div>';
     }

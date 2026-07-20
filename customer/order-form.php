@@ -165,12 +165,79 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
       .container { padding: 1rem; }
       .quote-table th, .quote-table td { padding: 0.4rem 0.5rem; font-size: 0.8rem; }
     }
+    .payment-methods { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .payment-option { flex: 1; min-width: 140px; cursor: pointer; }
+    .payment-option input[type="radio"] { position: absolute; opacity: 0; }
+    .payment-option-content {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 12px;
+      font-weight: 600; font-size: 0.88rem; color: #475569;
+      transition: all 0.2s ease; background: white;
+    }
+    .payment-option-content i { font-size: 1.1rem; color: #94a3b8; }
+    .payment-option:hover .payment-option-content { border-color: #4A7C84; }
+    .payment-option.active .payment-option-content { border-color: #2B4C52; background: rgba(43,76,82,0.04); color: #0f172a; }
+    .payment-option.active .payment-option-content i { color: #2B4C52; }
+
+    .payment-details { margin-top: 0.75rem; grid-column: 1 / -1; }
+    .payment-details-inner {
+      background: #f8fafc; border-radius: 12px; padding: 1.25rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .gcash-qr-section { text-align: center; margin-bottom: 1rem; }
+    .gcash-qr { width: 220px; height: 220px; object-fit: contain; border-radius: 12px; border: 1px solid #e2e8f0; background: white; padding: 0.5rem; }
+
+    .dp-summary { background: white; border-radius: 10px; padding: 0.75rem 1rem; border: 1px solid #e2e8f0; }
+    .dp-row { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 0.88rem; color: #475569; }
+    .dp-row.dp-highlight { font-weight: 700; color: #0f172a; font-size: 0.95rem; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; margin-top: 0.25rem; }
+
+    .dp-sub-methods { display: flex; gap: 0.5rem; }
+    .payment-option.sm { flex: 0 1 auto; min-width: 100px; }
+    .payment-option.sm .payment-option-content { padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+    .payment-option.sm .payment-option-content i { font-size: 0.85rem; }
+
+    .dp-sub-fields { margin-top: 0.75rem; }
+
+    @media (max-width: 640px) {
+      .payment-methods { flex-direction: column; }
+      .payment-option { min-width: 0; }
+      .dp-sub-methods { flex-direction: column; }
+    }
+    @media (max-width: 576px) {
+      .container { padding: 0.85rem; }
+      .card { padding: 1.15rem; }
+    }
     @media (max-width: 480px) {
       .page-header h1 { font-size: 1.2rem; }
       .container { padding: 0.75rem; }
       .card { padding: 1rem; }
       .btn-primary { padding: 0.75rem 1.25rem; font-size: 0.85rem; width: 100%; justify-content: center; }
       .quote-table th, .quote-table td { padding: 0.35rem 0.4rem; font-size: 0.75rem; }
+    }
+    @media (max-width: 400px) {
+      .card { padding: 0.85rem; }
+      .quote-table { font-size: 0.7rem; }
+      .form-grid { gap: 0.5rem; }
+      .page-header h1 { font-size: 1rem; }
+      .dp-sub-methods { flex-direction: column; }
+      .gcash-qr { width: 140px; height: 140px; }
+    }
+    @media (max-width: 360px) {
+      .container { padding: 0.5rem; }
+      .card { padding: 0.65rem; margin-bottom: 1rem; }
+      .page-header h1 { font-size: 0.85rem; }
+      .page-header p { font-size: 0.72rem; }
+      .quote-table th, .quote-table td { padding: 0.25rem 0.3rem; font-size: 0.6rem; }
+      .form-group input, .form-group select, .form-group textarea { padding: 0.5rem 0.65rem; font-size: 0.78rem; }
+      .btn-primary { padding: 0.6rem 1rem; font-size: 0.75rem; }
+      .gcash-qr { width: 100px; height: 100px; }
+      .payment-option-content { padding: 0.5rem 0.65rem; font-size: 0.72rem; }
+    }
+    @media (max-width: 768px) {
+      .hamburger-btn, .header-icon-btn { min-width: 44px; min-height: 44px; }
+      .modal-close { min-width: 44px; min-height: 44px; }
+      .notif-mark-all-btn { min-height: 44px; padding: 0.5rem 1rem; }
     }
   </style>
 </head>
@@ -255,7 +322,13 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
       <?php endif; ?>
     </div>
 
-    <?php if ($submitted && !$canEdit): ?>
+    <?php
+$paymentDetails = null;
+if (!empty($proposal['payment_details'])) {
+    $paymentDetails = json_decode($proposal['payment_details'], true);
+}
+?>
+<?php if ($submitted && !$canEdit): ?>
     <!-- Submitted Details -->
     <div class="card">
       <h2><i class="fas fa-check-circle" style="color:#10b981;"></i> Your Submitted Details</h2>
@@ -264,6 +337,31 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
         <div><strong>Email:</strong><br><?php echo htmlspecialchars($proposal['email'] ?? ''); ?></div>
         <div><strong>Phone:</strong><br><?php echo htmlspecialchars($proposal['phone'] ?? ''); ?></div>
         <div><strong>Payment Method:</strong><br><?php echo ucfirst($proposal['payment_method'] ?? ''); ?></div>
+        <?php if ($paymentDetails): ?>
+        <div class="full-width">
+          <strong>Payment Details:</strong><br>
+          <?php if ($proposal['payment_method'] === 'gcash'): ?>
+            <span>GCash Reference: <?php echo htmlspecialchars($paymentDetails['gcash_ref'] ?? '-'); ?></span>
+          <?php elseif ($proposal['payment_method'] === 'credit-card'): ?>
+            <span>Card: <?php echo htmlspecialchars($paymentDetails['card_holder'] ?? '-'); ?> — ****<?php echo htmlspecialchars(substr($paymentDetails['card_number'] ?? '', -4)); ?></span>
+          <?php elseif ($proposal['payment_method'] === 'downpayment'): ?>
+            <div style="margin-top:0.3rem;">
+              <div style="font-weight:600;font-size:0.82rem;color:#334155;">Downpayment (50%):</div>
+              <?php if (($paymentDetails['down']['method'] ?? '') === 'gcash'): ?>
+                <span style="font-size:0.82rem;">GCash Ref: <?php echo htmlspecialchars($paymentDetails['down']['details']['gcash_ref'] ?? '-'); ?></span>
+              <?php else: ?>
+                <span style="font-size:0.82rem;">Card: <?php echo htmlspecialchars($paymentDetails['down']['details']['card_holder'] ?? '-'); ?> — ****<?php echo htmlspecialchars(substr($paymentDetails['down']['details']['card_number'] ?? '', -4)); ?></span>
+              <?php endif; ?>
+            </div>
+            <div style="margin-top:0.3rem;">
+              <div style="font-weight:600;font-size:0.82rem;color:#334155;">Remaining Balance (50%):</div>
+              <span style="font-size:0.82rem;">
+                <?php echo ($paymentDetails['balance']['method'] ?? '') === 'gcash' ? 'GCash' : 'Credit Card'; ?>
+              </span>
+            </div>
+          <?php endif; ?>
+        </div>
+        <?php endif; ?>
         <div class="full-width"><strong>Delivery Address:</strong><br><?php echo nl2br(htmlspecialchars($proposal['delivery_address'] ?? '')); ?><br>
           <?php echo htmlspecialchars($proposal['city'] ?? ''); ?>, <?php echo htmlspecialchars($proposal['province'] ?? ''); ?> <?php echo htmlspecialchars($proposal['zip'] ?? ''); ?>
         </div>
@@ -326,16 +424,67 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
             <label>Landmark <span style="font-weight:400;color:#94a3b8;">(optional)</span></label>
             <input type="text" id="landmark" name="landmark" placeholder="e.g. Near church, beside 7-Eleven, etc.">
           </div>
-          <div class="form-group">
+           <div class="form-group">
             <label>Payment Method <span class="required">*</span></label>
-            <select id="payment_method" name="payment_method" required>
-              <option value="">Select payment method...</option>
-              <option value="gcash">GCash</option>
-              <option value="credit-card">Credit Card</option>
-              <option value="cod">Cash on Delivery</option>
-              <option value="downpayment">Downpayment (50%)</option>
-            </select>
-            <div class="error-msg">Please select a payment method</div>
+            <div class="payment-methods" id="payment_methods">
+              <label class="payment-option" data-method="gcash">
+                <input type="radio" name="payment_method" value="gcash" required>
+                <span class="payment-option-content">
+                  <i class="fas fa-mobile-alt"></i>
+                  <span>GCash</span>
+                </span>
+              </label>
+              <label class="payment-option" data-method="credit-card">
+                <input type="radio" name="payment_method" value="credit-card" required>
+                <span class="payment-option-content">
+                  <i class="fas fa-credit-card"></i>
+                  <span>Credit Card</span>
+                </span>
+              </label>
+              <label class="payment-option" data-method="downpayment">
+                <input type="radio" name="payment_method" value="downpayment" required>
+                <span class="payment-option-content">
+                  <i class="fas fa-percent"></i>
+                  <span>Downpayment (50%)</span>
+                </span>
+              </label>
+            </div>
+            <div class="error-msg" id="pm-error">Please select a payment method</div>
+          </div>
+
+          <!-- Downpayment Details -->
+          <div class="payment-details" id="payment-details-downpayment" style="display:none;">
+            <div class="payment-details-inner">
+              <div class="dp-summary">
+                <div class="dp-row"><span>Total Amount</span><span>₱<?php echo number_format($rfpTotal, 2); ?></span></div>
+                <div class="dp-row dp-highlight"><span>50% Downpayment</span><span>₱<?php echo number_format($rfpTotal * 0.5, 2); ?></span></div>
+                <div class="dp-row"><span>Remaining Balance (50%)</span><span>₱<?php echo number_format($rfpTotal * 0.5, 2); ?></span></div>
+              </div>
+
+              <h4 style="margin:1rem 0 0.5rem;font-size:0.9rem;color:#334155;">How will you pay the 50% downpayment?</h4>
+              <div class="dp-sub-methods">
+                <label class="payment-option sm" data-sub="down">
+                  <input type="radio" name="dp_down_method" value="gcash" required>
+                  <span class="payment-option-content"><i class="fas fa-mobile-alt"></i><span>GCash</span></span>
+                </label>
+                <label class="payment-option sm" data-sub="down">
+                  <input type="radio" name="dp_down_method" value="credit-card" required>
+                  <span class="payment-option-content"><i class="fas fa-credit-card"></i><span>Credit Card</span></span>
+                </label>
+              </div>
+
+              <h4 style="margin:1rem 0 0.5rem;font-size:0.9rem;color:#334155;">How will you pay the remaining 50%?</h4>
+              <div class="dp-sub-methods">
+                <label class="payment-option sm" data-sub="balance">
+                  <input type="radio" name="dp_balance_method" value="gcash" required>
+                  <span class="payment-option-content"><i class="fas fa-mobile-alt"></i><span>GCash</span></span>
+                </label>
+                <label class="payment-option sm" data-sub="balance">
+                  <input type="radio" name="dp_balance_method" value="credit-card" required>
+                  <span class="payment-option-content"><i class="fas fa-credit-card"></i><span>Credit Card</span></span>
+                </label>
+              </div>
+            </div>
           </div>
           <div class="form-group full-width">
             <label>Additional Notes <span style="font-weight:400;color:#94a3b8;">(optional)</span></label>
@@ -354,15 +503,46 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
   </div>
 
   <script>
+    // Payment method toggle
+    document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        document.querySelectorAll('.payment-details').forEach(d => d.style.display = 'none');
+        document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('active'));
+        this.closest('.payment-option').classList.add('active');
+        const detail = document.getElementById('payment-details-' + this.value);
+        if (detail) detail.style.display = 'block';
+      });
+    });
+
+    // Downpayment sub-method toggles
+    document.querySelectorAll('input[name="dp_down_method"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        document.querySelectorAll('.payment-option[data-sub="down"]').forEach(o => o.classList.remove('active'));
+        this.closest('.payment-option').classList.add('active');
+      });
+    });
+    document.querySelectorAll('input[name="dp_balance_method"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        document.querySelectorAll('.payment-option[data-sub="balance"]').forEach(o => o.classList.remove('active'));
+        this.closest('.payment-option').classList.add('active');
+      });
+    });
+
+    function getPaymentDetails() {
+      return null;
+    }
+
     async function submitForm() {
       const btn = document.getElementById('submitBtn');
       const errorEl = document.getElementById('formError');
       const loadingEl = document.getElementById('formLoading');
       errorEl.style.display = 'none';
 
+      const method = document.querySelector('input[name="payment_method"]:checked');
+
       // Client-side validation
       const fields = [
-        'full_name', 'email', 'phone', 'delivery_address', 'city', 'province', 'zip', 'payment_method'
+        'full_name', 'email', 'phone', 'delivery_address', 'city', 'province', 'zip'
       ];
       let hasError = false;
 
@@ -376,6 +556,13 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
           group.classList.remove('has-error');
         }
       });
+
+      if (!method) {
+        document.getElementById('pm-error').style.display = 'block';
+        hasError = true;
+      } else {
+        document.getElementById('pm-error').style.display = 'none';
+      }
 
       // Validate email format
       const emailInput = document.getElementById('email');
@@ -411,13 +598,13 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
             province: document.getElementById('province').value.trim(),
             zip: document.getElementById('zip').value.trim(),
             landmark: document.getElementById('landmark').value.trim(),
-            payment_method: document.getElementById('payment_method').value,
+            payment_method: method ? method.value : '',
+            payment_details: getPaymentDetails(),
             additional_notes: document.getElementById('additional_notes').value.trim()
           })
         });
         const data = await res.json();
         if (data.success) {
-          // Show success message and redirect
           document.getElementById('orderForm').innerHTML = `
             <div class="success-msg">
               <i class="fas fa-check-circle"></i>

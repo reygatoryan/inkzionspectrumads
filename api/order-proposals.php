@@ -242,6 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $province = trim($data['province'] ?? '');
         $zip = trim($data['zip'] ?? '');
         $paymentMethod = trim($data['payment_method'] ?? '');
+        $paymentDetails = isset($data['payment_details']) ? json_encode($data['payment_details']) : null;
         $additionalNotes = trim($data['additional_notes'] ?? '');
         $landmark = trim($data['landmark'] ?? '');
 
@@ -262,10 +263,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             UPDATE order_proposals SET
                 full_name = ?, email = ?, phone = ?, delivery_address = ?,
                 city = ?, province = ?, zip = ?, landmark = ?,
-                payment_method = ?, additional_notes = ?, status = 'filled', updated_at = NOW()
+                payment_method = ?, payment_details = ?, additional_notes = ?, status = 'filled', updated_at = NOW()
             WHERE id = ? AND user_id = ?
         ");
-        $updateStmt->bind_param('ssssssssssii', $fullName, $email, $phone, $deliveryAddress, $city, $province, $zip, $landmark, $paymentMethod, $additionalNotes, $proposalId, $userId);
+        $updateStmt->bind_param('sssssssssssii', $fullName, $email, $phone, $deliveryAddress, $city, $province, $zip, $landmark, $paymentMethod, $paymentDetails, $additionalNotes, $proposalId, $userId);
 
         if ($updateStmt->execute()) {
             // Notify admin
