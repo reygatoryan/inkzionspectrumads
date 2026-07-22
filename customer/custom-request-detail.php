@@ -438,7 +438,7 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
       </div>
     </div>
     <div class="sidebar-profile">
-      <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
+      <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="<?php echo htmlspecialchars(profilePhotoUrl($userProfilePhoto)); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
       <div class="sidebar-profile-info">
         <h4><?php echo htmlspecialchars($userName); ?></h4>
         <p><?php echo $isSeller ? 'admin' : 'Customer'; ?></p>
@@ -497,7 +497,7 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
           </div>
           <div class="header-profile-dropdown-wrapper">
             <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
-              <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
+              <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="<?php echo htmlspecialchars(profilePhotoUrl($userProfilePhoto)); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
               <span class="header-profile-name"><?php echo htmlspecialchars($userName); ?></span>
               <i class="fas fa-chevron-down header-profile-arrow"></i>
             </button>
@@ -635,7 +635,8 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
           <div class="prop-card">
             <?php if (!empty($req['ready_for_purchase_image'])): ?>
             <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border-color);">
-              <img src="../<?php echo htmlspecialchars($req['ready_for_purchase_image']); ?>" alt="<?php echo htmlspecialchars($req['ready_for_purchase_name'] ?? 'Product'); ?>" style="width:140px;height:140px;border-radius:12px;object-fit:cover;border:1px solid var(--border-color);">
+              <?php $rfpImg = $req['ready_for_purchase_image']; if (!str_starts_with($rfpImg, '../') && !str_starts_with($rfpImg, 'http')) $rfpImg = '../' . $rfpImg; ?>
+              <img src="<?php echo htmlspecialchars($rfpImg); ?>" alt="<?php echo htmlspecialchars($req['ready_for_purchase_name'] ?? 'Product'); ?>" style="width:140px;height:140px;border-radius:12px;object-fit:cover;border:1px solid var(--border-color);">
               <div style="flex:1;min-width:160px;">
                 <h3 style="margin:0 0 0.35rem;font-size:1.1rem;"><?php echo htmlspecialchars($req['ready_for_purchase_name'] ?? 'Product'); ?></h3>
                 <div style="font-size:1.3rem;font-weight:800;color:var(--primary);">₱<?php echo number_format($rfpPrice, 2); ?></div>

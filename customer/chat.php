@@ -535,7 +535,7 @@ session_write_close();
       const unread = conv.unread_count || 0;
       const lastMsg = conv.last_message || 'No messages yet';
       const time = conv.last_message_at ? new Date(conv.last_message_at).toLocaleDateString() : '';
-      const reqInfo = conv.request_type ? `<span style="font-size:0.7rem;color:#2B4C52;">${escapeHtml(conv.request_type)}</span>` : '';
+      const reqInfo = (conv.request_type || conv.product_name) ? `<span style="font-size:0.7rem;color:#2B4C52;">${escapeHtml(conv.request_type || conv.product_name)}</span>` : '';
       
       return `
         <div class="conversation-item ${currentConversation == conv.id ? 'active' : ''}" data-id="${conv.id}" onclick="selectConversation(${conv.id})">
@@ -1112,6 +1112,7 @@ session_write_close();
           clearFilePreview();
           replacePendingMessage(tempId, data.message);
           updateUnreadBadge();
+          loadConversations();
         } else {
           markMessageFailed(tempId, data.error || 'Failed to send');
         }
@@ -1308,7 +1309,7 @@ session_write_close();
     // Init
     loadConversations();
     autoSelectConversation();
-    setInterval(loadConversations, 30000);
+    setInterval(loadConversations, 10000);
 
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('open');

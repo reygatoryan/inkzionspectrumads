@@ -42,6 +42,14 @@ function closeNotifDropdown() {
   var dd = document.getElementById('notifDropdown');
   if (dd) dd.classList.remove('active');
 }
+function toggleProfileDropdown() {
+  var dd = document.getElementById('profileDropdown');
+  if (dd) dd.classList.toggle('active');
+}
+function closeProfileDropdown() {
+  var dd = document.getElementById('profileDropdown');
+  if (dd) dd.classList.remove('active');
+}
 
 // Load notifications into dropdown
 var notifFetching = false;
@@ -148,10 +156,13 @@ function updateNotifBellDot(count) {
   dot.style.display = count > 0 ? 'block' : 'none';
 }
 
-// Close dropdown when clicking outside
+// Close dropdowns when clicking outside
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.header-notif-wrapper') && !e.target.closest('.notif-dropdown')) {
     closeNotifDropdown();
+  }
+  if (!e.target.closest('.header-profile-dropdown-wrapper')) {
+    closeProfileDropdown();
   }
 });
 

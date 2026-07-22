@@ -248,8 +248,8 @@ $contactContent = $siteContent['contact_info'] ?? [];
           </article>
           <article class="service-card">
             <div class="service-icon service-icon-blue"><i class="fas fa-certificate"></i></div>
-            <h3>Specialty Printing</h3>
-            <p>Certificates, vinyl stickers, PVC IDs, calendars, photo printing, and DTF printing.</p>
+            <h3>Certificates & Documents</h3>
+            <p>Certificates, diplomas, award plaques, document binding, and professional printing.</p>
           </article>
           <article class="service-card">
             <div class="service-icon service-icon-pink"><i class="fas fa-palette"></i></div>

@@ -4,6 +4,7 @@ if (empty($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit();
 }
+require_once __DIR__ . '/../db-config.php';
 $loggedIn = true;
 $userName = trim($_SESSION['user_name'] ?? '');
 $userInitials = '';
@@ -323,7 +324,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       </div>
     </div>
     <div class="sidebar-profile">
-      <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
+      <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="<?php echo htmlspecialchars(profilePhotoUrl($userProfilePhoto)); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
       <div class="sidebar-profile-info">
         <h4><?php echo htmlspecialchars($userName); ?></h4>
         <p><?php echo $isSeller ? 'admin' : 'Customer'; ?></p>
@@ -382,7 +383,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
           </div>
           <div class="header-profile-dropdown-wrapper">
             <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
-              <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
+              <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="<?php echo htmlspecialchars(profilePhotoUrl($userProfilePhoto)); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
               <span class="header-profile-name"><?php echo htmlspecialchars($userName); ?></span>
               <i class="fas fa-chevron-down header-profile-arrow"></i>
             </button>

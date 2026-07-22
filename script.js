@@ -87,7 +87,6 @@ async function initInkzionApp() {
         { name: 'Tri-Fold Brochures', description: 'Full color, double-sided, 500 pieces', price: '$89', image: 'assets/marketing/brochures.png' },
         { name: 'Flyers & Postcards', description: 'Glossy or matte finish, 1000 pieces', price: '$39', image: 'assets/marketing/flyers.png' },
         { name: 'Calendars', description: 'Custom printed wall or desk calendars', price: '$49', image: 'assets/marketing/calendars.png' },
-        { name: 'Certificate Printing', description: 'Professional certificates with borders, 100 pieces', price: '$29', image: 'assets/marketing/certificates.png' },
       ],
     },
     {
@@ -127,12 +126,12 @@ async function initInkzionApp() {
       ],
     },
     {
-      category: 'Specialty Printing',
+      category: 'Certificates & Documents',
       items: [
-        { name: 'Photo Printing', description: 'High-quality 4x6 to 16x20 prints', price: '$5-$29', image: 'https://via.placeholder.com/600x400/e91e8c/ffffff?text=Photo+Printing' },
-        { name: 'DTF (Direct-to-Film) Printing', description: 'Premium transfer printing quality', price: '$8', image: 'https://via.placeholder.com/600x400/00bcd4/ffffff?text=DTF+Printing' },
-        { name: 'Canvas Prints', description: 'Gallery-wrapped finish, custom sizes', price: '$49', image: 'https://via.placeholder.com/600x400/ffc107/ffffff?text=Canvas+Prints' },
-        { name: 'Presentation Folders', description: 'Custom pockets & die-cuts', price: '$99', image: 'https://via.placeholder.com/600x400/8bc34a/ffffff?text=Presentation+Folders' },
+        { name: 'Certificate Printing', description: 'Professional certificates with borders, 100 pieces', price: '$29', image: 'https://via.placeholder.com/600x400/8bc34a/ffffff?text=Certificates' },
+        { name: 'Diploma Printing', description: 'Premium diploma printing with gold seal', price: '$49', image: 'https://via.placeholder.com/600x400/ff9800/ffffff?text=Diploma' },
+        { name: 'Award Plaques', description: 'Wooden or acrylic plaques with engraving', price: '$39', image: 'https://via.placeholder.com/600x400/9c27b0/ffffff?text=Plaque' },
+        { name: 'Document Binding', description: 'Professional spiral or comb binding', price: '$15', image: 'https://via.placeholder.com/600x400/607d8b/ffffff?text=Binding' },
       ],
     },
   ];

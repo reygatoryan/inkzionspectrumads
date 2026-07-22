@@ -12,6 +12,11 @@ if ($conn->connect_error) {
 
 $conn->set_charset("utf8");
 
+function profilePhotoUrl($photo) {
+    if (empty($photo)) return '';
+    return (strpos($photo, '://') !== false ? '' : '../') . $photo;
+}
+
 function db_column_exists(mysqli $conn, string $table, string $column): bool {
     $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
     $stmt->bind_param('ss', $table, $column);

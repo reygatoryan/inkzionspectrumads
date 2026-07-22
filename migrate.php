@@ -13,47 +13,7 @@ require_once __DIR__ . '/db-config.php';
 
 echo "<pre>Running migrations...\n\n";
 
-// 1. Email verification
-db_create_table_if_missing($conn, 'email_verifications', "
-    CREATE TABLE email_verifications (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        token VARCHAR(128) NOT NULL UNIQUE,
-        expires_at DATETIME NOT NULL,
-        verified_at DATETIME DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        INDEX idx_user (user_id),
-        INDEX idx_token (token)
-    )
-");
-echo "[OK] email_verifications\n";
-
-// 2. User addresses
-db_create_table_if_missing($conn, 'user_addresses', "
-    CREATE TABLE user_addresses (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        label VARCHAR(50) DEFAULT 'Home',
-        first_name VARCHAR(100) NOT NULL,
-        last_name VARCHAR(100) NOT NULL,
-        phone VARCHAR(20) NOT NULL,
-        street VARCHAR(255) NOT NULL,
-        barangay VARCHAR(100) NOT NULL,
-        city VARCHAR(100) NOT NULL,
-        province VARCHAR(100) NOT NULL,
-        zip_code VARCHAR(10) NOT NULL,
-        country VARCHAR(100) DEFAULT 'Philippines',
-        is_default TINYINT(1) DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        INDEX idx_user (user_id)
-    )
-");
-echo "[OK] user_addresses\n";
-
-// 3. Order timeline
+// 1. Order timeline
 db_create_table_if_missing($conn, 'order_timeline', "
     CREATE TABLE order_timeline (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -71,132 +31,12 @@ db_create_table_if_missing($conn, 'order_timeline', "
 ");
 echo "[OK] order_timeline\n";
 
-// 4. Product reviews
-db_create_table_if_missing($conn, 'product_reviews', "
-    CREATE TABLE product_reviews (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        product_id INT NOT NULL,
-        user_id INT NOT NULL,
-        order_id INT NOT NULL,
-        rating TINYINT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-        title VARCHAR(255) DEFAULT NULL,
-        review TEXT DEFAULT NULL,
-        is_approved TINYINT(1) DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-        INDEX idx_product (product_id),
-        INDEX idx_user (user_id),
-        INDEX idx_order (order_id)
-    )
-");
-echo "[OK] product_reviews\n";
-
 // 5. Users columns
-db_add_column_if_missing($conn, 'users', 'email_verified_at', 'email_verified_at DATETIME DEFAULT NULL');
 db_add_column_if_missing($conn, 'users', 'is_online', 'is_online TINYINT(1) DEFAULT 0');
 db_add_column_if_missing($conn, 'users', 'last_seen', 'last_seen DATETIME DEFAULT NULL');
-echo "[OK] users columns (email_verified_at, is_online, last_seen)\n";
+echo "[OK] users columns (is_online, last_seen)\n";
 
-// 6. Product variants
-db_create_table_if_missing($conn, 'product_variants', "
-    CREATE TABLE product_variants (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        product_id INT NOT NULL,
-        size VARCHAR(50) DEFAULT NULL,
-        color VARCHAR(50) DEFAULT NULL,
-        material VARCHAR(100) DEFAULT NULL,
-        sku VARCHAR(100) DEFAULT NULL,
-        price DECIMAL(10,2) DEFAULT NULL,
-        stock INT DEFAULT 0,
-        image_url VARCHAR(500) DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-        INDEX idx_product (product_id)
-    )
-");
-echo "[OK] product_variants\n";
-
-// 7. Product images
-db_create_table_if_missing($conn, 'product_images', "
-    CREATE TABLE product_images (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        product_id INT NOT NULL,
-        image_url VARCHAR(500) NOT NULL,
-        is_primary TINYINT(1) DEFAULT 0,
-        sort_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-        INDEX idx_product (product_id)
-    )
-");
-echo "[OK] product_images\n";
-
-// 8. Product videos
-db_create_table_if_missing($conn, 'product_videos', "
-    CREATE TABLE product_videos (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        product_id INT NOT NULL,
-        video_url VARCHAR(500) NOT NULL,
-        thumbnail_url VARCHAR(500) DEFAULT NULL,
-        sort_order INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-        INDEX idx_product (product_id)
-    )
-");
-echo "[OK] product_videos\n";
-
-// 9. Product discounts
-db_create_table_if_missing($conn, 'product_discounts', "
-    CREATE TABLE product_discounts (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        product_id INT NOT NULL,
-        discount_type ENUM('percentage', 'fixed') DEFAULT 'percentage',
-        discount_value DECIMAL(10,2) NOT NULL,
-        start_date DATETIME DEFAULT NULL,
-        end_date DATETIME DEFAULT NULL,
-        is_active TINYINT(1) DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-        INDEX idx_product (product_id)
-    )
-");
-echo "[OK] product_discounts\n";
-
-// 10. Wishlist
-db_create_table_if_missing($conn, 'wishlist', "
-    CREATE TABLE wishlist (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        product_id INT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_wishlist (user_id, product_id),
-        INDEX idx_user (user_id)
-    )
-");
-echo "[OK] wishlist\n";
-
-// 11. Recently viewed
-db_create_table_if_missing($conn, 'recently_viewed', "
-    CREATE TABLE recently_viewed (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        product_id INT NOT NULL,
-        viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-        INDEX idx_user (user_id),
-        INDEX idx_viewed_at (viewed_at)
-    )
-");
-echo "[OK] recently_viewed\n";
-
-// 12. Custom printing requests
+// 6. Custom printing requests
 db_create_table_if_missing($conn, 'custom_printing_requests', "
     CREATE TABLE custom_printing_requests (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -238,21 +78,7 @@ db_create_table_if_missing($conn, 'custom_request_files', "
 ");
 echo "[OK] custom_request_files\n";
 
-// 14. Subcategories
-db_create_table_if_missing($conn, 'subcategories', "
-    CREATE TABLE subcategories (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        category_id INT NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        description TEXT DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
-        INDEX idx_category (category_id)
-    )
-");
-echo "[OK] subcategories\n";
-
-// 15. Chat conversations
+// 7. Chat conversations
 db_create_table_if_missing($conn, 'chat_conversations', "
     CREATE TABLE chat_conversations (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -326,20 +152,7 @@ $conn->query("ALTER TABLE users MODIFY role ENUM('admin', 'user') DEFAULT 'user'
 echo "[OK] simplified user roles\n";
 
 // Password reset requests
-$conn->query("CREATE TABLE IF NOT EXISTS password_reset_requests (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    token VARCHAR(128) NOT NULL,
-    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-    admin_notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    INDEX idx_user (user_id),
-    INDEX idx_status (status),
-    INDEX idx_created_at (created_at)
-)");
-echo "[OK] password_reset_requests\n";
+
 
 $conn->query("CREATE TABLE IF NOT EXISTS activity_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -356,20 +169,8 @@ $conn->query("CREATE TABLE IF NOT EXISTS activity_logs (
 )");
 echo "[OK] activity_logs\n";
 
-// Users columns (security)
-db_add_column_if_missing($conn, 'users', 'security_question_1', 'security_question_1 VARCHAR(255) DEFAULT NULL');
-db_add_column_if_missing($conn, 'users', 'security_answer_1', 'security_answer_1 VARCHAR(255) DEFAULT NULL');
-db_add_column_if_missing($conn, 'users', 'security_question_2', 'security_question_2 VARCHAR(255) DEFAULT NULL');
-db_add_column_if_missing($conn, 'users', 'security_answer_2', 'security_answer_2 VARCHAR(255) DEFAULT NULL');
-echo "[OK] users security columns\n";
-
 // Products columns
 db_add_column_if_missing($conn, 'products', 'seller_id', 'seller_id INT DEFAULT NULL AFTER category_id');
-db_add_column_if_missing($conn, 'products', 'subcategory_id', 'subcategory_id INT DEFAULT NULL AFTER category_id');
-db_add_column_if_missing($conn, 'products', 'is_featured', 'is_featured TINYINT(1) DEFAULT 0 AFTER stock');
-db_add_column_if_missing($conn, 'products', 'is_best_seller', 'is_best_seller TINYINT(1) DEFAULT 0 AFTER is_featured');
-db_add_column_if_missing($conn, 'products', 'is_new_arrival', 'is_new_arrival TINYINT(1) DEFAULT 0 AFTER is_best_seller');
-db_add_column_if_missing($conn, 'products', 'video_url', 'video_url VARCHAR(500) DEFAULT NULL AFTER image_url');
 db_add_column_if_missing($conn, 'products', 'weight', "weight DECIMAL(8,3) DEFAULT 0 AFTER stock");
 echo "[OK] products columns\n";
 
@@ -385,14 +186,11 @@ db_add_column_if_missing($conn, 'orders', 'delivery_city', 'delivery_city VARCHA
 db_add_column_if_missing($conn, 'orders', 'delivery_province', 'delivery_province VARCHAR(100) DEFAULT NULL AFTER delivery_city');
 db_add_column_if_missing($conn, 'orders', 'delivery_zip', 'delivery_zip VARCHAR(10) DEFAULT NULL AFTER delivery_province');
 db_add_column_if_missing($conn, 'orders', 'delivery_country', "delivery_country VARCHAR(100) DEFAULT 'Philippines' AFTER delivery_zip");
-db_add_column_if_missing($conn, 'orders', 'delivery_notes', 'delivery_notes TEXT DEFAULT NULL AFTER delivery_country');
-db_add_column_if_missing($conn, 'orders', 'order_notes', 'order_notes TEXT DEFAULT NULL AFTER delivery_notes');
+db_add_column_if_missing($conn, 'orders', 'order_notes', 'order_notes TEXT DEFAULT NULL AFTER delivery_country');
 db_add_column_if_missing($conn, 'orders', 'tracking_number', 'tracking_number VARCHAR(100) DEFAULT NULL AFTER order_notes');
 db_add_column_if_missing($conn, 'orders', 'courier', 'courier VARCHAR(100) DEFAULT NULL AFTER tracking_number');
 db_add_column_if_missing($conn, 'orders', 'estimated_delivery', 'estimated_delivery DATE DEFAULT NULL AFTER courier');
-db_add_column_if_missing($conn, 'orders', 'payment_reference', "payment_reference VARCHAR(255) DEFAULT NULL AFTER payment_method");
-db_add_column_if_missing($conn, 'orders', 'balance_method', "balance_method VARCHAR(50) DEFAULT NULL AFTER payment_reference");
-db_add_column_if_missing($conn, 'orders', 'total_weight', "total_weight DECIMAL(8,3) DEFAULT NULL AFTER balance_method");
+db_add_column_if_missing($conn, 'orders', 'total_weight', "total_weight DECIMAL(8,3) DEFAULT NULL AFTER payment_method");
 db_add_column_if_missing($conn, 'orders', 'shipping_fee', "shipping_fee DECIMAL(10,2) DEFAULT NULL AFTER total_weight");
 db_add_column_if_missing($conn, 'orders', 'checkout_session_id', "checkout_session_id VARCHAR(100) DEFAULT NULL AFTER shipping_fee");
 db_add_column_if_missing($conn, 'orders', 'checkout_url', "checkout_url VARCHAR(500) DEFAULT NULL AFTER checkout_session_id");
@@ -400,16 +198,12 @@ db_add_column_if_missing($conn, 'orders', 'paymongo_payment_id', "paymongo_payme
 db_add_column_if_missing($conn, 'orders', 'paid_at', "paid_at TIMESTAMP NULL DEFAULT NULL AFTER paymongo_payment_id");
 echo "[OK] orders columns\n";
 
-db_add_column_if_missing($conn, 'customization_requests', 'updated_at', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
-echo "[OK] customization_requests updated_at\n";
-
 // Status migrations
 $conn->query("UPDATE orders SET status = 'pending' WHERE status NOT IN ('pending','confirmed','shipped','delivered','completed','cancelled','returned')");
 $conn->query("UPDATE orders SET status = 'returned' WHERE status = 'return_refund'");
 $conn->query("UPDATE orders SET status = 'confirmed' WHERE status IN ('payment_verification','design_review','awaiting_approval','approved','printing','quality_check','packaging','ready_pickup')");
 $conn->query("UPDATE orders SET status = 'shipped' WHERE status IN ('out_delivery')");
 $conn->query("ALTER TABLE orders MODIFY status ENUM('pending', 'confirmed', 'shipped', 'delivered', 'completed', 'cancelled', 'returned') DEFAULT 'pending'");
-$conn->query("ALTER TABLE customization_requests MODIFY status ENUM('pending', 'reviewed', 'approved', 'rejected', 'completed') DEFAULT 'pending'");
 echo "[OK] status enums migrated\n";
 
 // Custom printing requests columns
@@ -455,6 +249,7 @@ echo "[OK] site_content seed data\n";
 db_add_column_if_missing($conn, 'users', 'google_id', 'google_id VARCHAR(255) DEFAULT NULL UNIQUE');
 db_add_column_if_missing($conn, 'users', 'avatar', 'avatar VARCHAR(500) DEFAULT NULL');
 $conn->query("ALTER TABLE users MODIFY password VARCHAR(255) DEFAULT NULL");
+db_add_column_if_missing($conn, 'users', 'profile_photo', "profile_photo VARCHAR(500) DEFAULT NULL AFTER avatar");
 echo "[OK] Google Sign-In columns\n";
 
 // Page views

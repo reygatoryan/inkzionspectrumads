@@ -146,9 +146,12 @@ $_SESSION['user_email'] = $user['email'];
 $_SESSION['user_role'] = $user['role'];
 $_SESSION['user_profile_photo'] = $user['avatar'] ?? '';
 
-// Sync avatar to profile_photo column for consistency across features
-if (!empty($user['avatar'])) {
-    $conn->query("UPDATE users SET profile_photo = avatar WHERE id = {$user['id']} AND profile_photo IS NULL AND avatar IS NOT NULL AND avatar != ''");
+// Sync avatar to profile_photo column for consistency across features (column added Jul 2026)
+if (!empty($user['avatar']) && db_column_exists($conn, 'users', 'profile_photo')) {
+    $stmt = $conn->prepare("UPDATE users SET profile_photo = avatar WHERE id = ? AND profile_photo IS NULL AND avatar IS NOT NULL AND avatar != ''");
+    $stmt->bind_param("i", $user['id']);
+    $stmt->execute();
+    $stmt->close();
 }
 
 // Log login (not for new registrations, already logged above)

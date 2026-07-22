@@ -341,7 +341,7 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
         </div>
       </div>
       <div class="sidebar-profile">
-        <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
+        <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="<?php echo htmlspecialchars(profilePhotoUrl($userProfilePhoto)); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
         <div class="sidebar-profile-info">
           <h4><?php echo htmlspecialchars($userName); ?></h4>
           <p><?php echo $isSeller ? 'admin' : 'Customer'; ?></p>
@@ -399,7 +399,7 @@ $title = $request ? htmlspecialchars($request['service_type'] ?? 'Custom Request
             </div>
             <div class="header-profile-dropdown-wrapper">
               <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
-                <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
+                <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="<?php echo htmlspecialchars(profilePhotoUrl($userProfilePhoto)); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
                 <span class="header-profile-name"><?php echo htmlspecialchars($userName); ?></span>
                 <i class="fas fa-chevron-down header-profile-arrow"></i>
               </button>

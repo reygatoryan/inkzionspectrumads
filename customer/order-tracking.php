@@ -620,7 +620,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             </div>
         </div>
         <div class="sidebar-profile">
-            <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
+            <div class="sidebar-avatar"><?php if ($userProfilePhoto): ?><img src="<?php echo htmlspecialchars(profilePhotoUrl($userProfilePhoto)); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
             <div class="sidebar-profile-info">
                 <h4><?php echo htmlspecialchars($userName); ?></h4>
                 <p><?php echo $isSeller ? 'admin' : 'Customer'; ?></p>
@@ -690,7 +690,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                     </div>
                     <div class="header-profile-dropdown-wrapper">
                         <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
-                            <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
+                            <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="<?php echo htmlspecialchars(profilePhotoUrl($userProfilePhoto)); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
                             <span class="header-profile-name"><?php echo htmlspecialchars($userName); ?></span>
                             <i class="fas fa-chevron-down header-profile-arrow"></i>
                         </button>
@@ -741,7 +741,8 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                     <?php if (!empty($orderItems)): ?>
                         <?php foreach ($orderItems as $item): ?>
                         <div class="order-item-row">
-                            <img src="../<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
+                            <?php $itemImg = $item['image_url']; if (!str_starts_with($itemImg, '../') && !str_starts_with($itemImg, 'http')) $itemImg = '../' . $itemImg; ?>
+                            <img src="<?php echo htmlspecialchars($itemImg); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
                             <div class="order-item-details">
                                 <div class="order-item-name"><?php echo htmlspecialchars($item['product_name']); ?></div>
                                 <div class="order-item-meta">Qty: <?php echo (int)$item['quantity']; ?> × ₱<?php echo number_format((float)$item['unit_price'], 2); ?></div>
@@ -842,14 +843,6 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                                 <?php echo ucfirst($order['payment_status']); ?>
                             </div>
                         </div>
-                        <?php if ($order['payment_status'] !== 'paid' && in_array($order['payment_method'], ['gcash', 'credit_card'])): ?>
-                            <div class="info-item" style="grid-column:1/-1;">
-                                <button onclick="payWithPayMongo(<?php echo (int)$orderId; ?>)" class="btn btn-primary" style="width:100%;padding:0.75rem;font-size:0.95rem;border:none;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,#2B4C52,#4A7C84);color:white;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all 0.2s;">
-                                    <i class="fas fa-credit-card"></i> Pay Now — ₱<?php echo number_format((float)$order['total_amount'], 2); ?>
-                                </button>
-                                <div id="paymongo-loading" style="display:none;text-align:center;padding:0.75rem;color:#64748b;font-size:0.85rem;"><i class="fas fa-spinner fa-pulse"></i> Redirecting to payment...</div>
-                            </div>
-                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -1154,64 +1147,6 @@ function updateSidebarBadges() {
 }
 updateSidebarBadges();
 setInterval(updateSidebarBadges, 10000);
-
-// ========= PAYMONGO PAYMENT =========
-function payWithPayMongo(orderId) {
-    var btn = event.target.closest('button');
-    var loading = document.getElementById('paymongo-loading');
-    btn.style.display = 'none';
-    loading.style.display = 'block';
-
-    fetch('../api/paymongo.php?action=create_session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: orderId })
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-        if (d.success && d.checkout_url) {
-            window.location.href = d.checkout_url;
-        } else {
-            btn.style.display = 'flex';
-            loading.style.display = 'none';
-            alert(d.error || 'Failed to create payment session');
-        }
-    })
-    .catch(function(){
-        btn.style.display = 'flex';
-        loading.style.display = 'none';
-        alert('Network error. Please try again.');
-    });
-}
-
-(function() {
-    var params = new URLSearchParams(window.location.search);
-    var paymentStatus = params.get('payment');
-    if (paymentStatus === 'success') {
-        var checkInterval = setInterval(function() {
-            fetch('../api/paymongo.php?action=check_status&order_id=' + orderId)
-            .then(function(r){ return r.json(); })
-            .then(function(d){
-                if (d.success && d.payment_status === 'paid') {
-                    clearInterval(checkInterval);
-                    var toast = document.createElement('div');
-                    toast.style.cssText = 'position:fixed;top:1rem;right:1rem;background:#10b981;color:white;padding:1rem 1.5rem;border-radius:12px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.2);animation:slideIn 0.3s ease;display:flex;align-items:center;gap:0.5rem;';
-                    toast.innerHTML = '<i class="fas fa-check-circle"></i> Payment successful! Thank you for your order.';
-                    document.body.appendChild(toast);
-                    setTimeout(function(){ location.reload(); }, 2000);
-                }
-            }).catch(function(){});
-        }, 2000);
-        setTimeout(function(){ clearInterval(checkInterval); }, 30000);
-    }
-    if (paymentStatus === 'cancelled') {
-        var toast = document.createElement('div');
-        toast.style.cssText = 'position:fixed;top:1rem;right:1rem;background:#f59e0b;color:white;padding:1rem 1.5rem;border-radius:12px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.2);animation:slideIn 0.3s ease;display:flex;align-items:center;gap:0.5rem;';
-        toast.innerHTML = '<i class="fas fa-times-circle"></i> Payment was cancelled. You can try again.';
-        document.body.appendChild(toast);
-        setTimeout(function(){ toast.remove(); }, 5000);
-    }
-})();
 
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.header-notif-wrapper') && !e.target.closest('.notif-dropdown')) closeNotifDropdown();

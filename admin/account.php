@@ -100,7 +100,7 @@ unset($_SESSION['success'], $_SESSION['error']);
           <div class="pa-photo-section">
             <div class="pa-photo-preview" id="photoPreview">
               <?php if (!empty($profileData['profile_photo'])): ?>
-                <img src="../<?php echo htmlspecialchars($profileData['profile_photo'], ENT_QUOTES, 'UTF-8'); ?>" alt="Profile Photo">
+                <img src="<?php echo htmlspecialchars(profilePhotoUrl($profileData['profile_photo']), ENT_QUOTES, 'UTF-8'); ?>" alt="Profile Photo">
               <?php else: ?>
                 <?php echo strtoupper(substr($sellerName, 0, 1)); ?>
               <?php endif; ?>

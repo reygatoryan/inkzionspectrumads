@@ -24,6 +24,13 @@ $stmt->close();
 
 if ($user_role === 'admin') {
     $chatStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM chat_messages cm JOIN chat_conversations cc ON cm.conversation_id = cc.id WHERE cc.admin_id = ? AND cm.sender_id != ? AND cm.is_read = 0");
+
+    // Also count pending/in-review custom requests needing admin action
+    $pendingStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM custom_printing_requests WHERE status IN ('pending', 'in_review')");
+    $pendingStmt->execute();
+    $pendingResult = $pendingStmt->get_result();
+    $counts['custom_request'] = ($counts['custom_request'] ?? 0) + (int)$pendingResult->fetch_assoc()['cnt'];
+    $pendingStmt->close();
 } else {
     $chatStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM chat_messages cm JOIN chat_conversations cc ON cm.conversation_id = cc.id WHERE cc.user_id = ? AND cm.sender_id != ? AND cm.is_read = 0");
 }

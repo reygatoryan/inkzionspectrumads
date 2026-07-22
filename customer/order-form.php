@@ -381,7 +381,7 @@ if (!empty($proposal['payment_details'])) {
       <h2><i class="fas fa-pen"></i> Your Details</h2>
       <p style="color:#64748b;font-size:0.88rem;margin-bottom:1.25rem;">Fill in your delivery and payment information to submit this order form.</p>
 
-      <form id="orderForm" onsubmit="event.preventDefault(); submitForm();">
+      <form id="orderForm" novalidate onsubmit="event.preventDefault(); submitForm();">
         <input type="hidden" name="proposal_id" value="<?php echo $proposalId; ?>">
 
         <div class="form-grid">

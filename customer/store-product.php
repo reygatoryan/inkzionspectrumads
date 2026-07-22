@@ -64,7 +64,7 @@ if (!empty($categoryOptions)) {
 
 // Filter products for Printing Services category if selected
 if ($isPrintingServices && !empty($productsByCategory)) {
-    $printingCategories = ['Business Cards', 'Marketing Materials', 'Specialty Printing'];
+    $printingCategories = ['Business Cards', 'Marketing Materials', 'Certificates & Documents'];
     $filteredProducts = [];
     foreach ($productsByCategory as $category => $products) {
         if (in_array($category, $printingCategories)) {
@@ -82,7 +82,7 @@ if (!$useDbProducts) {
         'Apparel & Sublimation' => 0,
         'Custom Merchandise' => 0,
         'Promotional Items & Giveaways' => 0,
-        'Specialty Printing' => 0,
+        'Certificates & Documents' => 0,
     ];
 
     $productsByCategory = [
@@ -124,11 +124,11 @@ if (!$useDbProducts) {
             ['name' => 'Giveaways & Promotional Items', 'description' => 'Branded merchandise for events', 'price' => '$10+', 'image' => 'assets/PROMOTIONAL_ITEMS_AND_GIVEAWAYS/GIVEAWAYS.png', 'features' => ['Custom branding', 'Event-ready', 'Various items']],
             ['name' => 'Custom Umbrellas', 'description' => 'Branded umbrellas with custom print', 'price' => '$25', 'image' => 'assets/PROMOTIONAL_ITEMS_AND_GIVEAWAYS/UMBRELLA.png', 'features' => ['Custom print', 'Durable frame', 'Compact design']],
         ],
-        'Specialty Printing' => [
-            ['name' => 'Photo Printing', 'description' => 'High-quality 4x6 to 16x20 prints', 'price' => '$5-$29', 'image' => 'https://via.placeholder.com/600x400/e91e8c/ffffff?text=Photo+Printing', 'features' => ['High quality', 'Various sizes', 'Matte/glossy']],
-            ['name' => 'DTF (Direct-to-Film) Printing', 'description' => 'Premium transfer printing quality', 'price' => '$8', 'image' => 'https://via.placeholder.com/600x400/00bcd4/ffffff?text=DTF+Printing', 'features' => ['Premium transfer', 'Vibrant colors', 'Durable print']],
-            ['name' => 'Canvas Prints', 'description' => 'Gallery-wrapped finish, custom sizes', 'price' => '$49', 'image' => 'https://via.placeholder.com/600x400/ffc107/ffffff?text=Canvas+Prints', 'features' => ['Gallery wrap', 'Custom sizes', 'Ready to hang']],
-            ['name' => 'Presentation Folders', 'description' => 'Custom pockets & die-cuts', 'price' => '$99', 'image' => 'https://via.placeholder.com/600x400/8bc34a/ffffff?text=Presentation+Folders', 'features' => ['Custom pockets', 'Die-cut options', 'Professional finish']],
+        'Certificates & Documents' => [
+            ['name' => 'Certificate Printing', 'description' => 'Professional certificates with borders, 100 pieces', 'price' => '$29', 'image' => 'https://via.placeholder.com/600x400/8bc34a/ffffff?text=Certificates', 'features' => ['Professional quality', 'Custom borders', 'Certificate paper']],
+            ['name' => 'Diploma Printing', 'description' => 'Premium diploma printing with gold seal', 'price' => '$49', 'image' => 'https://via.placeholder.com/600x400/ff9800/ffffff?text=Diploma', 'features' => ['Premium paper', 'Gold seal', 'Custom text']],
+            ['name' => 'Award Plaques', 'description' => 'Wooden or acrylic plaques with engraving', 'price' => '$39', 'image' => 'https://via.placeholder.com/600x400/9c27b0/ffffff?text=Plaque', 'features' => ['Engraved text', 'Premium finish', 'Ready to hang']],
+            ['name' => 'Document Binding', 'description' => 'Professional spiral or comb binding', 'price' => '$15', 'image' => 'https://via.placeholder.com/600x400/607d8b/ffffff?text=Binding', 'features' => ['Spiral/comb binding', 'Clear covers', 'Professional look']],
         ],
     ];
 }
@@ -1027,6 +1027,10 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .top-header-title { white-space: nowrap; }
       .header-search-input { padding-left: 1.8rem; padding-right: 0.5rem; font-size: 0.75rem; }
       .qv-overlay { padding: 0.75rem; }
+      .qv-gallery { padding: 0.75rem; }
+      .qv-info { padding: 0.75rem; }
+      .qv-info h2 { font-size: 1rem; }
+      .qv-price { font-size: 1.3rem; }
       .qv-spec-grid { grid-template-columns: 1fr; }
       .skeleton-grid { gap: 0.75rem; }
       .top-header-left { gap: 0.5rem; }
@@ -1112,7 +1116,8 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .qv-modal {
       background: white; border-radius: 18px;
       max-width: 900px; width: 100%; max-height: 90vh;
-      overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+      overflow-y: auto; overflow-x: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.25);
       animation: qvSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
     }
@@ -1129,19 +1134,23 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       z-index: 10; transition: all 0.2s ease;
     }
     .qv-close:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
-    .qv-layout { display: grid; grid-template-columns: 1fr 1fr; min-height: 400px; }
+    .qv-layout { display: grid; grid-template-columns: 1.3fr 1fr; min-height: 400px; }
     
     .qv-gallery {
-      background: #f8fafc; padding: 1.5rem;
+      background: linear-gradient(135deg, #f0f4f8 0%, #e8edf2 100%); padding: 1.5rem;
       display: flex; flex-direction: column; gap: 1rem;
-      align-self: start;
+      position: sticky; top: 0; align-self: start;
     }
     .qv-main-img {
-      width: 100%; aspect-ratio: 1; border-radius: 12px;
+      width: 100%; aspect-ratio: 1; border-radius: 14px;
       overflow: hidden; background: white; display: flex;
       align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      border: 1px solid rgba(255,255,255,0.8);
+      transition: box-shadow 0.3s ease;
     }
-    .qv-main-img img { width: 100%; height: 100%; object-fit: cover; }
+    .qv-main-img:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
+    .qv-main-img img { width: 100%; height: 100%; object-fit: contain; }
     .qv-thumbs { display: flex; gap: 0.5rem; }
     .qv-thumb {
       width: 60px; height: 60px; border-radius: 8px;
@@ -1160,17 +1169,17 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       color: var(--primary); border-radius: 20px;
       font-size: 0.65rem; font-weight: 700;
     }
-    .qv-info h2 { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); line-height: 1.3; }
+    .qv-info h2 { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); line-height: 1.3; word-break: break-word; }
     .qv-price { font-size: 1.8rem; font-weight: 900; color: var(--primary); }
-    .qv-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+    .qv-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; word-break: break-word; }
     .qv-spec-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
       margin: 0.5rem 0;
     }
     .qv-spec-card {
-      display: flex; align-items: center; gap: 0.65rem;
-      padding: 0.55rem 0.75rem; background: var(--border-light);
-      border-radius: 10px; transition: var(--transition);
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.45rem 0.65rem; background: var(--border-light);
+      border-radius: 8px; transition: var(--transition);
     }
     .qv-spec-card:hover { background: var(--primary-bg); transform: translateX(2px); }
     .qv-spec-icon {
@@ -1181,63 +1190,12 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     }
     .qv-spec-info { flex: 1; min-width: 0; }
     .qv-spec-label { display: block; font-size: 0.6rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-    .qv-spec-value { display: block; font-size: 0.72rem; font-weight: 600; color: var(--text-primary); margin-top: 0.05rem; }
+    .qv-spec-value { display: block; font-size: 0.72rem; font-weight: 600; color: var(--text-primary); margin-top: 0.05rem; word-break: break-word; }
 
 
 
 
 
-    /* RELATED PRODUCTS */
-    .qv-related { margin: 1rem 0; }
-    .qv-related-header {
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;
-    }
-    .qv-related-header h3 { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem; }
-    .qv-related-tabs { display: flex; gap: 0.3rem; }
-    .qv-related-tab {
-      padding: 0.3rem 0.65rem; border: 1px solid var(--border-color);
-      border-radius: 20px; background: white; font-size: 0.65rem;
-      font-weight: 600; color: var(--text-muted); cursor: pointer;
-      transition: var(--transition); white-space: nowrap;
-    }
-    .qv-related-tab:hover { border-color: var(--primary); color: var(--primary); }
-    .qv-related-tab.active { background: var(--primary-bg); border-color: var(--primary); color: var(--primary); }
-    .qv-related-slider-wrapper {
-      position: relative; display: flex; align-items: center;
-    }
-    .qv-related-arrow {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 1px solid var(--border-color); background: white;
-      color: var(--text-secondary); cursor: pointer; display: flex;
-      align-items: center; justify-content: center; flex-shrink: 0;
-      transition: var(--transition); z-index: 2;
-    }
-    .qv-related-arrow:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
-    .qv-related-slider {
-      flex: 1; overflow-x: auto; overflow-y: hidden;
-      scroll-behavior: smooth; display: flex; gap: 0.75rem;
-      padding: 0.25rem 0.5rem; scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-    .qv-related-slider::-webkit-scrollbar { display: none; }
-    .qv-related-item {
-      flex: 0 0 140px; min-width: 0;
-      background: white; border-radius: 10px;
-      border: 1px solid var(--border-color);
-      overflow: hidden; transition: var(--transition);
-      cursor: pointer; text-decoration: none; color: inherit;
-    }
-    .qv-related-item:hover {
-      border-color: var(--primary); transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(43, 76, 82,0.1);
-    }
-    .qv-related-item img {
-      width: 100%; height: 110px; object-fit: cover; display: block;
-    }
-    .qv-related-item-body { padding: 0.5rem; }
-    .qv-related-item-title { font-size: 0.7rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.2rem; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-    .qv-related-item-price { font-size: 0.75rem; font-weight: 800; color: var(--primary); }
 
 
     .float-panel-header {
@@ -1355,11 +1313,14 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
 
       
       .qv-layout { grid-template-columns: 1fr; }
-      .qv-gallery { padding: 1rem; }
+      .qv-gallery { padding: 1rem; position: static; background: linear-gradient(135deg, #f0f4f8 0%, #e8edf2 100%); }
       .qv-main-img { aspect-ratio: 4/3; }
       .qv-info { padding: 1rem; }
       .qv-info h2 { font-size: 1.1rem; }
       .qv-price { font-size: 1.4rem; }
+      .qv-spec-grid { grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+      .qv-spec-card { padding: 0.45rem 0.6rem; }
+      .qv-spec-icon { width: 28px; height: 28px; font-size: 0.7rem; }
     }
     .modal-overlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(4px); }
     .modal-overlay.open { display: flex; }
@@ -1506,7 +1467,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       </div>
       
       <div class="sidebar-profile">
-        <div class="sidebar-avatar"><?php if ($loggedIn && $userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php elseif ($loggedIn): ?><?php echo htmlspecialchars($userInitials); ?><?php else: ?><i class="fas fa-user" style="font-size:0.7rem;"></i><?php endif; ?></div>
+        <div class="sidebar-avatar"><?php if ($loggedIn && $userProfilePhoto): ?><img src="<?php echo htmlspecialchars(profilePhotoUrl($userProfilePhoto)); ?>" alt=""><?php elseif ($loggedIn): ?><?php echo htmlspecialchars($userInitials); ?><?php else: ?><i class="fas fa-user" style="font-size:0.7rem;"></i><?php endif; ?></div>
         <div class="sidebar-profile-info">
           <h4><?php echo $loggedIn ? htmlspecialchars($userName) : 'Guest'; ?></h4>
           <p><?php echo $loggedIn ? ($isSeller ? 'admin' : 'Customer') : 'Not logged in'; ?></p>
@@ -1587,7 +1548,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             </div>
             <div class="header-profile-dropdown-wrapper">
               <button class="header-profile-btn" onclick="toggleProfileDropdown()" aria-label="Account menu">
-                <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="../<?php echo htmlspecialchars($userProfilePhoto); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
+                <div class="header-profile-avatar"><?php if ($userProfilePhoto): ?><img src="<?php echo htmlspecialchars(profilePhotoUrl($userProfilePhoto)); ?>" alt=""><?php else: ?><?php echo htmlspecialchars($userInitials); ?><?php endif; ?></div>
                 <span class="header-profile-name"><?php echo htmlspecialchars($userName); ?></span>
                 <i class="fas fa-chevron-down header-profile-arrow"></i>
               </button>
@@ -1653,13 +1614,9 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         <div class="products-toolbar">
           <div class="filter-chips" id="filter-section">
             <button class="filter-chip active" data-filter="all"><i class="fas fa-th"></i> All Products</button>
-            <button class="filter-chip" data-filter="Business Cards">Business Cards</button>
-            <button class="filter-chip" data-filter="Marketing Materials">Marketing Materials</button>
-            <button class="filter-chip" data-filter="Large Format & Signage">Large Format & Signage</button>
-            <button class="filter-chip" data-filter="Apparel & Sublimation">Apparel & Sublimation</button>
-            <button class="filter-chip" data-filter="Custom Merchandise">Custom Merchandise</button>
-            <button class="filter-chip" data-filter="Promotional Items & Giveaways">Promotional Items & Giveaways</button>
-            <button class="filter-chip" data-filter="Specialty Printing">Specialty Printing</button>
+            <?php foreach ($categoryOptions as $catName => $catId): ?>
+            <button class="filter-chip" data-filter="<?php echo htmlspecialchars($catName); ?>"><?php echo htmlspecialchars($catName); ?></button>
+            <?php endforeach; ?>
           </div>
         </div>
         
@@ -1934,20 +1891,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
 
 
           <!-- RELATED PRODUCTS SECTION -->
-          <div class="qv-related">
-            <div class="qv-related-header">
-              <h3><i class="fas fa-link" style="color:var(--primary);"></i> Related Products</h3>
-              <div class="qv-related-tabs">
-                <button class="qv-related-tab active" data-rel="you-may-like">You May Also Like</button>
-                <button class="qv-related-tab" data-rel="customers-bought">Customers Also Bought</button>
-              </div>
-            </div>
-            <div class="qv-related-slider-wrapper">
-              <button class="qv-related-arrow qv-related-prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
-              <div class="qv-related-slider" id="qvRelatedSlider"></div>
-              <button class="qv-related-arrow qv-related-next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
-            </div>
-          </div>
+
 
         </div>
       </div>
@@ -1997,8 +1941,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     });
 
     // Quick View Modal — event delegation
-    let qvProduct = null;
-
     document.addEventListener('click', function(e) {
       const trigger = e.target.closest('.qv-trigger');
       if (!trigger) return;
@@ -2012,8 +1954,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       const price = card.dataset.qvPrice;
       const image = card.dataset.qvImage;
       const productId = card.dataset.qvId;
-
-      qvProduct = { name, price, image, id: productId, category, desc };
 
       const parsed = parseFloat(String(price).replace(/[^0-9.]/g, ''));
       const displayPrice = isNaN(parsed) ? '' : '\u20B1' + parsed.toFixed(2);
@@ -2047,7 +1987,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       document.getElementById('qvOverlay').classList.add('active');
       document.body.style.overflow = 'hidden';
 
-      setTimeout(() => loadRelatedProducts(category, name), 100);
     });
 
     // Close quick view — overlay backdrop, close button, or ESC
@@ -2100,47 +2039,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       allProductsByCategory[cat].push({ name: title, price, image: img, description: desc });
     });
 
-    function loadRelatedProducts(category, excludeName) {
-      const slider = document.getElementById('qvRelatedSlider');
-      slider.innerHTML = '';
-      const products = allProductsByCategory[category] || [];
-      const filtered = products.filter(p => p.name !== excludeName);
-      const shuffled = filtered.sort(() => Math.random() - 0.5);
-      const display = shuffled.slice(0, 10);
-
-      if (display.length === 0) {
-        for (const cat in allProductsByCategory) {
-          if (cat !== category) {
-            allProductsByCategory[cat].forEach(p => { if (display.length < 10) display.push(p); });
-          }
-        }
-      }
-
-      display.forEach(p => {
-        const item = document.createElement('a');
-        item.className = 'qv-related-item';
-        item.href = p.image;
-        item.innerHTML = `<img src="${p.image}" alt="${p.name}" loading="lazy"><div class="qv-related-item-body"><div class="qv-related-item-title">${p.name}</div><div class="qv-related-item-price">${p.price}</div></div>`;
-        slider.appendChild(item);
-      });
-    }
-
-    document.querySelector('.qv-related-prev')?.addEventListener('click', function() {
-      const slider = document.getElementById('qvRelatedSlider');
-      slider.scrollBy({ left: -160, behavior: 'smooth' });
-    });
-    document.querySelector('.qv-related-next')?.addEventListener('click', function() {
-      const slider = document.getElementById('qvRelatedSlider');
-      slider.scrollBy({ left: 160, behavior: 'smooth' });
-    });
-
-    document.querySelectorAll('.qv-related-tab').forEach(tab => {
-      tab.addEventListener('click', function() {
-        document.querySelectorAll('.qv-related-tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        if (qvProduct) loadRelatedProducts(qvProduct.category, qvProduct.name);
-      });
-    });
 
 
     async function handleGoogleCredential(response) {

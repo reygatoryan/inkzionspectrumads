@@ -120,116 +120,12 @@ require_once __DIR__ . '/includes/admin-header.php';
   </div>
 
   <div class="ss-top-tabs" id="ss-top-tabs">
-    <button class="ss-top-tab active" data-tab="payment">Payment</button>
-    <button class="ss-top-tab" data-tab="chat">Chat</button>
+    <button class="ss-top-tab active" data-tab="chat">Chat</button>
     <button class="ss-top-tab" data-tab="notification">Notification</button>
   </div>
 
-  <!-- ===== PAYMENT TAB ===== -->
-  <div id="ss-content-payment" class="ss-top-content">
-    <div class="ss-card">
-      <div class="ss-card-header">
-        <h2><i class="fas fa-credit-card"></i> Payment Methods</h2>
-        <span class="ss-badge info"><i class="fas fa-info-circle"></i> Enable/disable payment options</span>
-      </div>
-      <div class="ss-toggle-wrapper">
-        <div class="ss-toggle-info">
-          <div class="ss-toggle-label">GCash</div>
-          <div class="ss-toggle-desc">Accept payments via GCash</div>
-        </div>
-        <div class="ss-toggle active" data-key="payment.methods.gcash.enabled" onclick="toggleSwitch(this)"></div>
-      </div>
-      <div class="ss-toggle-wrapper">
-        <div class="ss-toggle-info">
-          <div class="ss-toggle-label">Credit / Debit Card</div>
-          <div class="ss-toggle-desc">Accept credit and debit card payments</div>
-        </div>
-        <div class="ss-toggle active" data-key="payment.methods.credit_card.enabled" onclick="toggleSwitch(this)"></div>
-      </div>
-      <div class="ss-toggle-wrapper">
-        <div class="ss-toggle-info">
-          <div class="ss-toggle-label">Downpayment (50% Now / 50% Later)</div>
-          <div class="ss-toggle-desc">Allow customers to pay 50% upfront and the balance later</div>
-        </div>
-        <div class="ss-toggle active" data-key="payment.methods.downpayment.enabled" onclick="toggleSwitch(this)"></div>
-      </div>
-      <div class="ss-toggle-wrapper">
-        <div class="ss-toggle-info">
-          <div class="ss-toggle-label">Cash on Delivery (COD)</div>
-          <div class="ss-toggle-desc">Accept cash payments upon delivery</div>
-        </div>
-        <div class="ss-toggle active" data-key="payment.methods.cod.enabled" onclick="toggleSwitch(this)"></div>
-      </div>
-    </div>
-    <div class="ss-card">
-      <div class="ss-card-header">
-        <h2><i class="fas fa-mobile-alt"></i> GCash Details</h2>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">GCash Account Number</label>
-          <input type="text" class="form-input" data-key="payment.methods.gcash.account_number" placeholder="e.g. 09XX XXX XXXX">
-        </div>
-        <div class="form-group">
-          <label class="form-label">GCash Account Name</label>
-          <input type="text" class="form-input" data-key="payment.methods.gcash.account_name" placeholder="e.g. Juan Dela Cruz">
-        </div>
-      </div>
-    </div>
-    <div class="ss-card">
-      <div class="ss-card-header">
-        <h2><i class="fas fa-percent"></i> Downpayment Settings</h2>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Downpayment Percentage</label>
-          <input type="number" class="form-input" data-key="payment.methods.downpayment.percentage" min="1" max="99" placeholder="50">
-        </div>
-      </div>
-    </div>
-    <div class="ss-card">
-      <div class="ss-card-header">
-        <h2><i class="fas fa-bolt"></i> PayMongo Online Payments</h2>
-        <span class="ss-badge info"><i class="fas fa-info-circle"></i> Accept GCash & Credit Card via PayMongo</span>
-      </div>
-      <div class="ss-toggle-wrapper">
-        <div class="ss-toggle-info">
-          <div class="ss-toggle-label">Enable PayMongo</div>
-          <div class="ss-toggle-desc">Allow customers to pay via GCash or Credit Card using PayMongo hosted checkout</div>
-        </div>
-        <div class="ss-toggle" data-key="payment.paymongo.enabled" onclick="toggleSwitch(this)"></div>
-      </div>
-      <div id="ss-paymongo-fields" style="margin-top:0.75rem;padding:0.75rem;background:#f8fafc;border-radius:10px;">
-        <p style="font-size:0.75rem;color:#64748b;margin-bottom:0.75rem;line-height:1.6;">
-          <i class="fas fa-lock" style="color:#2B4C52;"></i>
-          Your API keys are stored securely and only used server-side. Get your keys from the 
-          <a href="https://dashboard.paymongo.com" target="_blank" style="color:#2B4C52;font-weight:600;">PayMongo Dashboard</a>.
-          Use <strong>test keys</strong> for development, <strong>live keys</strong> for production.
-        </p>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Secret Key <span style="font-weight:400;color:#94a3b8;">(sk_xxx)</span></label>
-            <input type="password" class="form-input" data-key="payment.paymongo.secret_key" placeholder="sk_test_xxx or sk_live_xxx">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Public Key <span style="font-weight:400;color:#94a3b8;">(pk_xxx)</span></label>
-            <input type="password" class="form-input" data-key="payment.paymongo.public_key" placeholder="pk_test_xxx or pk_live_xxx">
-          </div>
-        </div>
-        <div class="form-group" style="margin-top:0.5rem;">
-          <label class="form-label">Webhook Secret <span style="font-weight:400;color:#94a3b8;">(whsec_xxx)</span></label>
-          <input type="password" class="form-input" data-key="payment.paymongo.webhook_secret" placeholder="whsec_xxx">
-          <p style="font-size:0.72rem;color:#94a3b8;margin-top:0.3rem;">
-            Set this in your PayMongo Dashboard → Developers → Webhooks. 
-            Webhook URL: <code style="background:#f1f5f9;padding:0.1rem 0.3rem;border-radius:4px;font-size:0.7rem;"><?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . dirname(dirname($_SERVER['SCRIPT_NAME'])) . '/api/paymongo-webhook.php'; ?></code>
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- ===== CHAT TAB ===== -->
-  <div id="ss-content-chat" class="ss-top-content" style="display:none;">
+  <div id="ss-content-chat" class="ss-top-content">
     <div class="ss-card">
       <div class="ss-card-header">
         <h2><i class="fas fa-comments"></i> Chat Availability</h2>
@@ -405,9 +301,6 @@ function updateConditionalVisibility() {
   var ohToggle = document.querySelector('.ss-toggle[data-key="chat.operating_hours.enabled"]');
   var ohFields = document.getElementById('ss-oh-fields');
   if (ohFields) ohFields.style.display = ohToggle && ohToggle.classList.contains('active') ? '' : 'none';
-  var pmToggle = document.querySelector('.ss-toggle[data-key="payment.paymongo.enabled"]');
-  var pmFields = document.getElementById('ss-paymongo-fields');
-  if (pmFields) pmFields.style.display = pmToggle && pmToggle.classList.contains('active') ? '' : 'none';
 }
 
 // === SAVE / LOAD ===

@@ -586,7 +586,7 @@ document.addEventListener('visibilitychange',function(){
 if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
 
 adminLoadConversations();
-setInterval(adminLoadConversations, 30000);
+setInterval(adminLoadConversations, 10000);
 
 (function(){
   var p=new URLSearchParams(window.location.search);

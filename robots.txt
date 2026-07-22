@@ -2,8 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
-Disallow: /customer/cart.php
-Disallow: /customer/checkout.php
 Disallow: /customer/profile.php
 
 # Sitemap

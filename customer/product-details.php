@@ -40,7 +40,6 @@ $fallbackProducts = [
     ['category' => 'Marketing Materials', 'name' => 'Tri-Fold Brochures', 'description' => 'Full color, double-sided, 500 pieces', 'price' => '$89', 'image' => 'assets/MARKETING_MATERIALS/TRIFOLD.png'],
     ['category' => 'Marketing Materials', 'name' => 'Flyers & Postcards', 'description' => 'Glossy or matte finish, 1000 pieces', 'price' => '$39', 'image' => 'assets/MARKETING_MATERIALS/FLYERS.png'],
     ['category' => 'Marketing Materials', 'name' => 'Calendars', 'description' => 'Custom printed wall or desk calendars', 'price' => '$49', 'image' => 'assets/MARKETING_MATERIALS/CALENDAR.png'],
-    ['category' => 'Marketing Materials', 'name' => 'Certificate Printing', 'description' => 'Professional certificates with borders, 100 pieces', 'price' => '$29', 'image' => 'https://via.placeholder.com/600x400/8bc34a/ffffff?text=Certificates'],
     ['category' => 'Large Format & Signage', 'name' => 'Vinyl Banners', 'description' => 'Indoor & outdoor durability, custom sizes', 'price' => '$79', 'image' => 'assets/LARGE_FORMAT_AND_SIGNAGE/VINYLBANNER.png'],
     ['category' => 'Large Format & Signage', 'name' => 'Stand Banners', 'description' => 'Retractable banner stands, premium quality', 'price' => '$199', 'image' => 'assets/LARGE_FORMAT_AND_SIGNAGE/STANDBANNER.png'],
     ['category' => 'Large Format & Signage', 'name' => 'Signage', 'description' => 'Custom shop signs and directional signage', 'price' => '$149', 'image' => 'assets/LARGE_FORMAT_AND_SIGNAGE/SIGNAGE.png'],
@@ -59,10 +58,10 @@ $fallbackProducts = [
     ['category' => 'Promotional Items & Giveaways', 'name' => 'PVC IDs & Cards', 'description' => 'Professional ID cards, 100 pieces', 'price' => '$29', 'image' => 'assets/PROMOTIONAL_ITEMS_AND_GIVEAWAYS/PVC ID.png'],
     ['category' => 'Promotional Items & Giveaways', 'name' => 'Giveaways & Promotional Items', 'description' => 'Branded merchandise for events', 'price' => '$10+', 'image' => 'assets/PROMOTIONAL_ITEMS_AND_GIVEAWAYS/GIVEAWAYS.png'],
     ['category' => 'Promotional Items & Giveaways', 'name' => 'Custom Umbrellas', 'description' => 'Branded umbrellas with custom print', 'price' => '$25', 'image' => 'assets/PROMOTIONAL_ITEMS_AND_GIVEAWAYS/UMBRELLA.png'],
-    ['category' => 'Specialty Printing', 'name' => 'Photo Printing', 'description' => 'High-quality 4x6 to 16x20 prints', 'price' => '$5-$29', 'image' => 'https://via.placeholder.com/600x400/e91e8c/ffffff?text=Photo+Printing'],
-    ['category' => 'Specialty Printing', 'name' => 'DTF (Direct-to-Film) Printing', 'description' => 'Premium transfer printing quality', 'price' => '$8', 'image' => 'https://via.placeholder.com/600x400/00bcd4/ffffff?text=DTF+Printing'],
-    ['category' => 'Specialty Printing', 'name' => 'Canvas Prints', 'description' => 'Gallery-wrapped finish, custom sizes', 'price' => '$49', 'image' => 'https://via.placeholder.com/600x400/ffc107/ffffff?text=Canvas+Prints'],
-    ['category' => 'Specialty Printing', 'name' => 'Presentation Folders', 'description' => 'Custom pockets & die-cuts', 'price' => '$99', 'image' => 'https://via.placeholder.com/600x400/8bc34a/ffffff?text=Presentation+Folders'],
+    ['category' => 'Certificates & Documents', 'name' => 'Certificate Printing', 'description' => 'Professional certificates with borders, 100 pieces', 'price' => '$29', 'image' => 'https://via.placeholder.com/600x400/8bc34a/ffffff?text=Certificates'],
+    ['category' => 'Certificates & Documents', 'name' => 'Diploma Printing', 'description' => 'Premium diploma printing with gold seal', 'price' => '$49', 'image' => 'https://via.placeholder.com/600x400/ff9800/ffffff?text=Diploma'],
+    ['category' => 'Certificates & Documents', 'name' => 'Award Plaques', 'description' => 'Wooden or acrylic plaques with engraving', 'price' => '$39', 'image' => 'https://via.placeholder.com/600x400/9c27b0/ffffff?text=Plaque'],
+    ['category' => 'Certificates & Documents', 'name' => 'Document Binding', 'description' => 'Professional spiral or comb binding', 'price' => '$15', 'image' => 'https://via.placeholder.com/600x400/607d8b/ffffff?text=Binding'],
 ];
 
 if (!$product) {
@@ -726,7 +725,6 @@ if (is_numeric($displayPrice)) {
         { name: 'Tri-Fold Brochures', price: '$89', image: 'assets/MARKETING_MATERIALS/TRIFOLD.png' },
         { name: 'Flyers & Postcards', price: '$39', image: 'assets/MARKETING_MATERIALS/FLYERS.png' },
         { name: 'Calendars', price: '$49', image: 'assets/MARKETING_MATERIALS/CALENDAR.png' },
-        { name: 'Certificate Printing', price: '$29', image: 'https://via.placeholder.com/600x400/8bc34a/ffffff?text=Certificates' },
       ]},
       { category: 'Large Format & Signage', items: [
         { name: 'Vinyl Banners', price: '$79', image: 'assets/LARGE_FORMAT_AND_SIGNAGE/VINYLBANNER.png' },
@@ -754,11 +752,11 @@ if (is_numeric($displayPrice)) {
         { name: 'Giveaways & Promotional Items', price: '$10+', image: 'assets/PROMOTIONAL_ITEMS_AND_GIVEAWAYS/GIVEAWAYS.png' },
         { name: 'Custom Umbrellas', price: '$25', image: 'assets/PROMOTIONAL_ITEMS_AND_GIVEAWAYS/UMBRELLA.png' },
       ]},
-      { category: 'Specialty Printing', items: [
-        { name: 'Photo Printing', price: '$5-$29', image: 'https://via.placeholder.com/600x400/e91e8c/ffffff?text=Photo+Printing' },
-        { name: 'DTF (Direct-to-Film) Printing', price: '$8', image: 'https://via.placeholder.com/600x400/00bcd4/ffffff?text=DTF+Printing' },
-        { name: 'Canvas Prints', price: '$49', image: 'https://via.placeholder.com/600x400/ffc107/ffffff?text=Canvas+Prints' },
-        { name: 'Presentation Folders', price: '$99', image: 'https://via.placeholder.com/600x400/8bc34a/ffffff?text=Presentation+Folders' },
+      { category: 'Certificates & Documents', items: [
+        { name: 'Certificate Printing', price: '$29', image: 'https://via.placeholder.com/600x400/8bc34a/ffffff?text=Certificates' },
+        { name: 'Diploma Printing', price: '$49', image: 'https://via.placeholder.com/600x400/ff9800/ffffff?text=Diploma' },
+        { name: 'Award Plaques', price: '$39', image: 'https://via.placeholder.com/600x400/9c27b0/ffffff?text=Plaque' },
+        { name: 'Document Binding', price: '$15', image: 'https://via.placeholder.com/600x400/607d8b/ffffff?text=Binding' },
       ]},
     ];
 
