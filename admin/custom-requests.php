@@ -289,9 +289,11 @@ async function openDetail(id) {
       try {
         const parsed = typeof req.items === 'string' ? JSON.parse(req.items) : req.items;
         if (Array.isArray(parsed) && parsed.length) {
-          let h = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><tr style="background:#f1f5f9;"><th style="padding:0.35rem 0.5rem;text-align:left;">Size</th><th style="padding:0.35rem 0.5rem;text-align:left;">Qty</th></tr>';
+          let h = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><tr style="background:#f1f5f9;"><th style="padding:0.35rem 0.5rem;text-align:left;">Size</th><th style="padding:0.35rem 0.5rem;text-align:left;">Qty</th><th style="padding:0.35rem 0.5rem;text-align:left;">Price</th><th style="padding:0.35rem 0.5rem;text-align:left;">Subtotal</th></tr>';
           parsed.forEach(function(it){
-            h += '<tr><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + escapeHtml(it.size||'') + '</td><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + (it.qty||1) + '</td></tr>';
+            const up = parseFloat(it.unit_price || 0);
+            const q = it.qty || 1;
+            h += '<tr><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + escapeHtml(it.size||'') + '</td><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">' + q + '</td><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">₱' + up.toFixed(2) + '</td><td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;">₱' + (up * q).toFixed(2) + '</td></tr>';
           });
           h += '</table>';
           return h;
@@ -300,10 +302,16 @@ async function openDetail(id) {
       return '<span>--</span>';
     }();
 
+    let orderTotal = 0;
+    try {
+      const _its = typeof req.items === 'string' ? JSON.parse(req.items) : req.items;
+      if (Array.isArray(_its)) _its.forEach(function(it){ orderTotal += parseFloat(it.unit_price || 0) * (it.qty || 1); });
+    } catch(e) {}
+
     document.getElementById('detailFields').innerHTML = `
       <div class="cr-detail-field"><label>Customer</label><span>${escapeHtml(req.user_name)} (${escapeHtml(req.user_email)})</span></div>
       <div class="cr-detail-field"><label>Service Type</label><span>${escapeHtml(req.service_type)}</span></div>
-      <div class="cr-detail-field"><label>Unit Price</label><span>${req.ready_for_purchase_price != null && req.ready_for_purchase_price !== '' ? '₱' + parseFloat(req.ready_for_purchase_price).toFixed(2) : '--'}</span></div>
+      <div class="cr-detail-field"><label>Total Price</label><span>${orderTotal > 0 ? '₱' + orderTotal.toFixed(2) : '--'}</span></div>
       <div class="cr-detail-field"><label>Material</label><span>${req.material || '--'}</span></div>
       <div class="cr-detail-field"><label>Deadline</label><span>${req.preferred_deadline || '--'}</span></div>
       <div class="cr-detail-field" style="grid-column:1/-1;"><label>Order Items</label><span>${itemsHtml}</span></div>
@@ -311,7 +319,7 @@ async function openDetail(id) {
     `;
 
     document.getElementById('rfpName').value = req.ready_for_purchase_name || '';
-    document.getElementById('rfpPrice').value = req.ready_for_purchase_price != null && req.ready_for_purchase_price !== '' ? req.ready_for_purchase_price : '';
+    document.getElementById('rfpPrice').value = orderTotal > 0 ? orderTotal.toFixed(2) : (req.ready_for_purchase_price != null && req.ready_for_purchase_price !== '' ? req.ready_for_purchase_price : '');
     document.getElementById('rfpShipping').value = req.ready_for_purchase_shipping || '0';
     let totalQty = 1;
     try {
@@ -377,9 +385,10 @@ async function saveCustomization() {
   document.querySelectorAll('#admin-items-container .admin-item-row').forEach(function(row) {
     const size = row.querySelector('.ai-size').value.trim();
     const qty = parseInt(row.querySelector('.ai-qty-value').textContent) || 1;
+    const price = parseFloat(row.querySelector('.ai-price').value) || 0;
     const preview = row.querySelector('.ai-image-preview');
     const image = (preview && preview.style.display !== 'none' && preview.src) ? preview.src : '';
-    if (size) items.push({size: size, qty: qty, image: image});
+    if (size) items.push({size: size, qty: qty, unit_price: price, image: image});
   });
   const data = {
     action: 'admin_update_details',
@@ -515,6 +524,7 @@ function adminRenderItems(items) {
         '<span class="ai-qty-value">' + (it.qty||1) + '</span>' +
         '<button type="button" class="ai-qty-btn" data-action="inc">+</button>' +
       '</div>' +
+      '<input type="number" class="ai-price" step="0.01" min="0" placeholder="0.00" value="' + (it.unit_price || '') + '">' +
       '<button type="button" class="ai-remove" onclick="adminRemoveItem(this)" title="Remove"><i class="fas fa-times"></i> Remove</button>';
     container.appendChild(row);
   });
@@ -591,6 +601,19 @@ async function deleteRequest(id) {
     alert('Failed to delete request');
   }
 }
+
+function autoFillRfpPrice() {
+  let total = 0;
+  document.querySelectorAll('#admin-items-container .admin-item-row').forEach(function(row) {
+    const price = parseFloat(row.querySelector('.ai-price').value) || 0;
+    const qty = parseInt(row.querySelector('.ai-qty-value').textContent) || 1;
+    total += price * qty;
+  });
+  document.getElementById('rfpPrice').value = total > 0 ? total : '';
+}
+document.getElementById('admin-items-container').addEventListener('input', function(e) {
+  if (e.target.classList.contains('ai-price')) autoFillRfpPrice();
+});
 
 // Init
 loadRequests();

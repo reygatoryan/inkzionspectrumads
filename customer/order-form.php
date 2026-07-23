@@ -268,6 +268,18 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
     <!-- Quote Summary -->
     <div class="card">
       <h2><i class="fas fa-receipt"></i> Quote Summary</h2>
+      <?php
+      $displaySubtotal = 0;
+      if (!empty($items)) {
+          foreach ($items as $itm) {
+              $displaySubtotal += (float)($itm['unit_price'] ?? 0) * (int)($itm['quantity'] ?? 1);
+          }
+      } else {
+          $displaySubtotal = $rfpSubtotal;
+      }
+      $displayShipping = $rfpShipping;
+      $displayTotal = $displaySubtotal + $displayShipping;
+      ?>
       <div style="overflow-x:auto;"><table class="quote-table">
         <thead>
           <tr>
@@ -278,38 +290,38 @@ $submitted = ($proposal['status'] === 'filled' || $proposal['status'] === 'appro
           </tr>
         </thead>
         <tbody>
-          <?php if (!empty($rfpName)): ?>
+          <?php if (!empty($items)): ?>
+          <?php foreach ($items as $item): ?>
+          <tr>
+            <td><?php echo htmlspecialchars($item['name'] ?? ($rfpName ?: 'Item')); ?></td>
+            <td style="text-align:center;"><?php echo (int)($item['quantity'] ?? 1); ?></td>
+            <td style="text-align:right;">₱<?php echo number_format((float)($item['unit_price'] ?? 0), 2); ?></td>
+            <td style="text-align:right;">₱<?php echo number_format((float)($item['unit_price'] ?? 0) * (int)($item['quantity'] ?? 1), 2); ?></td>
+          </tr>
+          <?php endforeach; ?>
+          <?php elseif (!empty($rfpName)): ?>
           <tr>
             <td><?php echo htmlspecialchars($rfpName); ?></td>
             <td style="text-align:center;"><?php echo $rfpQty; ?></td>
             <td style="text-align:right;">₱<?php echo number_format($rfpPrice, 2); ?></td>
             <td style="text-align:right;">₱<?php echo number_format($rfpSubtotal, 2); ?></td>
           </tr>
-          <?php else: ?>
-          <?php foreach ($items as $item): ?>
-          <tr>
-            <td><?php echo htmlspecialchars($item['name'] ?? 'Item'); ?></td>
-            <td style="text-align:center;"><?php echo (int)($item['quantity'] ?? 1); ?></td>
-            <td style="text-align:right;">₱<?php echo number_format((float)($item['unit_price'] ?? 0), 2); ?></td>
-            <td style="text-align:right;">₱<?php echo number_format((float)($item['unit_price'] ?? 0) * (int)($item['quantity'] ?? 1), 2); ?></td>
-          </tr>
-          <?php endforeach; ?>
           <?php endif; ?>
         </tbody>
         <tfoot>
           <tr>
             <td colspan="3" style="text-align:right;font-weight:600;">Subtotal</td>
-            <td style="text-align:right;">₱<?php echo number_format($rfpSubtotal, 2); ?></td>
+            <td style="text-align:right;">₱<?php echo number_format($displaySubtotal, 2); ?></td>
           </tr>
-          <?php if ($rfpShipping > 0): ?>
+          <?php if ($displayShipping > 0): ?>
           <tr>
             <td colspan="3" style="text-align:right;font-weight:600;">Shipping Fee</td>
-            <td style="text-align:right;">₱<?php echo number_format($rfpShipping, 2); ?></td>
+            <td style="text-align:right;">₱<?php echo number_format($displayShipping, 2); ?></td>
           </tr>
           <?php endif; ?>
           <tr class="total-row">
             <td colspan="3" style="text-align:right;">Total</td>
-            <td class="amount" style="text-align:right;">₱<?php echo number_format($rfpTotal, 2); ?></td>
+            <td class="amount" style="text-align:right;">₱<?php echo number_format($displayTotal, 2); ?></td>
           </tr>
         </tfoot>
       </table></div>

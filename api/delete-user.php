@@ -54,12 +54,25 @@ if (!$result || $result->num_rows === 0) {
 }
 $stmt->close();
 
+$conn->begin_transaction();
+
+// Delete child records that block user deletion due to FK constraints
+$delNotif = $conn->prepare("DELETE FROM notifications WHERE user_id = ?");
+$delNotif->bind_param("i", $userId);
+$delNotif->execute();
+$delNotif->close();
+
+// Tables with ON DELETE CASCADE (custom_printing_requests, chat_conversations,
+// order_proposals, chat_messages, etc.) will cascade when user is deleted.
+
 $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
 $stmt->bind_param("i", $userId);
 
 if ($stmt->execute()) {
+    $conn->commit();
     echo json_encode(['success' => true, 'message' => 'User deleted successfully']);
 } else {
+    $conn->rollback();
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Database error: ' . $stmt->error]);
 }

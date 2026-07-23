@@ -1637,17 +1637,10 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             <?php
               $imageSrc = htmlspecialchars($product['image_url'] ?? ($product['image'] ?? 'assets/logo.png'), ENT_QUOTES, 'UTF-8');
               if (strpos($imageSrc, '../../uploads/') === 0) $imageSrc = substr($imageSrc, 3);
-              $priceRaw = $product['price'] ?? '';
-              if (is_numeric($priceRaw)) {
-                  $priceText = '₱' . number_format((float)$priceRaw, 2);
-              } else {
-                  $priceText = str_replace('$', '₱', htmlspecialchars($priceRaw, ENT_QUOTES, 'UTF-8'));
-              }
             ?>
             <article class="product-card" data-category="<?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?>"
               data-qv-name="<?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?>"
               data-qv-desc="<?php echo htmlspecialchars($product['description'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-              data-qv-price="<?php echo htmlspecialchars($product['price'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
               data-qv-image="<?php echo $imageSrc; ?>"
               data-qv-id="<?php echo htmlspecialchars($product['id'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
               <div class="product-card-image">
@@ -1662,10 +1655,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
               <div class="product-card-body">
                 <h3 class="product-card-title"><?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?></h3>
                 <p class="product-card-desc"><?php echo htmlspecialchars($product['description'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
-                <div class="card-price-stock">
-                  <span class="product-price"><?php echo $priceText; ?></span>
-                  <span class="card-stock in-stock"><span class="stock-dot"></span> In Stock</span>
-                </div>
+                <span class="card-stock in-stock" style="margin-bottom:0.75rem;display:inline-block;"><span class="stock-dot"></span> In Stock</span>
               </div>
               <div class="product-card-footer">
                 <?php if ($isSeller && $useDbProducts && !empty($product['id'])): ?>
@@ -1709,7 +1699,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             <div class="why-card">
               <div class="why-icon" style="background:rgba(239,68,68,0.12);color:var(--danger);"><i class="fas fa-truck"></i></div>
               <h3>Free Delivery</h3>
-              <p>Complimentary shipping on orders over ₱1,000 with real-time tracking and careful packaging.</p>
+              <p>Complimentary shipping with real-time tracking and careful packaging.</p>
             </div>
             <div class="why-card">
               <div class="why-icon" style="background:rgba(16,185,129,0.12);color:var(--success);"><i class="fas fa-leaf"></i></div>
@@ -1827,7 +1817,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         <div class="qv-info">
           <span class="qv-badge" id="qvBadge"></span>
           <h2 id="qvName"></h2>
-          <div class="qv-price" id="qvPrice"></div>
+
           <p class="qv-desc" id="qvDesc"></p>
           <!-- SPECIFICATIONS DASHBOARD CARDS -->
           <div class="qv-spec-grid" id="qvSpecs">
@@ -1951,19 +1941,14 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       const category = card.dataset.category;
       const name = card.dataset.qvName;
       const desc = card.dataset.qvDesc;
-      const price = card.dataset.qvPrice;
       const image = card.dataset.qvImage;
       const productId = card.dataset.qvId;
-
-      const parsed = parseFloat(String(price).replace(/[^0-9.]/g, ''));
-      const displayPrice = isNaN(parsed) ? '' : '\u20B1' + parsed.toFixed(2);
 
       document.getElementById('qvMainImg').src = image;
       document.getElementById('qvMainImg').alt = name;
       document.getElementById('qvBadge').textContent = category;
       document.getElementById('qvName').textContent = name;
       document.getElementById('qvDesc').textContent = desc || '';
-      document.getElementById('qvPrice').textContent = displayPrice;
       document.getElementById('qvCategory').textContent = category;
       document.getElementById('qvStock').textContent = '\u25CF In Stock';
       document.getElementById('qvStock').style.color = 'var(--success)';
@@ -2033,10 +2018,9 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       const cat = card.dataset.category;
       if (!allProductsByCategory[cat]) allProductsByCategory[cat] = [];
       const title = card.querySelector('.product-card-title').textContent;
-      const price = card.querySelector('.product-price').textContent;
       const img = card.querySelector('.product-card-image img').src;
       const desc = card.querySelector('.product-card-desc').textContent;
-      allProductsByCategory[cat].push({ name: title, price, image: img, description: desc });
+      allProductsByCategory[cat].push({ name: title, image: img, description: desc });
     });
 
 

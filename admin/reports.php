@@ -8,7 +8,6 @@ $pageSubtitle = 'Comprehensive reports covering sales, customers, products, and 
 
 $totalUsers = $conn->query("SELECT COUNT(*) as cnt FROM users")->fetch_assoc()['cnt'];
 $totalCustomers = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE role='user'")->fetch_assoc()['cnt'];
-$totalSellers = 0;
 $totalAdmins = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE role='admin'")->fetch_assoc()['cnt'];
 $totalOrders = $conn->query("SELECT COUNT(*) as cnt FROM orders")->fetch_assoc()['cnt'];
 $totalProducts = $conn->query("SELECT COUNT(*) as cnt FROM products")->fetch_assoc()['cnt'];
@@ -30,6 +29,8 @@ $topCustomer = $conn->query("SELECT user_id FROM orders GROUP BY user_id ORDER B
 $topCustomerId = $topCustomer ? '#' . $topCustomer['user_id'] : 'N/A';
 $bestSeller = $conn->query("SELECT p.name FROM order_items oi JOIN products p ON oi.product_id = p.id GROUP BY oi.product_id ORDER BY COUNT(*) DESC LIMIT 1")->fetch_assoc();
 $bestSellerName = $bestSeller ? $bestSeller['name'] : 'N/A';
+$lowStockItems = $conn->query("SELECT COUNT(*) as cnt FROM products WHERE stock > 0 AND stock <= 5")->fetch_assoc()['cnt'];
+$outOfStockCount = $conn->query("SELECT COUNT(*) as cnt FROM products WHERE stock = 0")->fetch_assoc()['cnt'];
 
 $dailyData = [];
 $registrationData = [];
@@ -141,7 +142,7 @@ require 'includes/admin-header.php';
 
     <!-- KPI CARDS (10) -->
     <div class="it-kpis">
-      <div class="it-kpi"><div class="it-kpi-header"><span class="it-kpi-title">Revenue</span><div class="it-kpi-icon green"><i class="fas fa-php"></i></div></div><div class="it-kpi-value" style="color:var(--success);">₱<?php echo number_format($totalRevenue, 0); ?></div><div class="it-kpi-sub">Total completed</div></div>
+      <div class="it-kpi"><div class="it-kpi-header"><span class="it-kpi-title">Revenue</span><div class="it-kpi-icon green"><i class="fas fa-coins"></i></div></div><div class="it-kpi-value" style="color:var(--success);">₱<?php echo number_format($totalRevenue, 0); ?></div><div class="it-kpi-sub">Total completed</div></div>
       <div class="it-kpi"><div class="it-kpi-header"><span class="it-kpi-title">Orders</span><div class="it-kpi-icon blue"><i class="fas fa-shopping-cart"></i></div></div><div class="it-kpi-value"><?php echo $totalOrders; ?></div><div class="it-kpi-sub"><?php echo $completedOrders; ?> completed</div></div>
       <div class="it-kpi"><div class="it-kpi-header"><span class="it-kpi-title">Customers</span><div class="it-kpi-icon blue"><i class="fas fa-user"></i></div></div><div class="it-kpi-value"><?php echo $totalCustomers; ?></div><div class="it-kpi-sub">Registered users</div></div>
       <div class="it-kpi"><div class="it-kpi-header"><span class="it-kpi-title">Users</span><div class="it-kpi-icon green"><i class="fas fa-users"></i></div></div><div class="it-kpi-value"><?php echo $totalUsers; ?></div><div class="it-kpi-sub">All accounts</div></div>
@@ -230,7 +231,7 @@ require 'includes/admin-header.php';
         <div class="it-stat-item"><span class="label">Total Events</span><span class="value"><?php echo $totalActivities; ?></span></div>
         <div class="it-stat-item"><span class="label">Today's Events</span><span class="value" style="color:var(--primary);"><?php echo $todayActivities; ?></span></div>
         <div class="it-stat-item"><span class="label">Failed Logins</span><span class="value" style="color:var(--danger);"><?php echo $failedLogins; ?></span></div>
-        <div class="it-stat-item"><span class="label">Security Events</span><span class="value" style="color:var(--warning);"><?php echo rand(1, 10); ?></span></div>
+        <div class="it-stat-item"><span class="label">Security Events</span><span class="value" style="color:var(--warning);"><?php echo $failedLogins; ?></span></div>
         <div class="it-stat-item"><span class="label">Avg Events/Day</span><span class="value"><?php echo max(1, round($totalActivities / 30)); ?></span></div>
         <div class="it-stat-item"><span class="label">Audit Trail</span><span class="value" style="color:var(--success);">Recording</span></div>
       </div>
@@ -242,7 +243,7 @@ require 'includes/admin-header.php';
       <div class="it-stats-grid">
         <div class="it-stat-item"><span class="label">Failed Logins</span><span class="value" style="color:var(--danger);"><?php echo $failedLogins; ?></span></div>
         <div class="it-stat-item"><span class="label">Blocked IPs</span><span class="value">0</span></div>
-        <div class="it-stat-item"><span class="label">Suspicious Events</span><span class="value" style="color:var(--warning);"><?php echo rand(0, 5); ?></span></div>
+        <div class="it-stat-item"><span class="label">Suspicious Events</span><span class="value" style="color:var(--warning);"><?php echo $failedLogins; ?></span></div>
         <div class="it-stat-item"><span class="label">SSL Status</span><span class="value" style="color:var(--success);">Valid</span></div>
         <div class="it-stat-item"><span class="label">Firewall</span><span class="value" style="color:var(--success);">Active</span></div>
         <div class="it-stat-item"><span class="label">Security Score</span><span class="value" style="color:var(--success);">A+</span></div>
@@ -271,9 +272,9 @@ require 'includes/admin-header.php';
         <div class="it-stat-item"><span class="label">Total Products</span><span class="value"><?php echo $totalProducts; ?></span></div>
         <div class="it-stat-item"><span class="label">Categories</span><span class="value"><?php echo $totalCategories; ?></span></div>
         <div class="it-stat-item"><span class="label">Best Seller</span><span class="value" style="color:var(--primary);"><?php echo $bestSellerName; ?></span></div>
-        <div class="it-stat-item"><span class="label">Low Stock Items</span><span class="value" style="color:var(--warning);"><?php echo rand(0, 10); ?></span></div>
-        <div class="it-stat-item"><span class="label">Out of Stock</span><span class="value" style="color:var(--danger);"><?php echo rand(0, 5); ?></span></div>
-        <div class="it-stat-item"><span class="label">Avg Product Rating</span><span class="value" style="color:var(--success);"><?php echo (rand(35, 50) / 10); ?> / 5</span></div>
+        <div class="it-stat-item"><span class="label">Low Stock Items</span><span class="value" style="color:var(--warning);"><?php echo $lowStockItems; ?></span></div>
+        <div class="it-stat-item"><span class="label">Out of Stock</span><span class="value" style="color:var(--danger);"><?php echo $outOfStockCount; ?></span></div>
+        <div class="it-stat-item"><span class="label">Avg Product Rating</span><span class="value" style="color:var(--text-muted);">--</span></div>
       </div>
     </div>
 

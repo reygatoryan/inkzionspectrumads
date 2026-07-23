@@ -544,11 +544,23 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
         </div>
 
         <?php
-          $rfpPrice = (float)($req['ready_for_purchase_price'] ?? 0);
-          $rfpQty = (int)($req['ready_for_purchase_qty'] ?? 1);
-          $rfpShipping = (float)($req['ready_for_purchase_shipping'] ?? 0);
-          $rfpSubtotal = $rfpPrice * $rfpQty;
-          $rfpTotal = $rfpSubtotal + $rfpShipping;
+        $parsedItems = [];
+        if (!empty($req['items'])) {
+            try { $parsedItems = is_string($req['items']) ? json_decode($req['items'], true) : $req['items']; } catch (\Exception $e) {}
+        }
+
+        $rfpPrice = (float)($req['ready_for_purchase_price'] ?? 0);
+        $rfpQty = (int)($req['ready_for_purchase_qty'] ?? 1);
+        $rfpShipping = (float)($req['ready_for_purchase_shipping'] ?? 0);
+        $rfpSubtotal = 0;
+        if (!empty($parsedItems) && isset($parsedItems[0]['unit_price'])) {
+            foreach ($parsedItems as $it) {
+                $rfpSubtotal += (float)($it['unit_price'] ?? 0) * (int)($it['qty'] ?? 0);
+            }
+        } else {
+            $rfpSubtotal = $rfpPrice * $rfpQty;
+        }
+        $rfpTotal = $rfpSubtotal + $rfpShipping;
         ?>
 
         <!-- Customization Details -->
@@ -564,8 +576,8 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
               <span><?php echo htmlspecialchars($req['material'] ?? '--'); ?></span>
             </div>
             <div class="detail-field">
-              <label>Unit Price</label>
-              <span><?php echo $rfpPrice > 0 ? '₱'.number_format($rfpPrice, 2) : '--'; ?></span>
+              <label>Total Price</label>
+              <span><?php echo $rfpSubtotal > 0 ? '₱'.number_format($rfpSubtotal, 2) : '--'; ?></span>
             </div>
             <div class="detail-field">
               <label>Preferred Deadline</label>
@@ -579,22 +591,19 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
         </div>
 
         <!-- Items -->
-        <?php
-        $parsedItems = [];
-        if (!empty($req['items'])) {
-            try { $parsedItems = is_string($req['items']) ? json_decode($req['items'], true) : $req['items']; } catch (\Exception $e) {}
-        }
-        ?>
         <?php if (is_array($parsedItems) && count($parsedItems)): ?>
         <div class="detail-section">
           <h2><i class="fas fa-tshirt"></i> Order Items</h2>
           <table class="items-table">
-            <thead><tr><th>Size</th><th>Quantity</th></tr></thead>
+            <thead><tr><th>Size</th><th>Quantity</th><th>Price</th><th>Subtotal</th></tr></thead>
             <tbody>
+              <?php $hasUnitPrice = isset($parsedItems[0]['unit_price']); ?>
               <?php foreach ($parsedItems as $it): ?>
               <tr>
                 <td><?php echo htmlspecialchars($it['size'] ?? '--'); ?></td>
                 <td><?php echo (int)($it['qty'] ?? 0); ?></td>
+                <td><?php echo $hasUnitPrice ? '₱'.number_format((float)($it['unit_price'] ?? 0), 2) : '--'; ?></td>
+                <td><?php echo $hasUnitPrice ? '₱'.number_format((float)($it['unit_price'] ?? 0) * (int)($it['qty'] ?? 0), 2) : '--'; ?></td>
               </tr>
               <?php endforeach; ?>
             </tbody>
@@ -631,6 +640,13 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
           <?php
           $propStatusLabels = ['sent' => ['Sent', '#1d4ed8', 'rgba(59,130,246,0.12)'], 'filled' => ['Filled', '#b8860b', 'rgba(255,193,7,0.12)'], 'converted' => ['Approved', '#047857', 'rgba(16,185,129,0.12)'], 'rejected' => ['Rejected', '#dc2626', 'rgba(239,68,68,0.12)']];
           $ps = $propStatusLabels[$proposal['status']] ?? [$proposal['status'], '#64748b', 'rgba(100,116,139,0.12)'];
+          $quoteItems = $proposal['items'] ?? [];
+          $quoteSubtotal = 0;
+          foreach ($quoteItems as $qi) {
+              $quoteSubtotal += (float)($qi['unit_price'] ?? 0) * (int)($qi['quantity'] ?? 0);
+          }
+          $quoteShipping = (float)($proposal['shipping_fee'] ?? $rfpShipping);
+          $quoteTotal = $quoteSubtotal + $quoteShipping;
           ?>
           <div class="prop-card">
             <?php if (!empty($req['ready_for_purchase_image'])): ?>
@@ -639,12 +655,26 @@ $st = $statusLabels[$req['status']] ?? [$req['status'], '#64748b', 'rgba(100,116
               <img src="<?php echo htmlspecialchars($rfpImg); ?>" alt="<?php echo htmlspecialchars($req['ready_for_purchase_name'] ?? 'Product'); ?>" style="width:140px;height:140px;border-radius:12px;object-fit:cover;border:1px solid var(--border-color);">
               <div style="flex:1;min-width:160px;">
                 <h3 style="margin:0 0 0.35rem;font-size:1.1rem;"><?php echo htmlspecialchars($req['ready_for_purchase_name'] ?? 'Product'); ?></h3>
-                <div style="font-size:1.3rem;font-weight:800;color:var(--primary);">₱<?php echo number_format($rfpPrice, 2); ?></div>
-                <div style="font-size:0.85rem;color:var(--text-muted);">Quantity: <?php echo $rfpQty; ?></div>
+                <?php $propItems = $proposal['items'] ?? []; ?>
+                <?php if (!empty($propItems)): ?>
+                <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin:0.5rem 0;">
+                  <thead><tr style="background:#f8fafc;"><th style="padding:0.35rem 0.5rem;text-align:left;">Item</th><th style="padding:0.35rem 0.5rem;text-align:center;">Qty</th><th style="padding:0.35rem 0.5rem;text-align:right;">Price</th><th style="padding:0.35rem 0.5rem;text-align:right;">Subtotal</th></tr></thead>
+                  <tbody>
+                    <?php foreach ($propItems as $pi): ?>
+                    <tr>
+                      <td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;"><?php echo htmlspecialchars($pi['name'] ?? 'Item'); ?></td>
+                      <td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;text-align:center;"><?php echo (int)($pi['quantity'] ?? 0); ?></td>
+                      <td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;text-align:right;">₱<?php echo number_format((float)($pi['unit_price'] ?? 0), 2); ?></td>
+                      <td style="padding:0.3rem 0.5rem;border-bottom:1px solid #f1f5f9;text-align:right;">₱<?php echo number_format((float)($pi['unit_price'] ?? 0) * (int)($pi['quantity'] ?? 0), 2); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+                <?php endif; ?>
                 <div style="height:1px;background:var(--border-color);margin:0.5rem 0;"></div>
-                <div style="font-size:0.88rem;color:var(--text-secondary);">Subtotal (×<?php echo $rfpQty; ?>): ₱<?php echo number_format($rfpSubtotal, 2); ?></div>
-                <div style="font-size:0.88rem;color:var(--text-secondary);">Shipping: ₱<?php echo number_format($rfpShipping, 2); ?></div>
-                <div style="font-size:1.1rem;font-weight:800;color:var(--text-primary);margin-top:0.25rem;">Total: ₱<?php echo number_format($rfpTotal, 2); ?></div>
+                <div style="font-size:0.88rem;color:var(--text-secondary);text-align:right;">Subtotal: ₱<?php echo number_format($quoteSubtotal, 2); ?></div>
+                <div style="font-size:0.88rem;color:var(--text-secondary);text-align:right;">Shipping: ₱<?php echo number_format($quoteShipping, 2); ?></div>
+                <div style="font-size:1.1rem;font-weight:800;color:var(--text-primary);margin-top:0.25rem;text-align:right;">Total: ₱<?php echo number_format($quoteTotal, 2); ?></div>
               </div>
             </div>
             <?php endif; ?>

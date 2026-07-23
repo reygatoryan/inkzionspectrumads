@@ -593,7 +593,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }));
 
   <?php if ($actionMsg): ?>
-  showToast('<?php echo $actionMsg; ?>', '<?php echo $actionType; ?>');
+  setTimeout(function() { showToast(<?php echo json_encode($actionMsg); ?>, <?php echo json_encode($actionType); ?>); }, 0);
   <?php endif; ?>
 </script>
 

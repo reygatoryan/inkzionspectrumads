@@ -107,9 +107,9 @@ require_once __DIR__ . '/includes/admin-header.php';
         <select id="ship-courier" required>
           <option value="">Select courier...</option>
           <option value="J&T Express">J&T Express</option>
-          <option value="LBC Express">LBC Express</option>
+          <option value="Lalamove">Lalamove</option>
           <option value="2GO Express">2GO Express</option>
-          <option value="DHL">DHL</option>
+          <option value="Maxim">Maxim</option>
           <option value="Store Pickup">Store Pickup</option>
           <option value="Other">Other</option>
         </select>

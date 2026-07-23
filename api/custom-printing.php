@@ -138,8 +138,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $checkProp->close();
 
             if (!$existingProp) {
-                $itemsJson = json_encode([['name' => $productName, 'quantity' => $qty, 'unit_price' => $price]]);
-                $subtotal = $price * $qty;
+                // Build proposal items from request items with per-unit pricing
+                $reqItems = [];
+                $reqItemsStmt = $conn->prepare("SELECT items FROM custom_printing_requests WHERE id = ?");
+                $reqItemsStmt->bind_param('i', $requestId);
+                $reqItemsStmt->execute();
+                $reqItemsResult = $reqItemsStmt->get_result();
+                $reqItemsRow = $reqItemsResult->fetch_assoc();
+                $reqItemsStmt->close();
+                if ($reqItemsRow && $reqItemsRow['items']) {
+                    $reqItems = json_decode($reqItemsRow['items'], true) ?: [];
+                }
+                $proposalItems = [];
+                $subtotal = 0;
+                if (!empty($reqItems) && isset($reqItems[0]['unit_price'])) {
+                    foreach ($reqItems as $ri) {
+                        $pItem = [
+                            'name' => $ri['size'] ?? $productName,
+                            'quantity' => (int)($ri['qty'] ?? 1),
+                            'unit_price' => (float)($ri['unit_price'] ?? 0)
+                        ];
+                        $proposalItems[] = $pItem;
+                        $subtotal += $pItem['unit_price'] * $pItem['quantity'];
+                    }
+                } else {
+                    $proposalItems = [['name' => $productName, 'quantity' => $qty, 'unit_price' => $price]];
+                    $subtotal = $price * $qty;
+                }
+                $itemsJson = json_encode($proposalItems);
                 $total = $subtotal + $shipping;
                 $insertProp = $conn->prepare("INSERT INTO order_proposals (user_id, admin_id, request_id, conversation_id, items, subtotal, shipping_fee, total_amount, admin_notes, status, created_at) VALUES (?, ?, ?, 0, ?, ?, ?, ?,             '', 'sent', NOW())");
                 $insertProp->bind_param('iiisddd', $customerId, $userId, $requestId, $itemsJson, $subtotal, $shipping, $total);
@@ -224,9 +250,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $items = isset($data['items']) ? json_encode($data['items']) : '[]';
         $specialRequests = trim($data['special_requests'] ?? '');
         $preferredDeadline = trim($data['preferred_deadline'] ?? '');
+        $unitPrice = (float)($data['unit_price'] ?? 0);
 
-        $stmt = $conn->prepare("UPDATE custom_printing_requests SET material = ?, items = ?, special_requests = ?, preferred_deadline = ?, status = 'in_review', is_viewed = 0 WHERE id = ?");
-        $stmt->bind_param('ssssi', $material, $items, $specialRequests, $preferredDeadline, $requestId);
+        $stmt = $conn->prepare("UPDATE custom_printing_requests SET material = ?, items = ?, special_requests = ?, preferred_deadline = ?, ready_for_purchase_price = ?, status = 'in_review', is_viewed = 0 WHERE id = ?");
+        $stmt->bind_param('ssssdi', $material, $items, $specialRequests, $preferredDeadline, $unitPrice, $requestId);
         if (!$stmt->execute()) {
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => 'Database error: ' . $stmt->error]);

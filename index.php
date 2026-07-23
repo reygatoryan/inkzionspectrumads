@@ -42,10 +42,29 @@ $contactContent = $siteContent['contact_info'] ?? [];
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <style>
     .g-signin-wrapper { display: flex; align-items: center; }
     .g-signin-wrapper > div > iframe { max-width: 210px !important; }
     .g-signin-wrapper .g_id_signin { display: flex; align-items: center; }
+    .profile-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: none; align-items: center; justify-content: center; }
+    .profile-modal { background: white; border-radius: 16px; padding: 2rem; max-width: 440px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .profile-modal h2 { margin: 0 0 0.25rem; font-size: 1.25rem; color: #0f172a; }
+    .profile-modal p.sub { margin: 0 0 1.25rem; font-size: 0.85rem; color: #64748b; }
+    .profile-modal .field { margin-bottom: 1rem; }
+    .profile-modal .field label { display: block; font-size: 0.78rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem; }
+    .profile-modal .field input, .profile-modal .field textarea { width: 100%; padding: 0.65rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.9rem; outline: none; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s; }
+    .profile-modal .field input:focus, .profile-modal .field textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .profile-modal .field textarea { min-height: 70px; resize: vertical; }
+    .profile-modal .cf-turnstile { margin-bottom: 1rem; }
+    .profile-modal .modal-actions { display: flex; gap: 0.75rem; }
+    .profile-modal .modal-actions button { flex: 1; padding: 0.7rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s; }
+    .profile-modal .btn-save { background: #2563eb; color: white; }
+    .profile-modal .btn-save:hover { opacity: 0.9; }
+    .profile-modal .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .profile-modal .btn-skip { background: #f1f5f9; color: #475569; }
+    .profile-modal .btn-skip:hover { background: #e2e8f0; }
+    .profile-modal .error-msg { font-size: 0.8rem; color: #dc2626; margin-bottom: 0.75rem; display: none; }
   </style>
 </head>
 <body>
@@ -454,6 +473,31 @@ $contactContent = $siteContent['contact_info'] ?? [];
     </div>
   </footer>
 
+  <div class="profile-modal-overlay" id="profileModal">
+    <div class="profile-modal">
+      <h2>Complete Your Profile</h2>
+      <p class="sub">Please provide your details to continue.</p>
+      <div class="error-msg" id="profileError"></div>
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="profName" placeholder="Your full name">
+      </div>
+      <div class="field">
+        <label>Contact Number</label>
+        <input type="text" id="profContact" placeholder="e.g. 09171234567">
+      </div>
+      <div class="field">
+        <label>Delivery Address</label>
+        <textarea id="profAddress" placeholder="Street, Barangay, City, Province"></textarea>
+      </div>
+      <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" id="turnstileWidget"></div>
+      <div class="modal-actions">
+        <button class="btn-skip" onclick="skipProfile()">Skip for now</button>
+        <button class="btn-save" id="saveProfileBtn" onclick="saveProfile()">Save & Continue</button>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js?v=4"></script>
   <div id="gToast" style="position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:0.85rem 1.8rem;border-radius:12px;font-size:0.9rem;font-weight:500;z-index:9999;color:white;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.3);"></div>
   <script>
@@ -464,6 +508,8 @@ $contactContent = $siteContent['contact_info'] ?? [];
       t.style.display = 'block';
       setTimeout(function(){ t.style.display = 'none'; }, 4000);
     }
+    let pendingRedirect = '';
+    let pendingUserId = 0;
     async function handleGoogleCredential(response) {
       try {
         const res = await fetch('api/google-auth.php', {
@@ -473,7 +519,17 @@ $contactContent = $siteContent['contact_info'] ?? [];
         });
         const data = await res.json();
         if (data.ok) {
-          window.location.href = data.redirect;
+          pendingRedirect = data.redirect || '';
+          if (data.needs_profile) {
+            pendingUserId = data.user ? data.user.id : 0;
+            document.getElementById('profName').value = data.user && data.user.name ? data.user.name : '';
+            document.getElementById('profContact').value = '';
+            document.getElementById('profAddress').value = '';
+            document.getElementById('profileError').style.display = 'none';
+            document.getElementById('profileModal').style.display = 'flex';
+          } else {
+            window.location.href = pendingRedirect;
+          }
         } else {
           console.error('Google auth error:', data);
           showGToast(data.error || 'Sign-in failed. Please try again.', 'error');
@@ -482,6 +538,55 @@ $contactContent = $siteContent['contact_info'] ?? [];
         console.error('Google auth exception:', e);
         showGToast('Sign-in failed. Please try again.', 'error');
       }
+    }
+    async function saveProfile() {
+      var name = document.getElementById('profName').value.trim();
+      var contact = document.getElementById('profContact').value.trim();
+      var address = document.getElementById('profAddress').value.trim();
+      var errEl = document.getElementById('profileError');
+      if (!name || !contact || !address) {
+        errEl.textContent = 'All fields are required.';
+        errEl.style.display = 'block';
+        return;
+      }
+      var token = '';
+      if (typeof turnstile !== 'undefined') {
+        try { token = turnstile.getResponse(); } catch(e) {}
+      }
+      if (!token) {
+        errEl.textContent = 'Please complete the security check.';
+        errEl.style.display = 'block';
+        return;
+      }
+      errEl.style.display = 'none';
+      var btn = document.getElementById('saveProfileBtn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      try {
+        var res = await fetch('api/update-profile.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name, contact_number: contact, address: address, turnstile_token: token })
+        });
+        var result = await res.json();
+        if (result.success) {
+          document.getElementById('profileModal').style.display = 'none';
+          window.location.href = pendingRedirect || 'index.php';
+        } else {
+          errEl.textContent = result.error || 'Failed to save. Please try again.';
+          errEl.style.display = 'block';
+          if (typeof turnstile !== 'undefined') turnstile.reset();
+        }
+      } catch (e) {
+        errEl.textContent = 'Network error. Please try again.';
+        errEl.style.display = 'block';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Save & Continue';
+    }
+    function skipProfile() {
+      document.getElementById('profileModal').style.display = 'none';
+      window.location.href = pendingRedirect || 'index.php';
     }
     document.getElementById('nav-toggle').addEventListener('click', function() {
       var nav = document.getElementById('nav-list');
