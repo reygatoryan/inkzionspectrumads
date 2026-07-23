@@ -372,17 +372,12 @@ textarea {
   line-height: 1.05;
   margin: 0;
   letter-spacing: -0.02em;
-  background: linear-gradient(90deg, #ffffff, #00e5ff);
+  background: linear-gradient(90deg, #ff4757, #ffa502, #2ed573, #1e90ff, #a55eea);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  -webkit-text-stroke: 0;
-  text-shadow: 
-    -1.5px -1.5px 0 #ff0f7f,
-    1.5px -1.5px 0 #ffc107,
-    -1.5px 1.5px 0 #4A7C84,
-    1.5px 1.5px 0 #8bc34a,
-    0 4px 30px rgba(0, 229, 255, 0.4);
+  -webkit-text-stroke: 1.2px rgba(0,0,0,0.25);
+  text-shadow: none;
   font-weight: 900;
 }
 

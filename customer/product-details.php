@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../db-config.php';
+require_once '../includes/google-config.php';
 
 $loggedIn = !empty($_SESSION['user_id']);
 $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
@@ -524,6 +525,7 @@ if (is_numeric($displayPrice)) {
         <?php if (!$isSeller): ?>
         <a href="../index.php" class="btn auth-btn">Home</a>
         <?php endif; ?>
+        <?php endif; ?>
         <a href="../logout.php" class="btn auth-btn">Logout</a>
       </div>
       <?php else: ?>
@@ -531,7 +533,7 @@ if (is_numeric($displayPrice)) {
         <a href="../index.php" class="btn auth-btn">Home</a>
         <div class="g-signin-wrapper">
           <div id="g_id_onload"
-               data-client_id="710352328695-8n7ggg4rg6c89rga59kn9fb5ueffb6kl.apps.googleusercontent.com"
+               data-client_id="<?php echo GOOGLE_CLIENT_ID; ?>"
                data-callback="handleGoogleCredential"
                data-auto_prompt="false">
           </div>

@@ -1,0 +1,164 @@
+===========================================================
+  DEPLOY GUIDE - Inkzion Spectrum Ads to InfinityFree
+===========================================================
+
+Follow these steps to deploy your website to:
+  https://inkzionspectrumads.infinityfreeapp.com/inkzion101/
+
+
+===========================================================
+  STEP 1: PREPARE YOUR FILES
+===========================================================
+
+1A - Export the Database
+
+  1. Open http://localhost/phpmyadmin
+  2. Click the "inkzion" database on the left
+  3. Click the "Export" tab at the top
+  4. Choose "Quick" export method, "SQL" format
+  5. Click "Go"
+  6. Save the file as "inkzion.sql" to your desktop
+
+1B - Zip the Uploads Folder
+
+  1. Go to C:\xampp\htdocs\inkzion101\
+  2. Right-click the "uploads" folder
+  3. Click "Send to > Compressed (zipped) folder"
+  4. Name it "uploads.zip"
+
+1C - Zip the Whole Project
+
+  1. Right-click the entire "inkzion101" folder
+  2. Click "Send to > Compressed (zipped) folder"
+  3. Name it "inkzion101.zip"
+
+  You should now have 3 files on your desktop:
+    - inkzion.sql
+    - uploads.zip
+    - inkzion101.zip
+
+
+===========================================================
+  STEP 2: UPLOAD TO INFINITYFREE
+===========================================================
+
+  1. Go to https://control.infinityfree.net/ and log in
+  2. Click "File Manager" for your account (if0_42406703)
+  3. Click into the "htdocs" folder
+  4. Click "Upload" (top toolbar)
+  5. Select "inkzion101.zip" and upload it
+  6. After upload finishes, refresh the File Manager
+  7. Right-click "inkzion101.zip" > "Extract"
+  8. Wait for extraction to finish completely
+  9. Delete "inkzion101.zip" (select it > right-click > Delete)
+  10. Click "Upload" again
+  11. Select "uploads.zip" and upload it
+  12. Right-click "uploads.zip" > "Extract"
+  13. If it asks about overwriting, click "Yes"
+  14. Delete "uploads.zip"
+
+
+===========================================================
+  STEP 3: CREATE A DATABASE
+===========================================================
+
+  1. In InfinityFree control panel, click "MySQL Databases"
+  2. Click "Create MySQL Database"
+  3. Write down what it gives you:
+
+     Host:     sqlXXX.infinityfree.com
+     Database: if0_42406703_inkzion
+     Username: if0_42406703
+     Password: (type your own password here)
+
+  4. Click "Create"
+
+
+===========================================================
+  STEP 4: IMPORT YOUR SQL DATABASE
+===========================================================
+
+  1. In MySQL Databases page, find your new database
+  2. Click the "phpMyAdmin" button next to it
+  3. Click your database name on the left sidebar
+  4. Click "Import" tab at the top
+  5. Click "Choose File" > select "inkzion.sql" from your desktop
+  6. Scroll down > click "Go"
+  7. Wait for "Import has been successfully finished"
+
+
+===========================================================
+  STEP 5: UPDATE db-config.php
+===========================================================
+
+  1. Go back to File Manager
+  2. Navigate to htdocs/inkzion101/
+  3. Right-click "db-config.php" > "Edit"
+  4. Find these lines near the top:
+
+     define('DB_HOST', 'localhost');
+     define('DB_USER', 'root');
+     define('DB_PASS', '');
+     define('DB_NAME', 'inkzion');
+
+  5. Replace with your InfinityFree details:
+
+     define('DB_HOST', 'sqlXXX.infinityfree.com');
+     define('DB_USER', 'if0_42406703');
+     define('DB_PASS', 'your_password_here');
+     define('DB_NAME', 'if0_42406703_inkzion');
+
+  6. Click "Save"
+
+
+===========================================================
+  STEP 6: VISIT YOUR SITE
+===========================================================
+
+  Open your browser and go to:
+
+  https://inkzionspectrumads.infinityfreeapp.com/inkzion101/
+
+
+===========================================================
+  STEP 7: ADMIN LOGIN
+===========================================================
+
+  Go to:
+
+  https://inkzionspectrumads.infinityfreeapp.com/inkzion101/admin/
+
+  Log in with your existing email and password.
+
+
+===========================================================
+  TROUBLESHOOTING
+===========================================================
+
+  Blank white page
+    -> Wrong database credentials in db-config.php
+    -> Double-check host, user, password, database name
+
+  "Database connection failed"
+    -> Check your MySQL credentials again in InfinityFree
+
+  Images not showing
+    -> You must upload and extract "uploads.zip" into htdocs/
+    -> The folder should be at: htdocs/inkzion101/uploads/products/
+
+  "No products" or missing data
+    -> The SQL import may have failed
+    -> Recheck phpMyAdmin to see if tables are populated
+
+  404 error
+    -> Your site is at .../inkzion101/ not just the domain
+
+  Can't log in
+    -> Try registering a new account first on the live site
+    -> Or check that your SQL import included the users table
+
+  Uploads not saving (permission error)
+    -> In File Manager, set these folders to 755:
+       htdocs/inkzion101/uploads/
+       htdocs/inkzion101/uploads/products/
+       htdocs/inkzion101/uploads/profiles/

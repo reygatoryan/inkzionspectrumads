@@ -19,6 +19,21 @@ require_once '../db-config.php';
 
 $user_id = $_SESSION['user_id'];
 
+$unreadOrderIds = [];
+$unreadStmt = $conn->prepare("SELECT DISTINCT related_id FROM notifications WHERE user_id = ? AND related_type = 'order' AND is_read = 0 AND is_deleted = 0");
+$unreadStmt->bind_param('i', $user_id);
+$unreadStmt->execute();
+$unreadRes = $unreadStmt->get_result();
+while ($row = $unreadRes->fetch_assoc()) {
+    $unreadOrderIds[] = (int)$row['related_id'];
+}
+$unreadStmt->close();
+
+$markReadStmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND related_type = 'order' AND is_read = 0");
+$markReadStmt->bind_param('i', $user_id);
+$markReadStmt->execute();
+$markReadStmt->close();
+
 $orders = [];
 $orderStmt = $conn->prepare("
   SELECT o.id, o.order_reference, o.total_amount, o.status, o.created_at, o.updated_at,
@@ -216,6 +231,35 @@ foreach ($groupedOrders as $o) {
     .badge-completed { background: rgba(5,150,105,0.12); color: #047857; border: 1px solid rgba(5,150,105,0.3); }
     .badge-returned { background: rgba(249,115,22,0.12); color: #c2410c; border: 1px solid rgba(249,115,22,0.3); }
     .badge-cancelled { background: rgba(239,68,68,0.12); color: #dc2626; border: 1px solid rgba(239,68,68,0.3); }
+
+    .order-card[data-updated="true"] {
+      border-color: var(--primary);
+      box-shadow: 0 2px 16px rgba(43, 76, 82, 0.2);
+      animation: notifHighlight 2.5s ease-in-out;
+    }
+    @keyframes notifHighlight {
+      0%, 100% { box-shadow: 0 2px 16px rgba(43, 76, 82, 0.2); }
+      50% { box-shadow: 0 4px 28px rgba(43, 76, 82, 0.35); }
+    }
+    .order-updated-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #2B4C52;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    .order-updated-badge i {
+      font-size: 0.45rem;
+      color: #10B981;
+      animation: notifPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes notifPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
 
     .progress-tracker { display: flex; align-items: center; justify-content: space-between; margin: 1.25rem 0; padding: 0 0.5rem; position: relative; }
     .progress-tracker::before { content: ''; position: absolute; top: 18px; left: 40px; right: 40px; height: 3px; background: #e2e8f0; z-index: 0; }
@@ -564,7 +608,7 @@ foreach ($groupedOrders as $o) {
             $statusLabels = ['pending'=>'Pending','confirmed'=>'Confirmed','shipped'=>'Shipped','delivered'=>'Delivered','completed'=>'Completed','returned'=>'Returned','cancelled'=>'Cancelled'];
             $statusLabel = $statusLabels[$order['status']] ?? ucfirst($order['status']);
           ?>
-          <div class="order-card" data-tab="<?= $tabCategory ?>">
+          <div class="order-card" data-tab="<?= $tabCategory ?>"<?= in_array($order['id'], $unreadOrderIds) ? ' data-updated="true"' : '' ?>>
             <div class="order-header">
               <div class="order-header-left">
                 <span class="order-id">Order #<?= htmlspecialchars($order['order_reference'] ?? 'INK-' . str_pad($order['id'], 6, '0', STR_PAD_LEFT)) ?></span>
@@ -574,6 +618,9 @@ foreach ($groupedOrders as $o) {
                 <i class="fas fa-<?= $order['status']==='completed'?'check-circle':($order['status']==='cancelled'?'times-circle':($order['status']==='shipped'?'truck':($order['status']==='returned'?'undo':'clock'))) ?>"></i>
                 <?= $statusLabel ?>
               </span>
+              <?php if (in_array($order['id'], $unreadOrderIds)): ?>
+              <span class="order-updated-badge"><i class="fas fa-circle"></i> Updated</span>
+              <?php endif; ?>
             </div>
             <?php if ($order['status'] !== 'cancelled' && $order['status'] !== 'returned'): ?>
             <div class="progress-tracker">

@@ -221,15 +221,15 @@ if (!empty($categoryOptions)) {
       xhr.open('POST', '../api/delete-product.php', true);
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
       xhr.onload = function() {
-        if (xhr.status === 200) {
+        try {
           const data = JSON.parse(xhr.responseText);
-          if (data.success) {
+          if (xhr.status === 200 && data.success) {
             closeDeleteModal();
             window.location.reload();
           } else {
-            alert('Error: ' + (data.error || 'Could not delete product'));
+            alert(data.error || 'Could not delete product');
           }
-        } else {
+        } catch (e) {
           alert('Network error occurred');
         }
       };
