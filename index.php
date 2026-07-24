@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/includes/session-helper.php';
+secureSessionStart();
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
 $loggedIn = !empty($_SESSION['user_id']);
@@ -15,6 +16,9 @@ if ($loggedIn && $userInitials === '') {
 
 // Load site content for hero/about/contact
 require_once 'db-config.php';
+require_once __DIR__ . '/includes/csrf-helper.php';
+require_once __DIR__ . '/includes/turnstile-config.php';
+$csrfToken = generateCsrfToken();
 $siteContent = [];
 $result = $conn->query("SELECT section_key, title, subtitle, content, image_url, meta FROM site_content");
 while ($row = $result->fetch_assoc()) {
@@ -37,12 +41,13 @@ $contactContent = $siteContent['contact_info'] ?? [];
   $seoKeywords = 'printing, advertising, business cards, marketing materials, signage, apparel, custom merchandise, promotional items';
   outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
   ?>
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="styles.css?v=13">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script>const CSRF_TOKEN = '<?php echo $csrfToken; ?>';</script>
   <style>
     .g-signin-wrapper { display: flex; align-items: center; }
     .g-signin-wrapper > div > iframe { max-width: 210px !important; }
@@ -59,11 +64,9 @@ $contactContent = $siteContent['contact_info'] ?? [];
     .profile-modal .cf-turnstile { margin-bottom: 1rem; }
     .profile-modal .modal-actions { display: flex; gap: 0.75rem; }
     .profile-modal .modal-actions button { flex: 1; padding: 0.7rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s; }
-    .profile-modal .btn-save { background: #2563eb; color: white; }
+    .profile-modal .btn-save { background: #2563eb; color: white; width: 100%; }
     .profile-modal .btn-save:hover { opacity: 0.9; }
     .profile-modal .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
-    .profile-modal .btn-skip { background: #f1f5f9; color: #475569; }
-    .profile-modal .btn-skip:hover { background: #e2e8f0; }
     .profile-modal .error-msg { font-size: 0.8rem; color: #dc2626; margin-bottom: 0.75rem; display: none; }
   </style>
 </head>
@@ -473,6 +476,8 @@ $contactContent = $siteContent['contact_info'] ?? [];
     </div>
   </footer>
 
+  <div id="turnstile-container" class="cf-turnstile" data-sitekey="<?php echo TURNSTILE_SITE_KEY; ?>" data-size="invisible" data-callback="onTurnstileCallback"></div>
+
   <div class="profile-modal-overlay" id="profileModal">
     <div class="profile-modal">
       <h2>Complete Your Profile</h2>
@@ -490,10 +495,9 @@ $contactContent = $siteContent['contact_info'] ?? [];
         <label>Delivery Address</label>
         <textarea id="profAddress" placeholder="Street, Barangay, City, Province"></textarea>
       </div>
-      <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" id="turnstileWidget"></div>
+      <div id="turnstileWidget"></div>
       <div class="modal-actions">
-        <button class="btn-skip" onclick="skipProfile()">Skip for now</button>
-        <button class="btn-save" id="saveProfileBtn" onclick="saveProfile()">Save & Continue</button>
+        <button class="btn-save" id="saveProfileBtn" onclick="saveProfile()">Save &amp; Continue</button>
       </div>
     </div>
   </div>
@@ -510,12 +514,38 @@ $contactContent = $siteContent['contact_info'] ?? [];
     }
     let pendingRedirect = '';
     let pendingUserId = 0;
-    async function handleGoogleCredential(response) {
+    let pendingGoogleCredential = '';
+
+    function handleGoogleCredential(response) {
+      pendingGoogleCredential = response.credential;
+      if (typeof turnstile !== 'undefined') {
+        turnstile.execute('#turnstile-container');
+      } else {
+        setTimeout(function() {
+          if (typeof turnstile !== 'undefined') {
+            turnstile.execute('#turnstile-container');
+          } else {
+            showGToast('Security check is still loading. Please try signing in again.', 'error');
+          }
+        }, 500);
+      }
+    }
+
+    function onTurnstileCallback(token) {
+      if (!pendingGoogleCredential) return;
+      proceedWithLogin(pendingGoogleCredential, token);
+    }
+
+    async function proceedWithLogin(credential, turnstileToken) {
       try {
         const res = await fetch('api/google-auth.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ credential: response.credential })
+          body: JSON.stringify({
+            credential: credential,
+            turnstile_token: turnstileToken,
+            csrf_token: CSRF_TOKEN
+          })
         });
         const data = await res.json();
         if (data.ok) {
@@ -527,6 +557,14 @@ $contactContent = $siteContent['contact_info'] ?? [];
             document.getElementById('profAddress').value = '';
             document.getElementById('profileError').style.display = 'none';
             document.getElementById('profileModal').style.display = 'flex';
+            setTimeout(function() {
+              if (typeof turnstile !== 'undefined') {
+                var tw = document.getElementById('turnstileWidget');
+                if (tw && !tw.childNodes.length) {
+                  turnstile.render(tw, { sitekey: TURNSTILE_SITE_KEY });
+                }
+              }
+            }, 100);
           } else {
             window.location.href = pendingRedirect;
           }
@@ -551,7 +589,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
       }
       var token = '';
       if (typeof turnstile !== 'undefined') {
-        try { token = turnstile.getResponse(); } catch(e) {}
+        try { token = turnstile.getResponse(document.getElementById('turnstileWidget')); } catch(e) {}
       }
       if (!token) {
         errEl.textContent = 'Please complete the security check.';
@@ -566,7 +604,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
         var res = await fetch('api/update-profile.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name, contact_number: contact, address: address, turnstile_token: token })
+          body: JSON.stringify({ name: name, contact_number: contact, address: address, turnstile_token: token, csrf_token: CSRF_TOKEN })
         });
         var result = await res.json();
         if (result.success) {
@@ -583,10 +621,6 @@ $contactContent = $siteContent['contact_info'] ?? [];
       }
       btn.disabled = false;
       btn.textContent = 'Save & Continue';
-    }
-    function skipProfile() {
-      document.getElementById('profileModal').style.display = 'none';
-      window.location.href = pendingRedirect || 'index.php';
     }
     document.getElementById('nav-toggle').addEventListener('click', function() {
       var nav = document.getElementById('nav-list');

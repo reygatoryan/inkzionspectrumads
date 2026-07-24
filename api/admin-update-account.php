@@ -57,7 +57,7 @@ try {
             
             // Create directory if it doesn't exist
             if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
+                mkdir($uploadDir, 0755, true);
             }
 
             $targetPath = $uploadDir . $filename;

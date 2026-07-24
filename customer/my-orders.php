@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/session-helper.php';
+secureSessionStart();
 if (empty($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit();
@@ -37,7 +38,7 @@ $markReadStmt->close();
 $orders = [];
 $orderStmt = $conn->prepare("
   SELECT o.id, o.order_reference, o.total_amount, o.status, o.created_at, o.updated_at,
-         o.total_weight, o.shipping_fee,
+         o.total_weight, o.shipping_fee, o.payment_method,
          oi.quantity, oi.unit_price, oi.product_id,
          COALESCE(p.name, oi.product_name) as product_name, p.image_url
   FROM orders o
@@ -70,6 +71,7 @@ foreach ($orders as $row) {
       'status' => $row['status'],
       'created_at' => $row['created_at'],
       'updated_at' => $row['updated_at'],
+      'payment_method' => $row['payment_method'],
       'items' => [],
     ];
   }
@@ -648,6 +650,27 @@ foreach ($groupedOrders as $o) {
               <div class="order-total" style="font-size:0.78rem;">Shipping: <strong>₱<?= number_format((float)$order['shipping_fee'], 2) ?></strong></div>
               <?php endif; ?>
               <div class="order-total">Total: <strong>₱<?= number_format((float)$order['total_amount'], 2) ?></strong></div>
+              <?php if (($order['payment_method'] ?? '') === 'downpayment'):
+                $dpSubtotal = (float)$order['total_amount'] - (float)$order['shipping_fee'];
+                $dpDown = $dpSubtotal * 0.5;
+                $dpBalance = $dpDown + (float)$order['shipping_fee'];
+              ?>
+              <div style="margin-top:0.4rem;padding-top:0.4rem;border-top:1px dashed #e2e8f0;width:100%;font-size:0.78rem;display:flex;flex-direction:column;gap:0.2rem;">
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:#e91e8c;">50% Downpayment (of Subtotal):</span>
+                  <strong style="color:#e91e8c;">₱<?= number_format($dpDown, 2) ?></strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                  <?php if (in_array($order['status'], ['shipped','delivered','completed'])): ?>
+                  <span style="color:#10b981;">Balance:</span>
+                  <strong style="color:#10b981;"><i class="fas fa-check-circle"></i> Paid</strong>
+                  <?php else: ?>
+                  <span style="color:#dc2626;">Balance Due:</span>
+                  <strong style="color:#dc2626;">₱<?= number_format($dpBalance, 2) ?></strong>
+                  <?php endif; ?>
+                </div>
+              </div>
+              <?php endif; ?>
               <div class="order-actions">
                 <button type="button" class="btn-order-action primary" onclick="openTrackingModal(<?= (int)$order['id'] ?>)"><i class="fas fa-eye"></i> View</button>
                 <?php if ($order['status'] === 'pending' || $order['status'] === 'confirmed'): ?>

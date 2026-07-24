@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/session-helper.php';
+secureSessionStart();
 if (!isset($_SESSION['user_id'])) {
   header('Location: ../index.php');
   exit();

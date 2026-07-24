@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ext = $allowedTypes[$imageInfo['mime']];
                 $filename = 'rfp_' . $requestId . '_' . time() . '.' . $ext;
                 $uploadDir = __DIR__ . '/../uploads/products/';
-                if (!is_dir($uploadDir)) { mkdir($uploadDir, 0777, true); }
+                if (!is_dir($uploadDir)) { mkdir($uploadDir, 0755, true); }
                 if (move_uploaded_file($_FILES['rfp_image']['tmp_name'], $uploadDir . $filename)) {
                     $image = 'uploads/products/' . $filename;
                 }

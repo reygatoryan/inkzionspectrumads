@@ -4,9 +4,6 @@ Disallow: /api/
 Disallow: /admin/
 Disallow: /customer/profile.php
 
-# Sitemap
-Sitemap: https://inkzion.com/sitemap.php
-
 # Crawl-delay
 Crawl-delay: 1
 

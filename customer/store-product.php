@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/session-helper.php';
+secureSessionStart();
 require_once '../db-config.php';
 require_once dirname(__DIR__) . '/includes/seo-helper.php';
 
@@ -28,8 +29,8 @@ unset($_SESSION['flash']);
 $selectedCategory = isset($_GET['category']) ? $_GET['category'] : '';
 $isPrintingServices = ($selectedCategory === 'Printing Services');
 
-$uploadDir = __DIR__ . '/uploads/products';
-if (!is_dir($uploadDir) && !mkdir($uploadDir, 0777, true) && !is_dir($uploadDir)) {
+$uploadDir = __DIR__ . '/../uploads/products';
+if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
 }
 
 $useDbProducts = false;
@@ -1646,7 +1647,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
               <div class="product-card-image">
                 <span class="card-category-badge"><?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?></span>
                 <a href="<?php echo $imageSrc; ?>" class="qv-trigger">
-                  <img src="<?php echo $imageSrc; ?>" alt="<?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
+                  <img src="<?php echo $imageSrc; ?>" onerror="this.src='assets/products-demo.jpg'" alt="<?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
                 </a>
                 <div class="card-quick-view">
                   <a href="<?php echo $imageSrc; ?>" class="card-quick-view-btn qv-trigger"><i class="fas fa-eye"></i> Quick View</a>
@@ -1810,7 +1811,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       <div class="qv-layout">
         <div class="qv-gallery">
           <div class="qv-main-img">
-            <img id="qvMainImg" src="" alt="">
+            <img id="qvMainImg" src="" onerror="this.src='assets/products-demo.jpg'" alt="">
           </div>
           <div class="qv-thumbs" id="qvThumbs"></div>
         </div>
@@ -1944,8 +1945,10 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       const image = card.dataset.qvImage;
       const productId = card.dataset.qvId;
 
-      document.getElementById('qvMainImg').src = image;
-      document.getElementById('qvMainImg').alt = name;
+      var qvImg = document.getElementById('qvMainImg');
+      qvImg.src = image;
+      qvImg.alt = name;
+      qvImg.onerror = function() { this.src = 'assets/products-demo.jpg'; };
       document.getElementById('qvBadge').textContent = category;
       document.getElementById('qvName').textContent = name;
       document.getElementById('qvDesc').textContent = desc || '';
@@ -1961,6 +1964,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       const thumbImg = document.createElement('img');
       thumbImg.src = image;
       thumbImg.alt = name;
+      thumbImg.onerror = function() { this.src = 'assets/products-demo.jpg'; };
       thumbImg.onclick = function() {
         document.querySelectorAll('.qv-thumb').forEach(t => t.classList.remove('active'));
         this.parentElement.classList.add('active');

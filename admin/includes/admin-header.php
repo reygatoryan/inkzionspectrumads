@@ -1,7 +1,6 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-  session_start();
-}
+require_once __DIR__ . '/../../includes/session-helper.php';
+secureSessionStart();
 if (empty($_SESSION['user_id']) || empty($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in as admin.'];
     header('Location: ../index.php');

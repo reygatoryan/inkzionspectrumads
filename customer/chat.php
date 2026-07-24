@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/session-helper.php';
+secureSessionStart();
 if (empty($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit();
@@ -194,7 +195,9 @@ session_write_close();
       .products-main { margin-left: 0; }
       .hamburger-btn { display: flex !important; }
     }
-    @media (max-width: 768px) {
+        .btn-back-conv { display:none;width:34px;height:34px;border-radius:8px;border:none;background:rgba(43,76,82,0.1);color:#2B4C52;cursor:pointer;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;transition:all 0.15s; }
+    .btn-back-conv:hover { background:#2B4C52;color:white; }
+@media (max-width: 768px) {
       .top-header { padding: 0 1rem; }
       .top-header-inner { height: 64px; }
       .top-header-title h1 { font-size: 1.1rem; }
@@ -204,8 +207,12 @@ session_write_close();
       .header-profile-arrow { display: none; }
       .chat-layout { grid-template-columns: 1fr; }
       .chat-sidebar { display: none; }
-      .chat-sidebar.mobile-show { display: flex; position: fixed; inset: 0; z-index: 1000; }
+      .chat-sidebar.mobile-show { display: flex; position: fixed; inset: 0; z-index: 1000; border-radius:0; }
+      .chat-main.mobile-hide { display: none; }
+      .btn-back-conv { display:inline-flex !important; }
     }
+    @media (hover:none) and (pointer:coarse) { .delete-conv-btn { opacity:0.4; } .conv-item:hover .delete-conv-btn { opacity:0.4; } .conversation-item:hover .delete-conv-btn { opacity:0.4; } }
+    @supports (height:100dvh) { .chat-layout { height:calc(100dvh - 200px); } }
     @media (max-width: 480px) {
       .conv-avatar { width: 40px; height: 40px; font-size: 0.85rem; }
     }
@@ -701,10 +708,31 @@ session_write_close();
       } catch(e) {}
     }
 
+    function customerMobileShowMain() {
+      if (window.innerWidth <= 768) {
+        var sidebar = document.querySelector('.chat-sidebar');
+        var main = document.querySelector('.chat-main');
+        if (sidebar) sidebar.classList.remove('mobile-show');
+        if (main) main.classList.remove('mobile-hide');
+      }
+    }
+
+    function goBackToConversations() {
+      stopSSE();
+      currentConversation = null;
+      document.querySelectorAll('.conversation-item').forEach(function(el){el.classList.remove('active');});
+      if (window.innerWidth <= 768) {
+        document.querySelector('.chat-sidebar').classList.add('mobile-show');
+        document.querySelector('.chat-main')?.classList.add('mobile-hide');
+        document.querySelector('.chat-main').innerHTML = '<div class="no-chat-selected"><i class="fas fa-comments"></i><p>Select a conversation to start messaging</p></div>';
+      }
+    }
+
     async function selectConversation(convId) {
       if (isLoadingConversation) return;
       isLoadingConversation = true;
       stopSSE();
+      customerMobileShowMain();
       try {
         currentConversation = convId;
         currentConvData = null;
@@ -876,8 +904,10 @@ session_write_close();
         }
         const sellerName = convData ? (convData.seller_name || 'Admin') : 'Admin';
         const isOnline = convData ? (convData.seller_online ? 'online' : '') : '';
+        const custBackBtn = window.innerWidth <= 768 ? '<button class="btn-back-conv" onclick="goBackToConversations()" title="Back" style="display:inline-flex;"><i class="fas fa-arrow-left"></i></button>' : '';
         chatMain.innerHTML = prodBar + `
           <div class="chat-header" id="chat-header">
+            ${custBackBtn}
             <div class="conv-avatar" id="chat-avatar">${getInitials(sellerName)}</div>
             <div class="chat-header-info">
               <div class="chat-header-name" id="chat-name">${escapeHtml(sellerName)}</div>
@@ -1406,6 +1436,25 @@ session_write_close();
     }
     updateSidebarBadges();
     setInterval(updateSidebarBadges, 10000);
+
+    (function(){
+      function adjustCustomerMobileLayout(){
+        var sidebar = document.querySelector('.chat-sidebar');
+        var main = document.querySelector('.chat-main');
+        if (!sidebar || !main) return;
+        if (window.innerWidth <= 768) {
+          if (!currentConversation) {
+            sidebar.classList.add('mobile-show');
+            main.classList.add('mobile-hide');
+          }
+        } else {
+          sidebar.classList.remove('mobile-show');
+          main.classList.remove('mobile-hide');
+        }
+      }
+      adjustCustomerMobileLayout();
+      window.addEventListener('resize', adjustCustomerMobileLayout);
+    })();
   </script>
   <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
     <div class="modal-box">

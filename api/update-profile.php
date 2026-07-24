@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/session-helper.php';
+secureSessionStart();
 header('Content-Type: application/json');
 header('Access-Control-Allow-Credentials: true');
 if (isset($_SERVER['HTTP_ORIGIN'])) {
@@ -25,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+require_once __DIR__ . '/../includes/csrf-helper.php';
 require_once __DIR__ . '/../includes/turnstile-config.php';
 require_once __DIR__ . '/../db-config.php';
 
@@ -32,6 +34,28 @@ $data = json_decode(file_get_contents('php://input'), true);
 if (!$data) {
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => 'Invalid request body']);
+    exit;
+}
+
+// Verify CSRF token
+$csrfToken = $data['csrf_token'] ?? '';
+if (!verifyCsrfToken($csrfToken)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Invalid request. Please refresh the page and try again.']);
+    exit;
+}
+
+// Rate limiting: max 10 profile update attempts per IP per 15 minutes
+$ip = $_SERVER['REMOTE_ADDR'] ?? '';
+$rateLimitWindow = date('Y-m-d H:i:s', strtotime('-15 minutes'));
+$stmt = $conn->prepare("SELECT COUNT(*) as cnt FROM login_attempts WHERE ip_address = ? AND attempted_at >= ? AND success = 0");
+$stmt->bind_param('ss', $ip, $rateLimitWindow);
+$stmt->execute();
+$rateResult = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+if ($rateResult && (int)$rateResult['cnt'] >= 10) {
+    http_response_code(429);
+    echo json_encode(['success' => false, 'error' => 'Too many attempts. Please try again later.']);
     exit;
 }
 

@@ -43,13 +43,21 @@ $changeConv = calcChange($thisWeekConv, $prevConv);
 $activity = [];
 $r1 = $conn->query("SELECT id, order_reference, 'order' AS type, CONCAT('Order #', COALESCE(order_reference, CONCAT('INK-', LPAD(id, 6, '0')))) AS title, status, created_at, user_id FROM orders WHERE status = 'pending' ORDER BY created_at DESC LIMIT 10");
 while ($row = $r1->fetch_assoc()) {
-    $u = $conn->query("SELECT name FROM users WHERE id = {$row['user_id']}")->fetch_assoc();
+    $stmt = $conn->prepare("SELECT name FROM users WHERE id = ?");
+    $stmt->bind_param("i", $row['user_id']);
+    $stmt->execute();
+    $u = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
     $row['customer'] = $u['name'] ?? 'Guest';
     $activity[] = $row;
 }
 $r2 = $conn->query("SELECT id, 'request' AS type, CONCAT('Custom Request #', id) AS title, status, created_at, user_id FROM custom_printing_requests WHERE status IN ('pending','in_review') ORDER BY created_at DESC LIMIT 10");
 while ($row = $r2->fetch_assoc()) {
-    $u = $conn->query("SELECT name FROM users WHERE id = {$row['user_id']}")->fetch_assoc();
+    $stmt = $conn->prepare("SELECT name FROM users WHERE id = ?");
+    $stmt->bind_param("i", $row['user_id']);
+    $stmt->execute();
+    $u = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
     $row['customer'] = $u['name'] ?? 'Guest';
     $activity[] = $row;
 }

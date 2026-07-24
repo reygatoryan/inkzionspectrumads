@@ -3,8 +3,8 @@ $pageTitle = 'Products';
 $pageSubtitle = 'Manage your product catalog';
 require_once __DIR__ . '/includes/admin-header.php';
 
-$uploadDir = __DIR__ . '/uploads/products';
-if (!is_dir($uploadDir) && !mkdir($uploadDir, 0777, true) && !is_dir($uploadDir)) {
+$uploadDir = __DIR__ . '/../uploads/products';
+if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
 }
 
 $categoryOptions = [];

@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/session-helper.php';
+secureSessionStart();
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit();
@@ -468,9 +469,11 @@ if (!empty($proposal['payment_details'])) {
           <div class="payment-details" id="payment-details-downpayment" style="display:none;">
             <div class="payment-details-inner">
               <div class="dp-summary">
-                <div class="dp-row"><span>Total Amount</span><span>₱<?php echo number_format($rfpTotal, 2); ?></span></div>
-                <div class="dp-row dp-highlight"><span>50% Downpayment</span><span>₱<?php echo number_format($rfpTotal * 0.5, 2); ?></span></div>
-                <div class="dp-row"><span>Remaining Balance (50%)</span><span>₱<?php echo number_format($rfpTotal * 0.5, 2); ?></span></div>
+                <div class="dp-row"><span>Subtotal</span><span>₱<?php echo number_format($displaySubtotal, 2); ?></span></div>
+                <div class="dp-row"><span>Shipping Fee</span><span>₱<?php echo number_format($displayShipping, 2); ?></span></div>
+                <div class="dp-row" style="font-weight:700;border-top:1px solid #e2e8f0;padding-top:0.5rem;margin-top:0.25rem;"><span>Total Amount</span><span>₱<?php echo number_format($displayTotal, 2); ?></span></div>
+                <div class="dp-row dp-highlight"><span>50% Downpayment (of Subtotal)</span><span>₱<?php echo number_format($displaySubtotal * 0.5, 2); ?></span></div>
+                <div class="dp-row"><span>Balance Due (50% Subtotal + Shipping)</span><span>₱<?php echo number_format(($displaySubtotal * 0.5) + $displayShipping, 2); ?></span></div>
               </div>
 
               <h4 style="margin:1rem 0 0.5rem;font-size:0.9rem;color:#334155;">How will you pay the 50% downpayment?</h4>

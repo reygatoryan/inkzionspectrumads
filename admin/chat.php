@@ -59,7 +59,11 @@ require 'includes/admin-header.php';
   .request-card .title { font-weight: 600; font-size: 0.85rem; color: #0f172a; margin-bottom: 0.3rem; }
   .request-card .title i { color: #2B4C52; margin-right: 0.35rem; }
   .request-card .btn-fill { display: inline-block; padding: 0.35rem 0.75rem; border-radius: 8px; background: #2B4C52; color: white; font-size: 0.75rem; font-weight: 600; text-decoration: none; margin-top: 0.4rem; }
-  @media (max-width: 768px) { .admin-chat-layout { grid-template-columns: 1fr; } .admin-chat-sidebar { display: none; } }
+  .btn-back-conv { display:none;width:34px;height:34px;border-radius:8px;border:none;background:rgba(43,76,82,0.1);color:#2B4C52;cursor:pointer;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;transition:all 0.15s; }
+  .btn-back-conv:hover { background:#2B4C52;color:white; }
+  @media (max-width: 768px) { .admin-chat-layout { grid-template-columns:1fr; } .admin-chat-sidebar { display:none; } .admin-chat-sidebar.mobile-show { display:flex;position:fixed;inset:0;z-index:1000;border-radius:0; } .admin-chat-main.mobile-hide { display:none; } .btn-back-conv { display:inline-flex !important; } }
+  @media (hover:none) and (pointer:coarse) { .delete-conv-btn { opacity:0.4; } .conv-item:hover .delete-conv-btn { opacity:0.4; } .conversation-item:hover .delete-conv-btn { opacity:0.4; } }
+  @supports (height:100dvh) { .admin-chat-layout { height:calc(100dvh - 180px); } }
   .img-modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;display:none;align-items:center;justify-content:center;cursor:pointer; }
   .img-modal-overlay.active { display:flex; }
   .img-modal-overlay img { max-width:90%;max-height:90%;border-radius:8px;cursor:default;box-shadow:0 8px 40px rgba(0,0,0,0.5); }
@@ -245,10 +249,31 @@ function adminAppendMessages(msgs, fromPoll) {
   });
 }
 
+function adminMobileShowMain() {
+  if (window.innerWidth <= 768) {
+    var sidebar = document.querySelector('.admin-chat-sidebar');
+    var main = document.getElementById('chatMain');
+    if (sidebar) sidebar.classList.remove('mobile-show');
+    if (main) main.classList.remove('mobile-hide');
+  }
+}
+
+function adminGoBackToConversations() {
+  adminStopSSE();
+  currentConvId = null;
+  document.querySelectorAll('.conv-item').forEach(function(el){el.classList.remove('active');});
+  if (window.innerWidth <= 768) {
+    document.querySelector('.admin-chat-sidebar').classList.add('mobile-show');
+    document.getElementById('chatMain').classList.add('mobile-hide');
+    document.getElementById('chatMain').innerHTML = '<div class="no-chat"><i class="fas fa-comments"></i><p>Select a conversation to start messaging</p></div>';
+  }
+}
+
 async function adminSelectConversation(convId) {
   if(isLoadingAdminConv)return;
   isLoadingAdminConv=true;
   adminStopSSE();
+  adminMobileShowMain();
   try{
     currentConvId=convId; msgOffset=0; hasMoreMsgs=false; isLoadingMore=false; lastMsgLen=0; autoScrollAdmin=true; lastMsgId=0; adminLoadedMsgIds=new Set(); adminLastDateLabel=null;
     document.querySelectorAll('.conv-item').forEach(function(el){el.classList.toggle('active',parseInt(el.dataset.id)===convId);});
@@ -339,7 +364,8 @@ async function adminLoadChat(convId, silent) {
     if(msgs.length){msgsHtml='';var lastDt=null;msgs.forEach(function(m){var dt=getDateLabel(m.created_at);if(dt!==lastDt){msgsHtml+='<div style="text-align:center;padding:0.35rem 0;font-size:0.7rem;color:#94a3b8;font-weight:500;">'+dt+'</div>';lastDt=dt;}msgsHtml+=adminRenderMsg(m);});adminLastDateLabel=lastDt;if(hasMoreMsgs){msgsHtml='<div style="text-align:center;padding:0.4rem;"><button onclick="adminLoadMoreMsgs()" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.8rem;color:#2B4C52;font-size:0.72rem;font-weight:500;cursor:pointer;"><i class="fas fa-chevron-up"></i> Load older</button></div>'+msgsHtml;}}
     else{msgsHtml='<p style="text-align:center;color:#94a3b8;padding:1.5rem;">No messages yet.</p>';adminLoadedMsgIds=new Set();}
     
-    main.innerHTML=prodBar+'<div class="chat-header" id="chatHdr"><h4><i class="fas fa-user" style="color:#2B4C52;margin-right:0.35rem;"></i>'+escapeHtml(customerName)+'</h4><div class="chat-header-actions">'+hdrActions+'</div></div>'+
+    var adminBackBtn = window.innerWidth <= 768 ? '<button class="btn-back-conv" onclick="adminGoBackToConversations()" title="Back"><i class="fas fa-arrow-left"></i></button>' : '';
+    main.innerHTML=prodBar+'<div class="chat-header" id="chatHdr">'+adminBackBtn+'<h4><i class="fas fa-user" style="color:#2B4C52;margin-right:0.35rem;"></i>'+escapeHtml(customerName)+'</h4><div class="chat-header-actions">'+hdrActions+'</div></div>'+
       '<div class="typing-indicator" id="admin-typing-indicator" style="display:none;padding:0.3rem 1.25rem;font-size:0.78rem;color:#94a3b8;font-style:italic;"></div>'+
       '<div class="chat-messages" id="chatMsgs">'+msgsHtml+'</div>'+
       '<div class="chat-input-area" id="chatInputArea">'+
@@ -604,6 +630,25 @@ function closeImageModal(){
   document.body.style.overflow='';
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeImageModal();});
+
+(function(){
+  function adjustAdminMobileLayout(){
+    var sidebar = document.querySelector('.admin-chat-sidebar');
+    var main = document.getElementById('chatMain');
+    if (!sidebar || !main) return;
+    if (window.innerWidth <= 768) {
+      if (!currentConvId) {
+        sidebar.classList.add('mobile-show');
+        main.classList.add('mobile-hide');
+      }
+    } else {
+      sidebar.classList.remove('mobile-show');
+      main.classList.remove('mobile-hide');
+    }
+  }
+  adjustAdminMobileLayout();
+  window.addEventListener('resize', adjustAdminMobileLayout);
+})();
 </script>
 
 <div class="img-modal-overlay" id="adminImgModalOverlay" onclick="closeImageModal()">

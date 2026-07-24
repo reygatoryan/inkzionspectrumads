@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/session-helper.php';
+secureSessionStart();
 require_once '../db-config.php';
 require_once '../includes/google-config.php';
 
@@ -558,7 +559,7 @@ if (is_numeric($displayPrice)) {
         <div class="product-details-container">
           <div class="product-image-section">
             <div class="product-main-image">
-              <img src="<?php echo htmlspecialchars($product['image_url'] ?? $product['image'], ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?>">
+              <img src="<?php echo htmlspecialchars($product['image_url'] ?? $product['image'], ENT_QUOTES, 'UTF-8'); ?>" onerror="this.src='assets/products-demo.jpg'" alt="<?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?>">
             </div>
           </div>
 
@@ -778,7 +779,7 @@ if (is_numeric($displayPrice)) {
       relatedContainer.innerHTML = relatedItems.map(item => `
         <a href="product-details.php?product=${encodeURIComponent(item.name)}" class="related-product-card">
           <div class="related-product-image">
-            <img src="${item.image}" alt="${item.name}">
+            <img src="${item.image}" onerror="this.src='assets/products-demo.jpg'" alt="${item.name}">
           </div>
           <div class="related-product-body">
             <div class="related-product-name">${item.name}</div>

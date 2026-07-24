@@ -61,9 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $proposals = $result->fetch_all(MYSQLI_ASSOC);
             $stmt->close();
 
-            // Decode items JSON for each proposal
+            // Decode items & payment_details JSON for each proposal
             foreach ($proposals as &$p) {
                 $p['items'] = json_decode($p['items'], true) ?: [];
+                $p['payment_details'] = json_decode($p['payment_details'] ?? '{}', true) ?: null;
             }
 
             echo json_encode(['success' => true, 'proposals' => $proposals]);
@@ -97,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             foreach ($proposals as &$p) {
                 $p['items'] = json_decode($p['items'], true) ?: [];
+                $p['payment_details'] = json_decode($p['payment_details'] ?? '{}', true) ?: null;
             }
 
             echo json_encode(['success' => true, 'proposals' => $proposals]);

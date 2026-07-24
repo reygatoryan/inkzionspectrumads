@@ -12,7 +12,7 @@ $adminId = (int)$_SESSION['user_id'];
 $editProduct = null;
 
 $uploadDir = __DIR__ . '/../uploads/products';
-if (!is_dir($uploadDir) && !mkdir($uploadDir, 0777, true) && !is_dir($uploadDir)) {
+if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
 }
 
 $categoryOptions = [];

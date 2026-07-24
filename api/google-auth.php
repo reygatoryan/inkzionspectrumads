@@ -19,14 +19,79 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 require_once __DIR__ . '/../includes/google-config.php';
+require_once __DIR__ . '/../includes/csrf-helper.php';
+require_once __DIR__ . '/../includes/turnstile-config.php';
+require_once __DIR__ . '/../includes/session-helper.php';
 require_once __DIR__ . '/../db-config.php';
+
+secureSessionStart();
+
+function logLoginAttempt(mysqli $conn, string $ip, int $success): void {
+    $stmt = $conn->prepare("INSERT INTO login_attempts (ip_address, attempted_at, success) VALUES (?, NOW(), ?)");
+    $stmt->bind_param('si', $ip, $success);
+    $stmt->execute();
+    $stmt->close();
+}
 
 $data = json_decode(file_get_contents('php://input'), true);
 $credential = $data['credential'] ?? '';
+$turnstileToken = $data['turnstile_token'] ?? '';
+$csrfToken = $data['csrf_token'] ?? '';
+$ip = $_SERVER['REMOTE_ADDR'] ?? '';
 
 if (empty($credential)) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing credential']);
+    exit();
+}
+
+// Verify CSRF token
+if (!verifyCsrfToken($csrfToken)) {
+    logLoginAttempt($conn, $ip, 0);
+    http_response_code(403);
+    echo json_encode(['error' => 'Invalid request. Please refresh the page and try again.']);
+    exit();
+}
+
+// Verify Turnstile token
+if (!empty($turnstileToken)) {
+    $ch = curl_init('https://challenges.cloudflare.com/turnstile/v0/siteverify');
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+        'secret' => TURNSTILE_SECRET_KEY,
+        'response' => $turnstileToken,
+        'remoteip' => $ip
+    ]));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    $verifyResult = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode !== 200 || !$verifyResult) {
+        logLoginAttempt($conn, $ip, 0);
+        echo json_encode(['error' => 'Could not verify security check. Please try again.']);
+        exit();
+    }
+
+    $verifyData = json_decode($verifyResult, true);
+    if (!$verifyData || !($verifyData['success'] ?? false)) {
+        logLoginAttempt($conn, $ip, 0);
+        echo json_encode(['error' => 'Security check failed. Please try again.']);
+        exit();
+    }
+}
+
+// Rate limiting: max 5 failed attempts per IP per 15 minutes
+$rateLimitWindow = date('Y-m-d H:i:s', strtotime('-15 minutes'));
+$stmt = $conn->prepare("SELECT COUNT(*) as cnt FROM login_attempts WHERE ip_address = ? AND attempted_at >= ? AND success = 0");
+$stmt->bind_param('ss', $ip, $rateLimitWindow);
+$stmt->execute();
+$rateResult = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+if ($rateResult && (int)$rateResult['cnt'] >= 5) {
+    http_response_code(429);
+    echo json_encode(['error' => 'Too many login attempts. Please try again later.']);
     exit();
 }
 
@@ -36,6 +101,7 @@ $response = @file_get_contents($verifyUrl);
 
 if ($response === false) {
     http_response_code(401);
+    logLoginAttempt($conn, $ip, 0);
     echo json_encode(['error' => 'Token verification failed']);
     exit();
 }
@@ -44,6 +110,7 @@ $payload = json_decode($response, true);
 
 if (!$payload || !isset($payload['sub'])) {
     http_response_code(401);
+    logLoginAttempt($conn, $ip, 0);
     echo json_encode(['error' => 'Invalid token']);
     exit();
 }
@@ -51,6 +118,7 @@ if (!$payload || !isset($payload['sub'])) {
 // Verify audience matches our Client ID
 if (($payload['aud'] ?? '') !== GOOGLE_CLIENT_ID) {
     http_response_code(401);
+    logLoginAttempt($conn, $ip, 0);
     echo json_encode(['error' => 'Token audience mismatch']);
     exit();
 }
@@ -58,6 +126,7 @@ if (($payload['aud'] ?? '') !== GOOGLE_CLIENT_ID) {
 // Verify issuer
 if (!in_array($payload['iss'] ?? '', ['accounts.google.com', 'https://accounts.google.com'])) {
     http_response_code(401);
+    logLoginAttempt($conn, $ip, 0);
     echo json_encode(['error' => 'Invalid issuer']);
     exit();
 }
@@ -69,11 +138,10 @@ $avatar = $payload['picture'] ?? '';
 
 if (empty($email)) {
     http_response_code(400);
+    logLoginAttempt($conn, $ip, 0);
     echo json_encode(['error' => 'Email not provided by Google']);
     exit();
 }
-
-session_start();
 
 // Compute root-relative base path so frontend JS resolves redirects correctly
 $basePath = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/');
@@ -126,7 +194,6 @@ if (!$user) {
         ];
         $isNew = true;
 
-        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
         $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
         $conn->query("INSERT INTO activity_logs (user_id, action, description, ip_address, user_agent) VALUES ($newId, 'registration', 'User registered via Google ($email)', '" . $conn->real_escape_string($ip) . "', '" . $conn->real_escape_string($ua) . "')");
     }
@@ -156,7 +223,6 @@ if (!empty($user['avatar']) && db_column_exists($conn, 'users', 'profile_photo')
 
 // Log login (not for new registrations, already logged above)
 if (!$isNew) {
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
     $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
     $conn->query("INSERT INTO activity_logs (user_id, action, description, ip_address, user_agent) VALUES ({$user['id']}, 'login', 'User logged in via Google', '" . $conn->real_escape_string($ip) . "', '" . $conn->real_escape_string($ua) . "')");
 }
@@ -165,6 +231,9 @@ if (!$isNew) {
 $needsProfile = ($user['role'] !== 'admin') && (empty($user['name']) || empty($user['contact_number']) || empty($user['address']));
 
 $redirect = $user['role'] === 'admin' ? $basePath . '/admin/dashboard.php' : $basePath . '/index.php';
+
+// Log successful login attempt
+logLoginAttempt($conn, $ip, 1);
 
 echo json_encode([
     'ok' => true,

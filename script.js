@@ -175,7 +175,7 @@ async function initInkzionApp() {
     productGrid.innerHTML = category.items.map((item) => `
       <article class="product-card" data-product-name="${item.name}">
         <a href="product-details.php?product=${encodeURIComponent(item.name)}" class="product-card-link">
-          <div class="product-image"><img src="${item.image}" alt="${item.name}"></div>
+          <div class="product-image"><img src="${item.image}" onerror="this.src='assets/products-demo.jpg'" alt="${item.name}"></div>
           <div class="product-info">
             <h3>${item.name}</h3>
             <p>${item.description}</p>

@@ -585,6 +585,26 @@ require_once __DIR__ . '/includes/admin-header.php';
         ${itemsHtml}
       </div>
 
+      ${order.payment_method === 'downpayment' ? `
+      <div class="card" style="padding:0.95rem;border:1px solid #e2e8f0;margin-bottom:1rem;background:#f8fafc;">
+        <div style="font-weight:700;color:#0f172a;margin-bottom:0.6rem;">
+          <i class="fas fa-percent" style="color:#2B4C52;"></i> Downpayment Breakdown
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem 1.5rem;font-size:0.9rem;">
+          <span style="color:#475569;">Subtotal:</span>
+          <span style="text-align:right;font-weight:600;">₱${items.reduce((sum,i) => sum + (parseFloat(i.unit_price||0) * (i.quantity||1)), 0).toFixed(2)}</span>
+          <span style="color:#475569;">50% Downpayment (of Subtotal):</span>
+          <span style="text-align:right;font-weight:700;color:#e91e8c;">₱${(items.reduce((sum,i) => sum + (parseFloat(i.unit_price||0) * (i.quantity||1)), 0) * 0.5).toFixed(2)}</span>
+          <span style="color:#475569;">Shipping Fee:</span>
+          <span style="text-align:right;font-weight:600;">₱${parseFloat(order.shipping_fee||0).toFixed(2)}</span>
+          ${['shipped','delivered','completed'].includes(order.status) ? `
+          <span style="color:#10b981;font-weight:700;border-top:1px solid #e2e8f0;padding-top:0.4rem;">Balance:</span>
+          <span style="text-align:right;font-weight:700;color:#10b981;border-top:1px solid #e2e8f0;padding-top:0.4rem;"><i class="fas fa-check-circle"></i> Paid</span>` : `
+          <span style="color:#dc2626;font-weight:700;border-top:1px solid #e2e8f0;padding-top:0.4rem;">Balance Due:</span>
+          <span style="text-align:right;font-weight:700;color:#dc2626;border-top:1px solid #e2e8f0;padding-top:0.4rem;">₱${((items.reduce((sum,i) => sum + (parseFloat(i.unit_price||0) * (i.quantity||1)), 0) * 0.5) + parseFloat(order.shipping_fee||0)).toFixed(2)}</span>`}
+        </div>
+      </div>` : ''}
+
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">
         <div class="card" style="padding:0.9rem;border:1px solid #e2e8f0;">
           <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;font-weight:700;">Shipping Fee</div>
@@ -715,6 +735,25 @@ require_once __DIR__ . '/includes/admin-header.php';
         <div><strong>Email:</strong><br>${escapeHtml(p.email || 'N/A')}</div>
         <div><strong>Phone:</strong><br>${escapeHtml(p.phone || 'N/A')}</div>
         <div><strong>Payment Method:</strong><br>${p.payment_method ? p.payment_method.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase()) : 'N/A'}</div>
+        ${p.payment_method === 'downpayment' ? `
+        <div style="grid-column:1/-1;margin-top:0.25rem;">
+          <div style="background:#f8fafc;border-radius:8px;padding:0.65rem 0.85rem;border:1px solid #e2e8f0;">
+            <div style="font-weight:600;font-size:0.8rem;color:#334155;margin-bottom:0.4rem;">
+              <i class="fas fa-percent" style="color:#2B4C52;"></i> Downpayment Breakdown
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.25rem 1rem;font-size:0.82rem;">
+              <span style="color:#64748b;">Subtotal:</span><span style="text-align:right;font-weight:600;">₱${parseFloat(p.subtotal).toFixed(2)}</span>
+              <span style="color:#64748b;">50% Downpayment (of Subtotal):</span><span style="text-align:right;font-weight:700;color:#e91e8c;">₱${(parseFloat(p.subtotal) * 0.5).toFixed(2)}</span>
+              <span style="color:#64748b;">Shipping Fee:</span><span style="text-align:right;font-weight:600;">₱${parseFloat(p.shipping_fee).toFixed(2)}</span>
+              <span style="color:#64748b;border-top:1px solid #e2e8f0;padding-top:0.25rem;">Balance Due:</span><span style="text-align:right;font-weight:700;color:#dc2626;border-top:1px solid #e2e8f0;padding-top:0.25rem;">₱${((parseFloat(p.subtotal) * 0.5) + parseFloat(p.shipping_fee)).toFixed(2)}</span>
+            </div>
+            ${p.payment_details?.down?.method ? `
+            <div style="margin-top:0.4rem;padding-top:0.4rem;border-top:1px solid #e2e8f0;font-size:0.78rem;color:#64748b;">
+              Down via: ${p.payment_details.down.method === 'gcash' ? 'GCash' : 'Credit Card'} |
+              Balance via: ${p.payment_details.balance?.method === 'gcash' ? 'GCash' : 'Credit Card'}
+            </div>` : ''}
+          </div>
+        </div>` : ''}
       </div>
       <div style="margin-bottom:1rem;">
         <strong>Delivery Address:</strong><br>

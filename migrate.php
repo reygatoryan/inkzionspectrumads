@@ -169,6 +169,16 @@ $conn->query("CREATE TABLE IF NOT EXISTS activity_logs (
 )");
 echo "[OK] activity_logs\n";
 
+// Login attempts for rate limiting
+$conn->query("CREATE TABLE IF NOT EXISTS login_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ip_address VARCHAR(45) NOT NULL,
+    attempted_at DATETIME NOT NULL,
+    success TINYINT(1) DEFAULT 0,
+    INDEX idx_ip_time (ip_address, attempted_at)
+)");
+echo "[OK] login_attempts\n";
+
 // Products columns
 db_add_column_if_missing($conn, 'products', 'seller_id', 'seller_id INT DEFAULT NULL AFTER category_id');
 db_add_column_if_missing($conn, 'products', 'weight', "weight DECIMAL(8,3) DEFAULT 0 AFTER stock");

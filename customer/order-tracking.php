@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/session-helper.php';
+secureSessionStart();
 require_once dirname(__DIR__) . '/db-config.php';
 
 // Check if user is logged in
@@ -770,6 +771,21 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
                                 <span>Grand Total</span>
                                 <span>₱<?php echo number_format($grandTotal, 2); ?></span>
                             </div>
+                            <?php if (($order['payment_method'] ?? '') === 'downpayment'): ?>
+                            <div class="order-summary-row" style="border-top:1px dashed #e2e8f0;margin-top:0.5rem;padding-top:0.5rem;">
+                                <span style="color:#e91e8c;font-weight:600;">50% Downpayment (of Subtotal)</span>
+                                <span style="color:#e91e8c;font-weight:700;">₱<?php echo number_format($subtotal * 0.5, 2); ?></span>
+                            </div>
+                            <div class="order-summary-row">
+                                <?php if (in_array($currentStatus, ['shipped','delivered','completed'])): ?>
+                                <span style="color:#10b981;font-weight:600;">Balance:</span>
+                                <span style="color:#10b981;font-weight:700;"><i class="fas fa-check-circle"></i> Paid</span>
+                                <?php else: ?>
+                                <span style="color:#dc2626;font-weight:600;">Balance Due</span>
+                                <span style="color:#dc2626;font-weight:700;">₱<?php echo number_format(($subtotal * 0.5) + $shipping, 2); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     <?php else: ?>
                         <p style="color:#64748b;font-size:0.85rem;">No items found.</p>

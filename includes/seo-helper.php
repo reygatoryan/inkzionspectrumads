@@ -8,7 +8,9 @@
  * Get base URL
  */
 function getBaseUrl() {
-    return 'https://inkzion.com';
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'inkzion.com';
+    return $protocol . '://' . $host;
 }
 
 /**
