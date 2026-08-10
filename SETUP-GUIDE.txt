@@ -1,0 +1,107 @@
+===========================================================
+  SETUP GUIDE - Inkzion Spectrum Ads (Localhost / Laptop)
+===========================================================
+
+This guide sets up the website on another PC (e.g. your laptop)
+using XAMPP and runs it on localhost.
+
+===========================================================
+  PART A - ON THE CURRENT PC
+===========================================================
+
+Step 1: Export the database
+  1. Open http://localhost/phpmyadmin
+  2. Click the "inkzion" database (left sidebar)
+  3. Click the "Export" tab > "Quick" > format "SQL"
+  4. Click "Go"
+  5. Save the file as "inkzion.sql"
+
+Step 2: Copy the uploads folder
+  1. Go to C:\xampp\htdocs\Inkzion101\uploads
+  2. Copy the whole "uploads" folder to a USB / Google Drive / cloud
+
+Step 3: Transfer to the laptop
+  - Copy both "inkzion.sql" and the "uploads" folder
+    to a USB drive / Google Drive / cloud
+  - Make sure they are available on the laptop before continuing
+
+
+===========================================================
+  PART B - ON THE LAPTOP
+===========================================================
+
+Step 4: Install XAMPP
+  1. Download from https://www.apachefriends.org (Windows version)
+  2. Install it (default location: C:\xampp)
+  3. Open "XAMPP Control Panel"
+  4. Click "Start" next to Apache and MySQL (both turn green)
+
+Step 5: Install Git (optional but recommended)
+  1. Download from https://git-scm.com/download/win
+  2. Install with default settings
+
+Step 6: Get the code
+  OPTION A (Git):
+    1. Open Command Prompt
+    2. Run:
+       cd C:\xampp\htdocs
+       git clone https://github.com/reygatoryan/inkzionspectrumads.git Inkzion101
+
+  OPTION B (Copy files):
+    1. Copy the entire Inkzion101 folder from this PC
+    2. Extract it to C:\xampp\htdocs\Inkzion101
+
+Step 7: Put back the uploads folder
+  - Copy the "uploads" folder from your USB into:
+       C:\xampp\htdocs\Inkzion101\uploads
+  - Click "Yes" if it asks to replace files
+
+Step 8: Create & import the database
+  1. Open http://localhost/phpmyadmin
+  2. Click "New" (left sidebar)
+  3. Database name: inkzion
+  4. Click "Create"
+  5. Click the "inkzion" database (left sidebar)
+  6. Click the "Import" tab
+  7. Click "Choose File" > select your "inkzion.sql"
+  8. Click "Go"
+  9. Wait for "Import has been successfully finished"
+
+Step 9: Verify the site
+  1. Open http://localhost/Inkzion101/
+  2. Log in with your existing email and password
+  3. Optional: visit http://localhost/Inkzion101/migrate.php?run=1
+     once to auto-create any missing tables/columns
+
+No configuration changes are needed - db-config.php already
+uses XAMPP defaults (localhost / root / empty password / inkzion).
+
+
+===========================================================
+  TROUBLESHOOTING
+===========================================================
+
+"Database connection failed"
+  -> The database must be named exactly "inkzion" (Step 8)
+  -> Recheck the import step
+
+Blank white page
+  -> Check db-config.php (DB_HOST, DB_USER, DB_PASS, DB_NAME)
+
+Images not showing
+  -> You forgot Step 7 (uploads folder must be in the project)
+
+Apache won't start (port in use)
+  -> Close Skype or change the port in XAMPP Apache config
+
+MySQL won't start
+  -> Port 3306 in use - close other database programs,
+     or change the port in MySQL config
+
+403 Forbidden
+  -> Make sure Apache DocumentRoot points to C:\xampp\htdocs
+     and the folder is named exactly "Inkzion101"
+
+Can't log in
+  -> The SQL import may have failed - redo Step 8
+  -> Or register a new account first
