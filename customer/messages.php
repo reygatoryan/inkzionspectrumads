@@ -199,9 +199,13 @@ session_write_close();
     .btn-back-conv:hover { background:#2B4C52;color:white; }
 @media (max-width: 768px) {
       .top-header { padding: 0 1rem; }
-      .top-header-inner { height: 64px; }
+      .top-header-inner { flex-wrap: wrap; height: auto; padding: 0.6rem 0; row-gap: 0.5rem; }
+      .top-header-left { min-width: 0; }
+      .top-header-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .top-header-title h1 { font-size: 1.1rem; }
       .top-header-title p { display: none; }
+      .top-header-center { order: 3; flex: 1 1 100%; max-width: 100%; margin: 0; min-width: 0; }
+      .top-header-right { margin-left: auto; flex-shrink: 0; }
       .content-area { padding: 1rem; }
       .header-profile-name { display: none; }
       .header-profile-arrow { display: none; }
@@ -349,7 +353,7 @@ session_write_close();
         <div class="sidebar-section-title">Shop</div>
         <a href="store-product.php" class="sidebar-menu-item"><i class="fas fa-box"></i> All Products</a>
         
-        <a href="chat.php" class="sidebar-menu-item active"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
+        <a href="messages.php" class="sidebar-menu-item active"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
         <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders<span class="sidebar-badge" id="sidebar-orders-badge"></span></a>
         <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests<span class="sidebar-badge" id="sidebar-requests-badge"></span></a>
@@ -566,7 +570,7 @@ session_write_close();
     async function loadConversations() {
       const list = document.getElementById('conversation-list');
       try {
-        const res = await fetch('../api/chat.php?action=conversations', { credentials: 'include' });
+        const res = await fetch('../api/messages.php?action=conversations', { credentials: 'include' });
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
         
@@ -623,7 +627,7 @@ session_write_close();
     function startSSE() {
       stopSSE();
       if (!currentConversation) return;
-      eventSource = new EventSource(`../api/chat-sse.php?conversation_id=${currentConversation}&last_message_id=${lastMessageId}&check_typing=1`);
+      eventSource = new EventSource(`../api/messages-sse.php?conversation_id=${currentConversation}&last_message_id=${lastMessageId}&check_typing=1`);
       eventSource.onmessage = function(e) {
         try {
           var d = JSON.parse(e.data);
@@ -699,7 +703,7 @@ session_write_close();
 
     async function updateUnreadBadge() {
       try {
-        const res = await fetch('../api/chat-poll.php', { credentials: 'include' });
+        const res = await fetch('../api/messages-poll.php', { credentials: 'include' });
         const data = await res.json();
         if (data.success) {
           unreadTotal = data.unread_total || 0;
@@ -751,7 +755,7 @@ session_write_close();
         
         // Fetch fresh conversation data
         try {
-          const r = await fetch('../api/chat.php?action=conversations', { credentials: 'include' });
+          const r = await fetch('../api/messages.php?action=conversations', { credentials: 'include' });
           const d = await r.json();
           if (d.success) {
             currentConvData = (d.conversations || []).find(c => c.id == convId) || null;
@@ -789,7 +793,7 @@ session_write_close();
       
       try {
         messageOffset += 50;
-        const res = await fetch(`../api/chat.php?action=messages&conversation_id=${currentConversation}&limit=50&offset=${messageOffset}`, { credentials: 'include' });
+        const res = await fetch(`../api/messages.php?action=messages&conversation_id=${currentConversation}&limit=50&offset=${messageOffset}`, { credentials: 'include' });
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
         
@@ -942,7 +946,7 @@ session_write_close();
       }
       
       try {
-        const res = await fetch(`../api/chat.php?action=messages&conversation_id=${convId}&limit=50&offset=0`, { credentials: 'include' });
+        const res = await fetch(`../api/messages.php?action=messages&conversation_id=${convId}&limit=50&offset=0`, { credentials: 'include' });
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
         
@@ -1031,7 +1035,7 @@ session_write_close();
     async function checkTypingStatus() {
       if (!currentConversation) return;
       try {
-        const res = await fetch(`../api/chat.php?action=typing_status&conversation_id=${currentConversation}`, { credentials: 'include' });
+        const res = await fetch(`../api/messages.php?action=typing_status&conversation_id=${currentConversation}`, { credentials: 'include' });
         const data = await res.json();
         const indicator = document.getElementById('typing-indicator');
         if (!indicator) return;
@@ -1118,14 +1122,14 @@ session_write_close();
           fd.append('conversation_id', currentConversation);
           fd.append('file', selectedFile);
           if (content) fd.append('content', content);
-          var res = await fetch('../api/chat.php', {
+          var res = await fetch('../api/messages.php', {
             method: 'POST',
             credentials: 'include',
             body: fd
           });
           data = await res.json();
         } else {
-          var res = await fetch('../api/chat.php', {
+          var res = await fetch('../api/messages.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -1200,7 +1204,7 @@ session_write_close();
     // Typing indicator (delegated)
     document.addEventListener('input', function(e) {
       if (e.target.id === 'message-input' && currentConversation) {
-        fetch('../api/chat.php', {
+        fetch('../api/messages.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -1208,7 +1212,7 @@ session_write_close();
         });
         if (typingTimeout) clearTimeout(typingTimeout);
         typingTimeout = setTimeout(() => {
-          fetch('../api/chat.php', {
+          fetch('../api/messages.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -1226,7 +1230,7 @@ session_write_close();
         var convId=parseInt(btn.dataset.id);
         if(!convId)return;
         if(!confirm('Delete this conversation? All messages will be permanently removed.'))return;
-        fetch('../api/chat.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'delete_conversation',conversation_id:convId})})
+        fetch('../api/messages.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'delete_conversation',conversation_id:convId})})
         .then(function(r){return r.json();})
         .then(function(d){
           if(d.success){
@@ -1267,7 +1271,7 @@ session_write_close();
       if (productId) {
         // Fetch sellers to find an admin to start conversation with
         try {
-          const sRes = await fetch('../api/chat.php?action=sellers', { credentials: 'include' });
+          const sRes = await fetch('../api/messages.php?action=sellers', { credentials: 'include' });
           if (!sRes.ok) {
             const raw = await sRes.text();
             showFallbackContact('Failed to load sellers.', raw.substring(0, 500));
@@ -1281,7 +1285,7 @@ session_write_close();
           const adminId = sData.sellers[0].id;
           
           try {
-            const cRes = await fetch('../api/chat.php', {
+            const cRes = await fetch('../api/messages.php', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
@@ -1307,13 +1311,13 @@ session_write_close();
           } catch(e2) {
             console.error('Conversation POST error:', e2);
             let diag = e2.message || 'Unknown error';
-            try { const t = await fetch('../api/chat.php?action=sellers', { credentials: 'include' }); diag += ' | sellers test: ' + (await t.text()).substring(0, 200); } catch(_) {}
+            try { const t = await fetch('../api/messages.php?action=sellers', { credentials: 'include' }); diag += ' | sellers test: ' + (await t.text()).substring(0, 200); } catch(_) {}
             showFallbackContact('Chat temporarily unavailable. Please contact us directly:', diag);
           }
         } catch(e) {
           console.error('Sellers fetch error:', e);
           let raw = '';
-          try { raw = await (await fetch('../api/chat.php?action=sellers', { credentials: 'include' })).text().then(r => r.substring(0, 300)); } catch(_) { raw = 'Could not fetch'; }
+          try { raw = await (await fetch('../api/messages.php?action=sellers', { credentials: 'include' })).text().then(r => r.substring(0, 300)); } catch(_) { raw = 'Could not fetch'; }
           showFallbackContact('Chat temporarily unavailable. Please contact us directly:', 'Sellers error: ' + (e.message || 'Unknown') + (raw ? ' | Response: ' + raw : ''));
         }
       }

@@ -175,7 +175,7 @@ function renderAdminConv(c) {
 async function adminLoadConversations() {
   var list=document.getElementById('convList');
   try {
-    var r=await fetch('../api/chat.php?action=conversations',{credentials:'include'});
+    var r=await fetch('../api/messages.php?action=conversations',{credentials:'include'});
     var d=await r.json();
     if(!d.success)throw new Error(d.error);
     allAdminConvs=d.conversations||[];
@@ -205,7 +205,7 @@ function adminUpdateConvPreview(newMsgs) {
 function adminStartSSE() {
   adminStopSSE();
   if(!currentConvId)return;
-  adminEventSource=new EventSource('../api/chat-sse.php?conversation_id='+currentConvId+'&last_message_id='+lastMsgId+'&check_typing=1');
+  adminEventSource=new EventSource('../api/messages-sse.php?conversation_id='+currentConvId+'&last_message_id='+lastMsgId+'&check_typing=1');
   adminEventSource.onmessage=function(e){
     try{
       var d=JSON.parse(e.data);
@@ -319,7 +319,7 @@ async function adminLoadMoreMsgs() {
   div.prepend(el);
   try{
     msgOffset+=50;
-    var r=await fetch('../api/chat.php?action=messages&conversation_id='+currentConvId+'&limit=50&offset='+msgOffset,{credentials:'include'});
+    var r=await fetch('../api/messages.php?action=messages&conversation_id='+currentConvId+'&limit=50&offset='+msgOffset,{credentials:'include'});
     var d=await r.json();if(!d.success)throw new Error(d.error);
     hasMoreMsgs=d.has_more||false;
     document.getElementById('admin-load-more').remove();
@@ -336,11 +336,11 @@ async function adminLoadChat(convId, silent) {
     main.innerHTML='<div class="chat-header" id="chatHdr"><h4>Loading...</h4></div><div class="chat-messages" id="chatMsgs"><p style="text-align:center;color:#94a3b8;padding:1.5rem;">Loading...</p></div><div class="chat-input-area" id="chatInputArea"></div>';
   }
   try{
-    var convRes=await fetch('../api/chat.php?action=conversations&conversation_id='+convId,{credentials:'include'});
+    var convRes=await fetch('../api/messages.php?action=conversations&conversation_id='+convId,{credentials:'include'});
     var convData=await convRes.json();
     var conv=(convData.conversations||[])[0];
     
-    var r=await fetch('../api/chat.php?action=messages&conversation_id='+convId+'&limit=50&offset=0',{credentials:'include'});
+    var r=await fetch('../api/messages.php?action=messages&conversation_id='+convId+'&limit=50&offset=0',{credentials:'include'});
     var d=await r.json();if(!d.success)throw new Error(d.error);
     var msgs=d.messages||[]; hasMoreMsgs=d.has_more||false;
     lastMsgLen=msgs.length;
@@ -384,7 +384,7 @@ async function adminLoadChat(convId, silent) {
     msgsDiv.onscroll=function(){var th=30;autoScrollAdmin=(msgsDiv.scrollHeight-msgsDiv.scrollTop-msgsDiv.clientHeight)<th;if(msgsDiv.scrollTop<80&&hasMoreMsgs&&!isLoadingMore)adminLoadMoreMsgs();};
     
     // Typing check
-    try{var tr=await fetch('../api/chat.php?action=typing_status&conversation_id='+convId,{credentials:'include'});var td=await tr.json();var ti=document.getElementById('admin-typing-indicator');if(ti){if(td.success&&td.is_typing){ti.style.display='block';ti.textContent=td.user_name+' is typing...';}else{ti.style.display='none';}}}catch(e){}
+    try{var tr=await fetch('../api/messages.php?action=typing_status&conversation_id='+convId,{credentials:'include'});var td=await tr.json();var ti=document.getElementById('admin-typing-indicator');if(ti){if(td.success&&td.is_typing){ti.style.display='block';ti.textContent=td.user_name+' is typing...';}else{ti.style.display='none';}}}catch(e){}
     
     if(silent&&prevLen>0&&msgs.length>prevLen&&autoScrollAdmin&&msgsDiv){msgsDiv.scrollTop=msgsDiv.scrollHeight;}
     
@@ -508,10 +508,10 @@ async function adminSendTextMsg() {
       fd.append('conversation_id',currentConvId);
       fd.append('file',adminSelectedFile);
       if(content)fd.append('content',content);
-      var r=await fetch('../api/chat.php',{method:'POST',credentials:'include',body:fd});
+      var r=await fetch('../api/messages.php',{method:'POST',credentials:'include',body:fd});
       d=await r.json();
     }else{
-      var r=await fetch('../api/chat.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'send_message',conversation_id:currentConvId,message_type:'text',content})});
+      var r=await fetch('../api/messages.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'send_message',conversation_id:currentConvId,message_type:'text',content})});
       d=await r.json();
     }
     if(d.success){
@@ -542,12 +542,12 @@ async function adminSendCustomRequest() {
 async function adminSendOrderForm() {
   if(!currentConvId)return;
   try{
-    var convRes=await fetch('../api/chat.php?action=conversations',{credentials:'include'});
+    var convRes=await fetch('../api/messages.php?action=conversations',{credentials:'include'});
     var convData=await convRes.json();
     var conv=(convData.conversations||[]).find(function(c){return c.id==currentConvId;});
     var requestId=conv?conv.request_id:null;if(!requestId){showAdminNotification('No custom request found','error');return;}
     var title=prompt('Order form title:','Order for '+(conv.product_name||'Custom Printing'));if(!title)return;
-    var r=await fetch('../api/chat.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'send_message',conversation_id:currentConvId,message_type:'order_form',content:JSON.stringify({request_id:requestId,title})})});
+    var r=await fetch('../api/messages.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'send_message',conversation_id:currentConvId,message_type:'order_form',content:JSON.stringify({request_id:requestId,title})})});
     var d=await r.json();
     if(d.success){
       if(d.message){lastMsgId=Math.max(lastMsgId,d.message.id);adminAppendMessages([d.message]);}
@@ -581,7 +581,7 @@ document.addEventListener('click',function(e){
     var convId=parseInt(btn.dataset.id);
     if(!convId)return;
     if(!confirm('Delete this conversation? All messages will be permanently removed.'))return;
-    fetch('../api/chat.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'delete_conversation',conversation_id:convId})})
+    fetch('../api/messages.php',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({action:'delete_conversation',conversation_id:convId})})
     .then(function(r){return r.json();})
     .then(function(d){
       if(d.success){

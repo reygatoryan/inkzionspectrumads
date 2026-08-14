@@ -167,6 +167,14 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       .products-sidebar.open { transform: translateX(0); }
       .hamburger-btn { display: flex; }
       .products-main { margin-left: 0; }
+      .top-header { padding: 0 1rem; }
+      .top-header-inner { flex-wrap: wrap; height: auto; padding: 0.6rem 0; row-gap: 0.5rem; }
+      .top-header-left { min-width: 0; }
+      .top-header-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .top-header-title h1 { font-size: 1.1rem; }
+      .top-header-title p { display: none; }
+      .top-header-center { order: 3; flex: 1 1 100%; max-width: 100%; margin: 0; min-width: 0; }
+      .top-header-right { margin-left: auto; flex-shrink: 0; }
       .content-area { padding: 1rem; }
     }
     @media (max-width: 640px) {
@@ -335,7 +343,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         <div class="sidebar-section-title">Shop</div>
         <a href="store-product.php" class="sidebar-menu-item"><i class="fas fa-box"></i> All Products</a>
         
-        <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
+        <a href="messages.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
         <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders<span class="sidebar-badge" id="sidebar-orders-badge"></span></a>
         <a href="my-requests.php" class="sidebar-menu-item active"><i class="fas fa-clipboard-list"></i> My Requests<span class="sidebar-badge" id="sidebar-requests-badge"></span></a>
@@ -470,7 +478,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
           (r.material ? '<div class="req-card-detail"><span>' + esc(r.material) + '</span></div>' : '') +
           '<div class="req-card-actions">' +
             '<a href="custom-request-detail.php?id=' + r.id + '" class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> View Details</a>' +
-            (hasChat ? '<a href="chat.php?conversation=' + r.chat_conversation_id + '" class="btn btn-primary btn-sm" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;"><i class="fas fa-comments"></i> Chat</a>' : '') +
+            (hasChat ? '<a href="messages.php?conversation=' + r.chat_conversation_id + '" class="btn btn-primary btn-sm" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;"><i class="fas fa-comments"></i> Chat</a>' : '') +
           '</div>' +
         '</div>';
       }).join('');
@@ -580,7 +588,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       if (rt==='order'&&ri) return 'order-tracking.php?id='+ri;
       if (rt==='order_proposal'&&ri) return 'order-form.php?id='+ri;
       if (rt==='custom_request'&&ri) return 'my-requests.php';
-      if (rt==='chat'&&ri) return 'chat.php?conversation='+ri;
+      if (rt==='chat'&&ri) return 'messages.php?conversation='+ri;
       return '#';
     }
     function notifTimeAgo(ds) {

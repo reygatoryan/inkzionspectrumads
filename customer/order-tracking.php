@@ -493,9 +493,13 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
         }
         @media (max-width: 768px) {
             .top-header { padding: 0 1rem; }
-            .top-header-inner { height: 64px; }
+            .top-header-inner { flex-wrap: wrap; height: auto; padding: 0.6rem 0; row-gap: 0.5rem; }
+            .top-header-left { min-width: 0; }
+            .top-header-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
             .top-header-title h1 { font-size: 1.1rem; }
             .top-header-title p { display: none; }
+            .top-header-center { order: 3; flex: 1 1 100%; max-width: 100%; margin: 0; min-width: 0; }
+            .top-header-right { margin-left: auto; flex-shrink: 0; }
             .content-area { padding: 1rem; }
             .header-profile-name { display: none; }
             .header-profile-arrow { display: none; }
@@ -517,7 +521,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
             .header-icon-btn { width: 38px; height: 38px; }
             .hamburger-btn { width: 38px; height: 38px; }
             .header-profile-name, .header-profile-arrow { display: none; }
-            .notif-dropdown { position: fixed; top: 64px; left: 0.75rem; right: 0.75rem; width: auto; }
+            .notif-dropdown { position: fixed; top: 108px; left: 0.75rem; right: 0.75rem; width: auto; }
             .top-header-inner { gap: 0.5rem; }
             .header-icon-btn[title="Home"] { display: none; }
             .step-circle { width: 32px; height: 32px; font-size: 0.75rem; }
@@ -631,7 +635,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       <div class="sidebar-section-title">Shop</div>
       <a href="store-product.php" class="sidebar-menu-item"><i class="fas fa-box"></i> All Products</a>
       
-      <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
+      <a href="messages.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
       <a href="my-orders.php" class="sidebar-menu-item active"><i class="fas fa-box"></i> My Orders<span class="sidebar-badge" id="sidebar-orders-badge"></span></a>
       <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests<span class="sidebar-badge" id="sidebar-requests-badge"></span></a>
@@ -1129,7 +1133,7 @@ function notifTypeLinkCustomer(n) {
   if (rt==='order'&&ri) return 'order-tracking.php?id='+ri;
   if (rt==='order_proposal'&&ri) return 'order-form.php?id='+ri;
   if (rt==='custom_request'&&ri) return 'my-requests.php';
-  if (rt==='chat'&&ri) return 'chat.php?conversation='+ri;
+  if (rt==='chat'&&ri) return 'messages.php?conversation='+ri;
   return '#';
 }
 function notifTimeAgo(ds) {

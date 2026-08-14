@@ -603,7 +603,7 @@ if (is_numeric($displayPrice)) {
               <button type="button" class="btn-customize-page" id="customize-page">
                 <i class="fas fa-paint-brush"></i> Request Customization
               </button>
-              <a href="chat.php<?= !empty($product['id']) ? '?product_id='.$product['id'] : ''; ?>" class="btn" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:12px;background:linear-gradient(135deg,#2B4C52,#4A7C84);color:white;text-decoration:none;font-weight:600;font-size:0.9rem;border:none;cursor:pointer;transition:all 0.2s ease;">
+              <a href="messages.php<?= !empty($product['id']) ? '?product_id='.$product['id'] : ''; ?>" class="btn" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:12px;background:linear-gradient(135deg,#2B4C52,#4A7C84);color:white;text-decoration:none;font-weight:600;font-size:0.9rem;border:none;cursor:pointer;transition:all 0.2s ease;">
                 <i class="fas fa-comments"></i> Chat with Admin
               </a>
               <button type="button" class="btn" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:12px;background:white;color:#0f172a;text-decoration:none;font-weight:600;font-size:0.9rem;border:1px solid #e2e8f0;cursor:pointer;transition:all 0.2s ease;" onclick="showContactInfo()">
@@ -846,7 +846,7 @@ if (is_numeric($displayPrice)) {
         });
         const data = await res.json();
         if (data.ok) {
-          window.location.href = data.redirect;
+          window.location.href = data.needs_profile ? '../index.php?complete_profile=1' : data.redirect;
         } else {
           console.error('Google auth error:', data);
           alert(data.error || 'Sign-in failed. Please try again.');

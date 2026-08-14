@@ -112,7 +112,7 @@ function notifTypeLink(n) {
   if (rt === 'order' && ri) return 'orders.php';
   if (rt === 'order_proposal' && ri) return '../customer/order-form.php?id=' + ri;
   if (rt === 'custom_request' && ri) return 'custom-requests.php';
-  if (rt === 'chat' && ri) return 'chat.php?conversation=' + ri;
+  if (rt === 'chat' && ri) return 'messages.php?conversation=' + ri;
   return '#';
 }
 
@@ -203,7 +203,7 @@ function showToast(message, type) {
   var types = [];
   if (page.includes('orders.php')) types = ['order','order_proposal'];
   else if (page.includes('custom-requests.php')) types = ['custom_request'];
-  else if (page.includes('chat.php')) types = ['chat'];
+  else if (page.includes('messages.php')) types = ['chat'];
   if (types.length) {
     Promise.all(types.map(function(t){
       return fetch('../api/notifications.php', {

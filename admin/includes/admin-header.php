@@ -63,7 +63,7 @@ $isAddProductPage = ($currentPage === 'product-form.php' && !isset($_GET['id']))
       <a href="dashboard.php" class="sidebar-menu-item <?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>"><i class="fas fa-chart-pie"></i> Dashboard</a>
       <a href="orders.php" class="sidebar-menu-item <?php echo $currentPage === 'orders.php' ? 'active' : ''; ?>"><i class="fas fa-shopping-cart"></i> Orders<span class="badge red" id="sidebar-orders-badge"></span></a>
       <a href="custom-requests.php" class="sidebar-menu-item <?php echo $currentPage === 'custom-requests.php' ? 'active' : ''; ?>"><i class="fas fa-paint-brush"></i> Customization Requests<span class="badge red" id="sidebar-requests-badge"></span></a>
-      <a href="chat.php" class="sidebar-menu-item <?php echo $currentPage === 'chat.php' ? 'active' : ''; ?>"><i class="fas fa-comments"></i> Messages<span class="badge red" id="sidebar-msg-badge"></span></a>
+      <a href="messages.php" class="sidebar-menu-item <?php echo $currentPage === 'messages.php' ? 'active' : ''; ?>"><i class="fas fa-comments"></i> Messages<span class="badge red" id="sidebar-msg-badge"></span></a>
 
       <div class="sidebar-section-title" style="padding-top:0.5rem;">Products</div>
       <a href="products.php" class="sidebar-menu-item <?php echo ($currentPage === 'products.php' || ($currentPage === 'product-form.php' && isset($_GET['id']))) ? 'active' : ''; ?>"><i class="fas fa-box"></i> My Products</a>

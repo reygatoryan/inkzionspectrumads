@@ -120,7 +120,7 @@ if (isset($userId)) {
     <div class="cr-chat-box" id="chatBox" style="display:none;">
       <div class="cr-chat-header">
         <span><i class="fas fa-comments"></i> Chat with Customer</span>
-        <span><a href="chat.php" id="openInChatLink" style="font-size:0.75rem;color:#2B4C52;text-decoration:none;font-weight:600;display:none;" target="_blank"><i class="fas fa-external-link-alt"></i> Open in Chat</a></span>
+        <span><a href="messages.php" id="openInChatLink" style="font-size:0.75rem;color:#2B4C52;text-decoration:none;font-weight:600;display:none;" target="_blank"><i class="fas fa-external-link-alt"></i> Open in Chat</a></span>
       </div>
       <div class="cr-chat-msgs" id="chatMessages"></div>
       <div class="cr-chat-input">
@@ -358,7 +358,7 @@ async function openDetail(id) {
     const chatBox = document.getElementById('chatBox');
     if (currentConvId) {
       chatBox.style.display = 'block';
-      document.getElementById('openInChatLink').href = 'chat.php?conversation=' + currentConvId;
+      document.getElementById('openInChatLink').href = 'messages.php?conversation=' + currentConvId;
       document.getElementById('openInChatLink').style.display = 'inline';
       loadChatMessages();
       if (chatPoll) clearInterval(chatPoll);
@@ -417,7 +417,7 @@ async function saveCustomization() {
 async function loadChatMessages() {
   if (!currentConvId) return;
   try {
-    const res = await fetch(`../api/chat.php?action=messages&conversation_id=${currentConvId}`, { credentials: 'include' });
+    const res = await fetch(`../api/messages.php?action=messages&conversation_id=${currentConvId}`, { credentials: 'include' });
     const data = await res.json();
     if (!data.success) return;
     const msgs = data.messages || [];
@@ -437,7 +437,7 @@ async function sendChatMsg() {
   if (!content || !currentConvId) return;
   input.value = '';
   try {
-    await fetch('../api/chat.php', {
+    await fetch('../api/messages.php', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
       body: JSON.stringify({ action: 'send_message', conversation_id: currentConvId, message_type: 'text', content })
     });

@@ -48,6 +48,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script>const CSRF_TOKEN = '<?php echo $csrfToken; ?>';</script>
+  <script>const TURNSTILE_SITE_KEY = '<?php echo TURNSTILE_SITE_KEY; ?>';</script>
   <style>
     .g-signin-wrapper { display: flex; align-items: center; }
     .g-signin-wrapper > div > iframe { max-width: 210px !important; }
@@ -108,8 +109,9 @@ $contactContent = $siteContent['contact_info'] ?? [];
       <?php else: ?>
         <div class="g-signin-wrapper">
           <div id="g_id_onload"
-               data-client_id="710352328695-8n7ggg4rg6c89rga59kn9fb5ueffb6kl.apps.googleusercontent.com"
+               data-client_id="1061589476506-s82uc7lcqm99jnmq41c8nj278cug5jjp.apps.googleusercontent.com"
                data-callback="handleGoogleCredential"
+               data-itp_support="true"
                data-auto_prompt="false">
           </div>
           <div class="g_id_signin"
@@ -476,7 +478,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
     </div>
   </footer>
 
-  <div id="turnstile-container" class="cf-turnstile" data-sitekey="<?php echo TURNSTILE_SITE_KEY; ?>" data-size="invisible" data-callback="onTurnstileCallback"></div>
+  <div id="turnstile-container" class="cf-turnstile" data-sitekey="<?php echo TURNSTILE_SITE_KEY; ?>" data-size="flexible" data-appearance="interaction-only" data-callback="onTurnstileCallback" data-error_callback="onTurnstileError"></div>
 
   <div class="profile-modal-overlay" id="profileModal">
     <div class="profile-modal">
@@ -515,28 +517,61 @@ $contactContent = $siteContent['contact_info'] ?? [];
     let pendingRedirect = '';
     let pendingUserId = 0;
     let pendingGoogleCredential = '';
+    let turnstileFallbackTimer = null;
 
     function handleGoogleCredential(response) {
       pendingGoogleCredential = response.credential;
-      if (typeof turnstile !== 'undefined') {
-        turnstile.execute('#turnstile-container');
-      } else {
+      tryTurnstileOrProceed();
+    }
+
+    function onTurnstileError(code) {
+      console.warn('Turnstile error:', code);
+      proceedWithLogin(pendingGoogleCredential, '');
+    }
+
+    function tryTurnstileOrProceed() {
+      if (turnstileFallbackTimer) clearTimeout(turnstileFallbackTimer);
+      turnstileFallbackTimer = setTimeout(function() {
+        proceedWithLogin(pendingGoogleCredential, '');
+      }, 5000);
+      if (typeof turnstile === 'undefined') {
         setTimeout(function() {
-          if (typeof turnstile !== 'undefined') {
-            turnstile.execute('#turnstile-container');
+          if (typeof turnstile === 'undefined') {
+            if (turnstileFallbackTimer) clearTimeout(turnstileFallbackTimer);
+            proceedWithLogin(pendingGoogleCredential, '');
           } else {
-            showGToast('Security check is still loading. Please try signing in again.', 'error');
+            try {
+              turnstile.execute('#turnstile-container');
+            } catch (e) {
+              console.warn('Turnstile execute failed:', e);
+              if (turnstileFallbackTimer) clearTimeout(turnstileFallbackTimer);
+              proceedWithLogin(pendingGoogleCredential, '');
+            }
           }
         }, 500);
+        return;
+      }
+      try {
+        turnstile.execute('#turnstile-container');
+      } catch (e) {
+        console.warn('Turnstile execute failed:', e);
+        if (turnstileFallbackTimer) clearTimeout(turnstileFallbackTimer);
+        proceedWithLogin(pendingGoogleCredential, '');
       }
     }
 
     function onTurnstileCallback(token) {
       if (!pendingGoogleCredential) return;
+      if (turnstileFallbackTimer) {
+        clearTimeout(turnstileFallbackTimer);
+        turnstileFallbackTimer = null;
+      }
       proceedWithLogin(pendingGoogleCredential, token);
     }
 
     async function proceedWithLogin(credential, turnstileToken) {
+      if (!credential) return;
+      pendingGoogleCredential = '';
       try {
         const res = await fetch('api/google-auth.php', {
           method: 'POST',
@@ -622,13 +657,31 @@ $contactContent = $siteContent['contact_info'] ?? [];
       btn.disabled = false;
       btn.textContent = 'Save & Continue';
     }
-    document.getElementById('nav-toggle').addEventListener('click', function() {
-      var nav = document.getElementById('nav-list');
-      nav.classList.toggle('show');
-      var expanded = this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true';
-      this.setAttribute('aria-expanded', expanded);
-    });
   </script>
+  <?php if ($loggedIn && ($_GET['complete_profile'] ?? '') === '1'): ?>
+  <script>
+    (function() {
+      function openProfileModal() {
+        if (typeof turnstile === 'undefined') { setTimeout(openProfileModal, 200); return; }
+        pendingRedirect = pendingRedirect || 'index.php';
+        document.getElementById('profName').value = '<?php echo htmlspecialchars($userName, ENT_QUOTES); ?>';
+        document.getElementById('profContact').value = '';
+        document.getElementById('profAddress').value = '';
+        document.getElementById('profileError').style.display = 'none';
+        var tw = document.getElementById('turnstileWidget');
+        if (tw && !tw.childNodes.length) {
+          turnstile.render(tw, { sitekey: TURNSTILE_SITE_KEY });
+        }
+        document.getElementById('profileModal').style.display = 'flex';
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', openProfileModal);
+      } else {
+        openProfileModal();
+      }
+    })();
+  </script>
+  <?php endif; ?>
   <script>navigator.sendBeacon('../api/track-visit.php?url=' + encodeURIComponent(location.pathname + location.search) + '&_=' + Date.now());</script>
 </body>
 </html>

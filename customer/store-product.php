@@ -830,6 +830,17 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       color: var(--primary);
       transform: scale(1.05);
     }
+    @media (hover: none) {
+      .card-quick-view {
+        opacity: 1;
+        transform: none;
+        padding: 0.4rem;
+      }
+      .card-quick-view-btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.68rem;
+      }
+    }
     
     /* BODY */
     .product-card-body {
@@ -979,16 +990,22 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     @media (max-width: 1024px) {
       .products-sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
       .products-sidebar.open { transform: translateX(0); }
-      .products-main { margin-left: 0; }
+      .products-main { margin-left: 0; min-width: 0; }
       .hamburger-btn { display: flex !important; }
       .top-header-inner { gap: 0.75rem; }
       .top-header-center { max-width: none; }
     }
     @media (max-width: 768px) {
       .top-header { padding: 0 1rem; }
-      .top-header-inner { height: 64px; }
+      .top-header-inner { flex-wrap: wrap; height: auto; padding: 0.6rem 0; row-gap: 0.5rem; }
+      .top-header-left { min-width: 0; }
+      .top-header-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .top-header-title h1 { font-size: 1.1rem; }
       .top-header-title p { display: none; }
+      .top-header-center { order: 3; flex: 1 1 100%; max-width: 100%; margin: 0; min-width: 0; }
+      .top-header-right { margin-left: auto; flex-shrink: 0; }
+      .compact-login { display: inline-flex; }
+      .g-signin-wrapper { display: none; }
       .content-area { padding: 1rem; }
       .products-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
       .product-card-image { height: 180px; }
@@ -1004,7 +1021,11 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .products-grid { gap: 0.75rem; }
     }
     @media (max-width: 480px) {
-      .products-grid { grid-template-columns: 1fr; }
+      .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+      .product-card { min-width: 0; }
+      .product-card-footer { flex-direction: column; }
+      .skeleton-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .skeleton-card .skeleton-img { height: 130px; }
       .top-header-center { max-width: 100%; }
     }
     @media (max-width: 400px) {
@@ -1013,7 +1034,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .header-icon-btn { width: 38px; height: 38px; }
       .hamburger-btn { width: 38px; height: 38px; }
       .header-profile-name, .header-profile-arrow { display: none; }
-      .notif-dropdown { position: fixed; top: 64px; left: 0.75rem; right: 0.75rem; width: auto; }
+      .notif-dropdown { position: fixed; top: 108px; left: 0.75rem; right: 0.75rem; width: auto; }
       .product-card-body { padding: 0.85rem; }
       .product-price { font-size: 1.1rem; }
       .product-card-image { height: 150px; }
@@ -1064,13 +1085,13 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .compact-login { font-size: 0.55rem; gap: 0.15rem; }
       .compact-login i { font-size: 0.65rem; }
       .content-area { padding: 0.5rem; }
-      .products-grid { display: flex !important; flex-direction: column; gap: 0.75rem; }
+      .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
       .product-card { min-width: 0; }
       .product-card-body { min-width: 0; padding: 0.6rem 0.7rem; }
       .product-card-title { font-size: 0.8rem; word-break: break-word; }
       .product-card-desc { font-size: 0.68rem; word-break: break-word; }
       .product-price { font-size: 0.85rem; }
-      .product-card-image { height: 110px; }
+      .product-card-image { height: 100px; }
       .product-card-footer { min-width: 0; padding: 0.35rem 0.7rem 0.7rem; }
       .product-card-footer .btn { font-size: 0.6rem; padding: 0.3rem 0.35rem; white-space: normal; word-break: break-word; }
       .card-category-badge { padding: 0.15rem 0.4rem; font-size: 0.5rem; top: 6px; left: 6px; }
@@ -1152,14 +1173,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     }
     .qv-main-img:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
     .qv-main-img img { width: 100%; height: 100%; object-fit: contain; }
-    .qv-thumbs { display: flex; gap: 0.5rem; }
-    .qv-thumb {
-      width: 60px; height: 60px; border-radius: 8px;
-      overflow: hidden; border: 2px solid transparent;
-      cursor: pointer; transition: all 0.2s ease; opacity: 0.6;
-    }
-    .qv-thumb.active { border-color: var(--primary); opacity: 1; }
-    .qv-thumb img { width: 100%; height: 100%; object-fit: cover; }
     
     .qv-info {
       padding: 1.5rem; display: flex; flex-direction: column; gap: 0.85rem;
@@ -1313,15 +1326,21 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .process-step { max-width: 100%; }
 
       
-      .qv-layout { grid-template-columns: 1fr; }
-      .qv-gallery { padding: 1rem; position: static; background: linear-gradient(135deg, #f0f4f8 0%, #e8edf2 100%); }
-      .qv-main-img { aspect-ratio: 4/3; }
-      .qv-info { padding: 1rem; }
+      .qv-layout { grid-template-columns: 1fr; min-height: 0; }
+      .qv-gallery { padding: 0.85rem; position: static; background: linear-gradient(135deg, #f0f4f8 0%, #e8edf2 100%); }
+      .qv-main-img { aspect-ratio: 16/10; }
+      .qv-info { padding: 0.85rem 1rem; }
       .qv-info h2 { font-size: 1.1rem; }
       .qv-price { font-size: 1.4rem; }
       .qv-spec-grid { grid-template-columns: 1fr 1fr; gap: 0.4rem; }
       .qv-spec-card { padding: 0.45rem 0.6rem; }
       .qv-spec-icon { width: 28px; height: 28px; font-size: 0.7rem; }
+    }
+    @media (max-width: 576px) {
+      .qv-overlay { align-items: flex-end; padding: 0; }
+      .qv-modal { border-radius: 18px 18px 0 0; max-height: 88vh; }
+      .qv-main-img { aspect-ratio: 1/1; max-height: 38vh; }
+      .qv-close { top: 0.6rem; right: 0.6rem; }
     }
     .modal-overlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(4px); }
     .modal-overlay.open { display: flex; }
@@ -1480,7 +1499,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         <a href="store-product.php" class="sidebar-menu-item active"><i class="fas fa-box"></i> All Products</a>
         <?php if ($loggedIn): ?>
         
-        <a href="chat.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
+        <a href="messages.php" class="sidebar-menu-item"><i class="fas fa-comments"></i> Messages<span class="sidebar-badge" id="sidebar-msg-badge"></span></a>
         <div class="sidebar-section-title" style="padding-top:0.5rem;">Orders</div>
         <a href="my-orders.php" class="sidebar-menu-item"><i class="fas fa-box"></i> My Orders<span class="sidebar-badge" id="sidebar-orders-badge"></span></a>
         <a href="my-requests.php" class="sidebar-menu-item"><i class="fas fa-clipboard-list"></i> My Requests<span class="sidebar-badge" id="sidebar-requests-badge"></span></a>
@@ -1560,7 +1579,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
             <?php else: ?>
             <div class="g-signin-wrapper">
               <div id="g_id_onload"
-                   data-client_id="710352328695-8n7ggg4rg6c89rga59kn9fb5ueffb6kl.apps.googleusercontent.com"
+                   data-client_id="1061589476506-s82uc7lcqm99jnmq41c8nj278cug5jjp.apps.googleusercontent.com"
                    data-callback="handleGoogleCredential"
                    data-auto_prompt="false">
               </div>
@@ -1662,7 +1681,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
                 <?php if ($isSeller && $useDbProducts && !empty($product['id'])): ?>
                 <a href="admin/products.php" class="btn btn-outline btn-sm" style="flex:1;justify-content:center;"><i class="fas fa-edit"></i> Manage</a>
                 <?php else: ?>
-                <a href="chat.php<?= !empty($product['id']) ? '?product_id='.$product['id'] : ''; ?>" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;" onclick="<?php echo $loggedIn ? '' : 'alert(\'Please login or sign up first.\'); return false;'; ?>"><i class="fas fa-comments"></i> Chat</a>
+                <a href="messages.php<?= !empty($product['id']) ? '?product_id='.$product['id'] : ''; ?>" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;" onclick="<?php echo $loggedIn ? '' : 'alert(\'Please login or sign up first.\'); return false;'; ?>"><i class="fas fa-comments"></i> Chat</a>
                 <?php endif; ?>
               </div>
             </article>
@@ -1813,7 +1832,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
           <div class="qv-main-img">
             <img id="qvMainImg" src="" onerror="this.src='assets/products-demo.jpg'" alt="">
           </div>
-          <div class="qv-thumbs" id="qvThumbs"></div>
         </div>
         <div class="qv-info">
           <span class="qv-badge" id="qvBadge"></span>
@@ -1830,13 +1848,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
               </div>
             </div>
             <div class="qv-spec-card">
-              <div class="qv-spec-icon"><i class="fas fa-cube"></i></div>
-              <div class="qv-spec-info">
-                <span class="qv-spec-label">Materials</span>
-                <span class="qv-spec-value">Premium 350gsm Cardstock</span>
-              </div>
-            </div>
-            <div class="qv-spec-card">
               <div class="qv-spec-icon"><i class="fas fa-ruler"></i></div>
               <div class="qv-spec-info">
                 <span class="qv-spec-label">Available Sizes</span>
@@ -1848,27 +1859,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
               <div class="qv-spec-info">
                 <span class="qv-spec-label">Available Colors</span>
                 <span class="qv-spec-value">Full CMYK + Custom PMS</span>
-              </div>
-            </div>
-            <div class="qv-spec-card">
-              <div class="qv-spec-icon"><i class="fas fa-print"></i></div>
-              <div class="qv-spec-info">
-                <span class="qv-spec-label">Printing Method</span>
-                <span class="qv-spec-value">Digital / Offset / Sublimation</span>
-              </div>
-            </div>
-            <div class="qv-spec-card">
-              <div class="qv-spec-icon"><i class="fas fa-clock"></i></div>
-              <div class="qv-spec-info">
-                <span class="qv-spec-label">Est. Production</span>
-                <span class="qv-spec-value">2-3 Business Days</span>
-              </div>
-            </div>
-            <div class="qv-spec-card">
-              <div class="qv-spec-icon"><i class="fas fa-truck"></i></div>
-              <div class="qv-spec-info">
-                <span class="qv-spec-label">Delivery Time</span>
-                <span class="qv-spec-value">3-5 Business Days</span>
               </div>
             </div>
             <div class="qv-spec-card">
@@ -1956,23 +1946,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       document.getElementById('qvStock').textContent = '\u25CF In Stock';
       document.getElementById('qvStock').style.color = 'var(--success)';
 
-      // Single thumbnail (only one image available)
-      const thumbs = document.getElementById('qvThumbs');
-      thumbs.innerHTML = '';
-      const thumb = document.createElement('div');
-      thumb.className = 'qv-thumb active';
-      const thumbImg = document.createElement('img');
-      thumbImg.src = image;
-      thumbImg.alt = name;
-      thumbImg.onerror = function() { this.src = 'assets/products-demo.jpg'; };
-      thumbImg.onclick = function() {
-        document.querySelectorAll('.qv-thumb').forEach(t => t.classList.remove('active'));
-        this.parentElement.classList.add('active');
-        document.getElementById('qvMainImg').src = this.src;
-      };
-      thumb.appendChild(thumbImg);
-      thumbs.appendChild(thumb);
-
       document.getElementById('qvOverlay').classList.add('active');
       document.body.style.overflow = 'hidden';
 
@@ -2038,7 +2011,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         });
         const data = await res.json();
         if (data.ok) {
-          window.location.href = data.redirect;
+          window.location.href = data.needs_profile ? '../index.php?complete_profile=1' : data.redirect;
         } else {
           console.error('Google auth error:', data);
           showToast(data.error || 'Sign-in failed. Please try again.', 'error');
@@ -2166,7 +2139,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       if (rt==='order'&&ri) return 'order-tracking.php?id='+ri;
       if (rt==='order_proposal'&&ri) return 'order-form.php?id='+ri;
       if (rt==='custom_request'&&ri) return 'my-requests.php';
-      if (rt==='chat'&&ri) return 'chat.php?conversation='+ri;
+      if (rt==='chat'&&ri) return 'messages.php?conversation='+ri;
       return '#';
     }
     function notifTimeAgo(ds) {
