@@ -335,16 +335,16 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     button.sidebar-footer-item { background: none; border: none; cursor: pointer; width: 100%; text-align: left; font: inherit; color: var(--text-muted); display: flex; align-items: center; gap: 0.65rem; padding: 0.5rem 0; font-size: 0.78rem; text-decoration: none; transition: var(--transition); }
     button.sidebar-footer-item:hover { color: var(--primary); }
 
-    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(4px); }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99999; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 1rem; overflow-y: auto; }
     .modal-overlay.open { display: flex; }
-    .modal-box { background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.2); animation: modalIn 0.25s ease; }
+    .modal-box { background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; overflow-x: hidden; margin: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.2); animation: modalIn 0.25s ease; }
     @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; }
-    .modal-header h2 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; display: flex; align-items: center; gap: 0.5rem; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; gap: 0.5rem; }
+    .modal-header h2 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
     .modal-header h2 i { color: #2B4C52; }
     .modal-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: all 0.15s ease; }
     .modal-close:hover { border-color: #ef4444; color: #ef4444; }
-    .modal-body { padding: 1.5rem; }
+    .modal-body { padding: 1.5rem; overflow-wrap: break-word; word-break: break-word; }
     .modal-body p { font-size: 0.9rem; color: #475569; line-height: 1.7; margin-bottom: 0.75rem; }
     .modal-body p:last-child { margin-bottom: 0; }
     .modal-contact-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; }
@@ -585,6 +585,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .btn-save { width: 100%; justify-content: center; }
       .modal-header { padding: 1rem 1.25rem; }
       .modal-body { padding: 1.25rem; }
+      .modal-overlay { padding: 0.75rem; }
     }
     @media (max-width: 400px) {
       .content-area { padding: 0.75rem; }
@@ -592,7 +593,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .header-icon-btn { width: 38px; height: 38px; }
       .hamburger-btn { width: 38px; height: 38px; }
       .header-profile-name, .header-profile-arrow { display: none; }
-      .notif-dropdown { position: fixed; top: 108px; left: 0.75rem; right: 0.75rem; width: auto; }
       .form-group input, .form-group select { padding: 0.6rem 0.75rem; }
     }
     @media (max-width: 360px) {
@@ -603,7 +603,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .header-icon-btn { width: 34px; height: 34px; }
       .content-area { padding: 0.5rem; }
       .form-card { padding: 0.85rem; }
-      .notif-dropdown { position: fixed; top: 60px; left: 0.5rem; right: 0.5rem; width: auto; }
     }
 
     .sidebar-badge {
@@ -624,12 +623,21 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .sidebar-badge.show { display: flex; }
     .header-notif-wrapper { position: relative; }
     .notif-bell-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; border: 2px solid white; }
-    .notif-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: white; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 12px 40px rgba(0,0,0,0.15); width: 360px; max-height: 480px; display: flex; flex-direction: column; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; }
-    .notif-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
-    .notif-dropdown-header { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 700; color: #0f172a; flex-shrink: 0; }
-    .notif-mark-all-btn { background: none; border: none; color: #2B4C52; font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 6px; }
+    .notif-dropdown { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.55); z-index: 10000; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
+    .notif-dropdown.active { display: flex; animation: notifFadeIn 0.25s ease; }
+    .notif-modal-box { background: white; border-radius: 20px; max-width: 480px; width: 100%; max-height: calc(100vh - 2rem); display: flex; flex-direction: column; overflow: hidden; margin: auto; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); animation: notifScaleIn 0.25s ease; }
+    .notif-dropdown-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 700; color: #0f172a; flex-shrink: 0; min-width: 0; }
+    .notif-dropdown-header > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .notif-mark-all-btn { background: none; border: none; color: #2B4C52; font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 6px; flex-shrink: 0; }
     .notif-mark-all-btn:hover { background: rgba(43,76,82,0.08); }
-    .notif-dropdown-list { overflow-y: auto; flex: 1; max-height: 400px; }
+    .notif-close { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(0,0,0,0.05); color: #64748b; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .notif-close:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+    .notif-dropdown-list { overflow-y: auto; flex: 1; min-height: 0; }
+    @keyframes notifFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes notifScaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+    @media (max-width: 480px) {
+      .notif-dropdown { padding: 0.75rem; }
+    }
     .notif-item { display: flex; gap: 0.7rem; padding: 0.75rem 1rem; border-bottom: 1px solid #f8fafc; cursor: pointer; transition: background 0.15s; text-decoration: none; color: inherit; align-items: flex-start; }
     .notif-item:hover { background: #f8fafc; }
     .notif-item.unread { background: rgba(43,76,82,0.04); }
@@ -653,6 +661,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .modal-close { min-width: 44px; min-height: 44px; }
       .sidebar-menu-item { padding: 0.75rem 1.25rem; }
       .notif-mark-all-btn { min-height: 44px; padding: 0.5rem 1rem; }
+      .notif-close { min-width: 44px; min-height: 44px; }
     }
   </style>
 </head>
@@ -729,13 +738,16 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
                 <i class="fas fa-bell"></i>
                 <span class="notif-bell-dot" id="notifBellDot" style="display:none;"></span>
               </button>
-              <div class="notif-dropdown" id="notifDropdown">
-                <div class="notif-dropdown-header">
-                  <span>Notifications</span>
-                  <button class="notif-mark-all-btn" id="notifMarkAll" onclick="markAllNotifRead()">Mark all read</button>
-                </div>
-                <div class="notif-dropdown-list" id="notifList">
-                  <div class="notif-loading">Loading...</div>
+              <div class="notif-dropdown" id="notifDropdown" onclick="if(event.target===this)closeNotifDropdown()">
+                <div class="notif-modal-box">
+                  <div class="notif-dropdown-header">
+                    <span>Notifications</span>
+                    <button class="notif-mark-all-btn" id="notifMarkAll" onclick="markAllNotifRead()">Mark all read</button>
+                    <button class="notif-close" onclick="closeNotifDropdown()" aria-label="Close notifications"><i class="fas fa-times"></i></button>
+                  </div>
+                  <div class="notif-dropdown-list" id="notifList">
+                    <div class="notif-loading">Loading...</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -942,7 +954,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     }
 
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') { closeModal(); closeNotifDropdown(); }
     });
 
     function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }

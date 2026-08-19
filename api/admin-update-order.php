@@ -100,18 +100,20 @@ $updateStmt = $conn->prepare($updateSql);
 $updateStmt->bind_param($types, ...$params);
 
 if ($updateStmt->execute()) {
-    // Record in order timeline
-    $timelineNotes = $notes;
-    if ($courier) {
-        $timelineNotes .= ($timelineNotes ? ' | ' : '') . "Courier: $courier" . ($trackingNumber ? " (Tracking: $trackingNumber)" : '');
+    // Record in order timeline (skip no-op status changes to avoid duplicate entries)
+    if ($oldStatus !== $newStatus) {
+        $timelineNotes = $notes;
+        if ($courier) {
+            $timelineNotes .= ($timelineNotes ? ' | ' : '') . "Courier: $courier" . ($trackingNumber ? " (Tracking: $trackingNumber)" : '');
+        }
+        $timelineStmt = $conn->prepare("
+            INSERT INTO order_timeline (order_id, from_status, to_status, changed_by, notes, created_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
+        ");
+        $timelineStmt->bind_param('issis', $orderId, $oldStatus, $newStatus, $userId, $timelineNotes);
+        $timelineStmt->execute();
+        $timelineStmt->close();
     }
-    $timelineStmt = $conn->prepare("
-        INSERT INTO order_timeline (order_id, from_status, to_status, changed_by, notes, created_at)
-        VALUES (?, ?, ?, ?, ?, NOW())
-    ");
-    $timelineStmt->bind_param('issis', $orderId, $oldStatus, $newStatus, $userId, $timelineNotes);
-    $timelineStmt->execute();
-    $timelineStmt->close();
 
     // Create notification for the customer
     $statusLabels = [

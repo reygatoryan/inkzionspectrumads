@@ -65,6 +65,7 @@ try {
             if (!move_uploaded_file($imageFile['tmp_name'], $targetPath)) {
                 throw new Exception('Failed to upload profile photo');
             }
+            @chmod($targetPath, 0644);
 
             $profilePhotoPath = 'uploads/profiles/' . $filename;
 

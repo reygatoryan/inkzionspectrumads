@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../includes/session-helper.php';
 secureSessionStart();
+require_once __DIR__ . '/../includes/csrf-helper.php';
+$csrfToken = generateCsrfToken();
 require_once '../db-config.php';
 require_once '../includes/google-config.php';
 
@@ -609,8 +611,8 @@ if (is_numeric($displayPrice)) {
               <button type="button" class="btn" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:12px;background:white;color:#0f172a;text-decoration:none;font-weight:600;font-size:0.9rem;border:1px solid #e2e8f0;cursor:pointer;transition:all 0.2s ease;" onclick="showContactInfo()">
                 <i class="fas fa-headset" style="color:#2B4C52;"></i> Contact Admin
               </button>
-              <div id="contactOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:99999;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)document.getElementById('contactOverlay').style.display='none'">
-                <div style="background:white;border-radius:16px;padding:2rem;max-width:360px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.2);animation:modalIn 0.2s ease;">
+              <div id="contactOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;" onclick="if(event.target===this)document.getElementById('contactOverlay').style.display='none'">
+                <div style="background:white;border-radius:16px;padding:2rem;max-width:360px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.2);animation:modalIn 0.2s ease;margin:auto;overflow-x:hidden;overflow-wrap:break-word;word-break:break-word;">
                   <div style="width:56px;height:56px;border-radius:50%;background:rgba(43, 76, 82,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#2B4C52;margin:0 auto 1rem;">
                     <i class="fas fa-headset"></i>
                   </div>
@@ -698,6 +700,7 @@ if (is_numeric($displayPrice)) {
   </footer>
   <script src="../script.js"></script>
   <script>
+    const CSRF_TOKEN = '<?php echo $csrfToken; ?>';
     // Year
     const year = document.getElementById('year');
     if (year) year.textContent = new Date().getFullYear();
@@ -842,7 +845,7 @@ if (is_numeric($displayPrice)) {
         const res = await fetch('../api/google-auth.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ credential: response.credential })
+          body: JSON.stringify({ credential: response.credential, csrf_token: CSRF_TOKEN })
         });
         const data = await res.json();
         if (data.ok) {

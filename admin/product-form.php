@@ -79,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!move_uploaded_file($imageFile['tmp_name'], $targetPath)) {
                     $errors[] = 'Unable to save the uploaded image. Check folder permissions.';
                 } else {
+                    @chmod($targetPath, 0644);
                     $newImageUploaded = true;
                     $imageUrl = '../uploads/products/' . $filename;
                 }

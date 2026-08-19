@@ -53,8 +53,9 @@ $contactContent = $siteContent['contact_info'] ?? [];
     .g-signin-wrapper { display: flex; align-items: center; }
     .g-signin-wrapper > div > iframe { max-width: 210px !important; }
     .g-signin-wrapper .g_id_signin { display: flex; align-items: center; }
-    .profile-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: none; align-items: center; justify-content: center; }
-    .profile-modal { background: white; border-radius: 16px; padding: 2rem; max-width: 440px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .profile-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
+    .profile-modal { background: white; border-radius: 16px; padding: 2rem; max-width: 440px; width: 100%; margin: auto; overflow-x: hidden; word-break: break-word; max-height: calc(100vh - 2rem); overflow-y: auto; box-sizing: border-box; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    @media (max-width: 480px) { .profile-modal { padding: 1rem; } }
     .profile-modal h2 { margin: 0 0 0.25rem; font-size: 1.25rem; color: #0f172a; }
     .profile-modal p.sub { margin: 0 0 1.25rem; font-size: 0.85rem; color: #64748b; }
     .profile-modal .field { margin-bottom: 1rem; }
@@ -62,7 +63,7 @@ $contactContent = $siteContent['contact_info'] ?? [];
     .profile-modal .field input, .profile-modal .field textarea { width: 100%; padding: 0.65rem 0.75rem; border: 1px solid #d1d5db; border-radius: 10px; font-size: 0.9rem; outline: none; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s; }
     .profile-modal .field input:focus, .profile-modal .field textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     .profile-modal .field textarea { min-height: 70px; resize: vertical; }
-    .profile-modal .cf-turnstile { margin-bottom: 1rem; }
+    .profile-modal .cf-turnstile { margin-bottom: 1rem; overflow-x: hidden; }
     .profile-modal .modal-actions { display: flex; gap: 0.75rem; }
     .profile-modal .modal-actions button { flex: 1; padding: 0.7rem; border-radius: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s; }
     .profile-modal .btn-save { background: #2563eb; color: white; width: 100%; }

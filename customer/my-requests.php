@@ -152,7 +152,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     .empty-state h3 { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; }
     .empty-state p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
 
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 1.5rem; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.55); z-index: 10000; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto; }
     .modal-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -190,6 +190,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       .top-header-title h1 { font-size: 1.1rem; }
       .header-profile-name, .header-profile-arrow { display: none; }
       .req-card { padding: 1rem; }
+      .modal-overlay { padding: 1rem; }
     }
     @media (max-width: 400px) {
       .content-area { padding: 0.75rem; }
@@ -197,7 +198,6 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       .header-icon-btn { width: 38px; height: 38px; }
       .hamburger-btn { width: 38px; height: 38px; }
       .header-profile-name, .header-profile-arrow { display: none; }
-      .notif-dropdown { position: fixed; top: 64px; left: 0.75rem; right: 0.75rem; width: auto; }
       .top-header-inner { gap: 0.5rem; }
       .header-icon-btn[title="Home"] { display: none; }
       .req-card { padding: 0.85rem; }
@@ -211,7 +211,6 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       .header-icon-btn { width: 34px; height: 34px; }
       .content-area { padding: 0.5rem; }
       .req-card { padding: 0.65rem; }
-      .notif-dropdown { position: fixed; top: 60px; left: 0.5rem; right: 0.5rem; width: auto; }
     }
     .sidebar-submenu {
       max-height: 0;
@@ -290,12 +289,21 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
     .sidebar-badge.show { display: flex; }
     .header-notif-wrapper { position: relative; }
     .notif-bell-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; border: 2px solid white; }
-    .notif-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: white; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 12px 40px rgba(0,0,0,0.15); width: 360px; max-height: 480px; display: flex; flex-direction: column; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; }
-    .notif-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
-    .notif-dropdown-header { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 700; color: #0f172a; flex-shrink: 0; }
-    .notif-mark-all-btn { background: none; border: none; color: #2B4C52; font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 6px; }
+    .notif-dropdown { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.55); z-index: 10000; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
+    .notif-dropdown.active { display: flex; animation: notifFadeIn 0.25s ease; }
+    .notif-modal-box { background: white; border-radius: 20px; max-width: 480px; width: 100%; max-height: calc(100vh - 2rem); display: flex; flex-direction: column; overflow: hidden; margin: auto; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); animation: notifScaleIn 0.25s ease; }
+    .notif-dropdown-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 700; color: #0f172a; flex-shrink: 0; min-width: 0; }
+    .notif-dropdown-header > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .notif-mark-all-btn { background: none; border: none; color: #2B4C52; font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 6px; flex-shrink: 0; }
     .notif-mark-all-btn:hover { background: rgba(43,76,82,0.08); }
-    .notif-dropdown-list { overflow-y: auto; flex: 1; max-height: 400px; }
+    .notif-close { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(0,0,0,0.05); color: #64748b; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .notif-close:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+    .notif-dropdown-list { overflow-y: auto; flex: 1; min-height: 0; }
+    @keyframes notifFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes notifScaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+    @media (max-width: 480px) {
+      .notif-dropdown { padding: 0.75rem; }
+    }
     .notif-item { display: flex; gap: 0.7rem; padding: 0.75rem 1rem; border-bottom: 1px solid #f8fafc; cursor: pointer; transition: background 0.15s; text-decoration: none; color: inherit; align-items: flex-start; }
     .notif-item:hover { background: #f8fafc; }
     .notif-item.unread { background: rgba(43,76,82,0.04); }
@@ -319,6 +327,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       .modal-close { min-width: 44px; min-height: 44px; }
       .sidebar-menu-item { padding: 0.75rem 1.25rem; }
       .notif-mark-all-btn { min-height: 44px; padding: 0.5rem 1rem; }
+      .notif-close { min-width: 44px; min-height: 44px; }
     }
   </style>
 </head>
@@ -380,13 +389,16 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
               <i class="fas fa-bell"></i>
               <span class="notif-bell-dot" id="notifBellDot" style="display:none;"></span>
             </button>
-            <div class="notif-dropdown" id="notifDropdown">
-              <div class="notif-dropdown-header">
-                <span>Notifications</span>
-                <button class="notif-mark-all-btn" id="notifMarkAll" onclick="markAllNotifRead()">Mark all read</button>
-              </div>
-              <div class="notif-dropdown-list" id="notifList">
-                <div class="notif-loading">Loading...</div>
+            <div class="notif-dropdown" id="notifDropdown" onclick="if(event.target===this)closeNotifDropdown()">
+              <div class="notif-modal-box">
+                <div class="notif-dropdown-header">
+                  <span>Notifications</span>
+                  <button class="notif-mark-all-btn" id="notifMarkAll" onclick="markAllNotifRead()">Mark all read</button>
+                  <button class="notif-close" onclick="closeNotifDropdown()" aria-label="Close notifications"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="notif-dropdown-list" id="notifList">
+                  <div class="notif-loading">Loading...</div>
+                </div>
               </div>
             </div>
           </div>
@@ -426,12 +438,12 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
 
 <!-- Help Modal -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal-box" style="background:white;border-radius:24px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 80px rgba(15,23,42,0.2);animation:scaleIn 0.25s ease;">
-    <div class="modal-header" style="position:sticky;top:0;background:white;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 1.5rem 1rem;border-bottom:1px solid #f1f5f9;">
-      <h2 id="modalTitle" style="font-size:1.2rem;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:0.5rem;"></h2>
+  <div class="modal-box" style="background:white;border-radius:24px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;overflow-x:hidden;margin:auto;box-shadow:0 24px 80px rgba(15,23,42,0.2);animation:scaleIn 0.25s ease;">
+    <div class="modal-header" style="position:sticky;top:0;background:white;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 1.5rem 1rem;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:0.5rem;">
+      <h2 id="modalTitle" style="font-size:1.2rem;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:0.5rem;min-width:0;"></h2>
       <button class="modal-close" onclick="closeModal()" style="width:36px;height:36px;border-radius:50%;border:none;background:#f1f5f9;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;"><i class="fas fa-times"></i></button>
     </div>
-    <div class="modal-body" id="modalBody" style="padding:1.5rem;"></div>
+    <div class="modal-body" id="modalBody" style="padding:1.5rem;overflow-wrap:break-word;word-break:break-word;"></div>
   </div>
 </div>
 
@@ -547,6 +559,7 @@ $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
       if (!wasActive) loadNotifs();
     }
     function closeNotifDropdown() { var dd = document.getElementById('notifDropdown'); if (dd) dd.classList.remove('active'); }
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeNotifDropdown(); });
     var notifFetching = false;
     function loadNotifs() {
       if (notifFetching) return;

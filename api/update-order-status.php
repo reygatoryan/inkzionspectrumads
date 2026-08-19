@@ -134,8 +134,18 @@ if (!isset($validTransitions[$currentStatus]) || !in_array($newStatus, $validTra
     exit;
 }
 
-$updateStmt = $conn->prepare("UPDATE orders SET status = ?, updated_at = NOW() WHERE id = ?");
-$updateStmt->bind_param('si', $newStatus, $orderId);
+$updateSql = "UPDATE orders SET status = ?, updated_at = NOW()";
+$updateParams = [$newStatus];
+$updateTypes = 's';
+if ($newStatus === 'completed') {
+    $updateSql .= ", payment_status = 'paid'";
+}
+$updateSql .= " WHERE id = ?";
+$updateParams[] = $orderId;
+$updateTypes .= 'i';
+
+$updateStmt = $conn->prepare($updateSql);
+$updateStmt->bind_param($updateTypes, ...$updateParams);
 
     if ($updateStmt->execute()) {
     $timelineStmt = $conn->prepare("

@@ -57,6 +57,7 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     $dest = $uploadDir . $filename;
 
     if (move_uploaded_file($_FILES['image']['tmp_name'], $dest)) {
+        @chmod($dest, 0644);
         $imageUrl = 'assets/content/' . $filename;
     }
 }

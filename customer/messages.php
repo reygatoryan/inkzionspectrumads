@@ -219,17 +219,18 @@ session_write_close();
     @supports (height:100dvh) { .chat-layout { height:calc(100dvh - 200px); } }
     @media (max-width: 480px) {
       .conv-avatar { width: 40px; height: 40px; font-size: 0.85rem; }
+      .modal-overlay { padding: 1rem; }
     }
 
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 1.5rem; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.55); z-index: 10000; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto; }
     .modal-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
-    .modal-box { background: white; border-radius: 24px; max-width: 640px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); animation: scaleIn 0.25s ease; }
-    .modal-header { position: sticky; top: 0; background: white; display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f5f9; }
-    .modal-header h2 { font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; }
+    .modal-box { background: white; border-radius: 24px; max-width: 640px; width: 100%; max-height: 85vh; overflow-y: auto; overflow-x: hidden; margin: auto; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); animation: scaleIn 0.25s ease; }
+    .modal-header { position: sticky; top: 0; background: white; display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; gap: 0.5rem; }
+    .modal-header h2 { font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
     .modal-header h2 i { color: var(--primary); }
     .modal-close { width: 36px; height: 36px; border-radius: 50%; border: none; background: #f1f5f9; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.2s; }
     .modal-close:hover { background: #e2e8f0; color: #0f172a; }
-    .modal-body { padding: 1.5rem; }
+    .modal-body { padding: 1.5rem; overflow-wrap: break-word; word-break: break-word; }
     .modal-body p { font-size: 0.92rem; color: #475569; line-height: 1.7; }
     .modal-contact-item { display: flex; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 14px; margin-bottom: 0.75rem; align-items: flex-start; }
     .modal-contact-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
@@ -302,9 +303,9 @@ session_write_close();
     .sidebar-menu-toggle.open .toggle-arrow {
       transform: rotate(180deg);
     }
-    .img-modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;display:none;align-items:center;justify-content:center;cursor:pointer; }
+    .img-modal-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:10000;display:none;align-items:center;justify-content:center;cursor:pointer;overflow-y:auto; }
     .img-modal-overlay.active { display:flex; }
-    .img-modal-overlay img { max-width:90%;max-height:90%;border-radius:8px;cursor:default;box-shadow:0 8px 40px rgba(0,0,0,0.5); }
+    .img-modal-overlay img { max-width:90%;max-height:90%;border-radius:8px;cursor:default;box-shadow:0 8px 40px rgba(0,0,0,0.5);margin:auto; }
     .img-modal-close { position:fixed;top:1rem;right:1.5rem;color:#fff;font-size:2.5rem;cursor:pointer;z-index:10001;background:none;border:none;opacity:0.7;transition:opacity 0.2s;line-height:1; }
     .img-modal-close:hover { opacity:1; }
     .sidebar-badge {

@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../includes/session-helper.php';
 secureSessionStart();
+require_once __DIR__ . '/../includes/csrf-helper.php';
+$csrfToken = generateCsrfToken();
 require_once '../db-config.php';
 require_once dirname(__DIR__) . '/includes/seo-helper.php';
 
@@ -956,14 +958,15 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
 
     /* QUANTITY POPUP */
     .qty-popup-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);
-      z-index: 1000; align-items: center; justify-content: center; padding: 1rem;
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 1000; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto;
     }
     .qty-popup-overlay.active { display: flex; animation: popupFadeIn 0.2s ease; }
     .qty-popup {
       background: white; border-radius: 20px; padding: 2rem;
-      max-width: 380px; width: 100%; box-shadow: 0 24px 64px rgba(15, 23, 42, 0.2);
+      max-width: 380px; width: 100%; margin: auto; overflow-x: hidden; word-break: break-word;
+      box-shadow: 0 24px 64px rgba(15, 23, 42, 0.2);
       animation: popupScaleIn 0.25s ease; text-align: center; position: relative;
     }
     .qty-popup-close {
@@ -1034,7 +1037,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .header-icon-btn { width: 38px; height: 38px; }
       .hamburger-btn { width: 38px; height: 38px; }
       .header-profile-name, .header-profile-arrow { display: none; }
-      .notif-dropdown { position: fixed; top: 108px; left: 0.75rem; right: 0.75rem; width: auto; }
       .product-card-body { padding: 0.85rem; }
       .product-price { font-size: 1.1rem; }
       .product-card-image { height: 150px; }
@@ -1066,9 +1068,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .product-card-footer { padding: 0.5rem 0.85rem 0.85rem; }
       .product-card-footer .btn { font-size: 0.68rem; padding: 0.4rem 0.5rem; white-space: normal; word-break: break-word; }
       .filter-chip { padding: 0.4rem 0.75rem; font-size: 0.72rem; }
-      .why-card { padding: 0.85rem; }
-      .section-header h2 { font-size: 0.95rem; }
-      .faq-question { font-size: 0.75rem; padding: 0.65rem 0.75rem; }
       .printing-banner { padding: 1.25rem !important; }
       .printing-banner h2 { font-size: 1.15rem !important; }
       .printing-banner > div:nth-child(2) > div:last-child { gap: 0.75rem !important; justify-content: center; }
@@ -1118,10 +1117,6 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .modal-body p { font-size: 0.82rem; }
       .modal-contact-item { gap: 0.5rem; }
       .modal-contact-icon { width: 28px; height: 28px; font-size: 0.75rem; }
-      .why-card { padding: 0.65rem; }
-      .section-header h2 { font-size: 0.85rem; }
-      .faq-question { font-size: 0.7rem; padding: 0.55rem 0.65rem; }
-      .notif-dropdown { position: fixed; top: 60px; left: 0.5rem; right: 0.5rem; width: auto; }
     }
     
     .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 99; }
@@ -1129,10 +1124,10 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
 
     /* ========= QUICK VIEW MODAL ========= */
     .qv-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(6px);
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
       z-index: 9999; align-items: center; justify-content: center;
-      padding: 1.5rem;
+      padding: 1.5rem; overflow-y: auto;
     }
     .qv-overlay.active { display: flex; }
     .qv-modal {
@@ -1141,7 +1136,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       overflow-y: auto; overflow-x: hidden;
       box-shadow: 0 24px 64px rgba(0,0,0,0.25);
       animation: qvSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
+      position: relative; margin: auto;
     }
     @keyframes qvSlideIn {
       from { opacity: 0; transform: scale(0.95) translateY(20px); }
@@ -1254,78 +1249,8 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .float-panel-checkout:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(43, 76, 82,0.35); }
     .float-panel-empty { text-align: center; padding: 1rem; font-size: 0.75rem; color: var(--text-muted); }
 
-    /* BOTTOM SECTIONS */
-    .bottom-section { margin: 2.5rem 0; }
-    .section-header { margin-bottom: 1.25rem; }
-    .section-header h2 { font-size: 1.15rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
-    .section-header p { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem; }
-
-    /* WHY CHOOSE US */
-    .why-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
-    .why-card {
-      background: white; border-radius: 12px; padding: 1.25rem;
-      border: 1px solid var(--border-color); transition: var(--transition);
-    }
-    .why-card:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(43, 76, 82,0.08); transform: translateY(-2px); }
-    .why-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; margin-bottom: 0.65rem; }
-    .why-card h3 { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
-    .why-card p { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.5; }
-
-    /* PRINTING PROCESS */
-    .process-steps { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
-    .process-step {
-      flex: 1; text-align: center; padding: 1.25rem 0.75rem;
-      background: white; border-radius: 12px; border: 1px solid var(--border-color);
-      transition: var(--transition); position: relative;
-    }
-    .process-step:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(43, 76, 82,0.08); }
-    .process-number {
-      width: 30px; height: 30px; border-radius: 50%; margin: 0 auto 0.65rem;
-      background: var(--primary); color: white; font-size: 0.72rem; font-weight: 800;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .process-icon { font-size: 1.4rem; color: var(--primary); margin-bottom: 0.5rem; }
-    .process-step h3 { font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.2rem; }
-    .process-step p { font-size: 0.7rem; color: var(--text-muted); }
-    .process-connector {
-      width: 100%; max-width: 40px; height: 2px; background: var(--border-color);
-      margin-top: 2.8rem; flex-shrink: 0;
-    }
-
-    /* FAQ */
-    .faq-grid { display: flex; flex-direction: column; gap: 0.5rem; }
-    .faq-item { background: white; border-radius: 10px; border: 1px solid var(--border-color); overflow: hidden; transition: var(--transition); }
-    .faq-item:hover { border-color: var(--primary); }
-    .faq-question {
-      width: 100%; padding: 0.85rem 1rem; background: none; border: none;
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 0.82rem; font-weight: 600; color: var(--text-primary);
-      cursor: pointer; font-family: var(--font); text-align: left;
-      transition: var(--transition);
-    }
-    .faq-question:hover { color: var(--primary); }
-    .faq-question i { font-size: 0.65rem; color: var(--text-muted); transition: var(--transition); }
-    .faq-item.open .faq-question i { transform: rotate(180deg); color: var(--primary); }
-    .faq-item.open .faq-question { color: var(--primary); }
-    .faq-answer {
-      max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease;
-      padding: 0 1rem; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;
-    }
-    .faq-item.open .faq-answer { max-height: 200px; padding: 0 1rem 0.85rem; }
-
-
-
     /* BOTTOM SECTIONS RESPONSIVE */
-    @media (max-width: 1024px) {
-      .why-grid { grid-template-columns: repeat(2,1fr); }
-    }
     @media (max-width: 768px) {
-      .why-grid { grid-template-columns: 1fr; }
-      .process-steps { flex-direction: column; gap: 0.75rem; }
-      .process-connector { display: none; }
-      .process-step { max-width: 100%; }
-
-      
       .qv-layout { grid-template-columns: 1fr; min-height: 0; }
       .qv-gallery { padding: 0.85rem; position: static; background: linear-gradient(135deg, #f0f4f8 0%, #e8edf2 100%); }
       .qv-main-img { aspect-ratio: 16/10; }
@@ -1338,20 +1263,20 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     }
     @media (max-width: 576px) {
       .qv-overlay { align-items: flex-end; padding: 0; }
-      .qv-modal { border-radius: 18px 18px 0 0; max-height: 88vh; }
+      .qv-modal { border-radius: 18px 18px 0 0; max-height: 88vh; margin: auto auto 0; }
       .qv-main-img { aspect-ratio: 1/1; max-height: 38vh; }
       .qv-close { top: 0.6rem; right: 0.6rem; }
     }
-    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 1rem; backdrop-filter: blur(4px); }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99999; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 1rem; overflow-y: auto; }
     .modal-overlay.open { display: flex; }
-    .modal-box { background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.2); animation: modalIn 0.25s ease; }
+    .modal-box { background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; overflow-x: hidden; margin: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.2); animation: modalIn 0.25s ease; }
     @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; }
-    .modal-header h2 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; display: flex; align-items: center; gap: 0.5rem; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; gap: 0.5rem; }
+    .modal-header h2 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
     .modal-header h2 i { color: #2B4C52; }
     .modal-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: all 0.15s ease; }
     .modal-close:hover { border-color: #ef4444; color: #ef4444; }
-    .modal-body { padding: 1.5rem; }
+    .modal-body { padding: 1.5rem; overflow-wrap: break-word; word-break: break-word; }
     .modal-body p { font-size: 0.9rem; color: #475569; line-height: 1.7; margin-bottom: 0.75rem; }
     .modal-body p:last-child { margin-bottom: 0; }
     .modal-contact-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; }
@@ -1364,7 +1289,10 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .modal-faq summary::-webkit-details-marker { display: none; }
     .modal-faq summary i { color: #64748b; font-size: 0.75rem; transition: transform 0.2s; }
     .modal-faq[open] summary i { transform: rotate(180deg); }
-    .modal-faq-answer { padding: 0 1.25rem 1rem; font-size: 0.85rem; color: #475569; line-height: 1.7; border-top: 1px solid #f1f5f9; padding-top: 0.75rem; }
+    .modal-faq-answer { padding: 0 1.25rem 1rem; font-size: 0.85rem; color: #475569; line-height: 1.7; border-top: 1px solid #f1f5f9; padding-top: 0.75rem; overflow-wrap: break-word; word-break: break-word; }
+    @media (max-width: 480px) {
+      .modal-overlay { padding: 0.75rem; }
+    }
     .sidebar-submenu {
       max-height: 0;
       overflow: hidden;
@@ -1442,12 +1370,21 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     .sidebar-badge.show { display: flex; }
     .header-notif-wrapper { position: relative; }
     .notif-bell-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; border: 2px solid white; }
-    .notif-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: white; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 12px 40px rgba(0,0,0,0.15); width: 360px; max-height: 480px; display: flex; flex-direction: column; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity 0.2s, transform 0.2s, visibility 0.2s; }
-    .notif-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
-    .notif-dropdown-header { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 700; color: #0f172a; flex-shrink: 0; }
-    .notif-mark-all-btn { background: none; border: none; color: #2B4C52; font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 6px; }
+    .notif-dropdown { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.55); z-index: 10000; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
+    .notif-dropdown.active { display: flex; animation: notifFadeIn 0.25s ease; }
+    .notif-modal-box { background: white; border-radius: 20px; max-width: 480px; width: 100%; max-height: calc(100vh - 2rem); display: flex; flex-direction: column; overflow: hidden; margin: auto; box-shadow: 0 24px 80px rgba(15, 23, 42, 0.2); animation: notifScaleIn 0.25s ease; }
+    .notif-dropdown-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 700; color: #0f172a; flex-shrink: 0; min-width: 0; }
+    .notif-dropdown-header > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .notif-mark-all-btn { background: none; border: none; color: #2B4C52; font-size: 0.72rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 6px; flex-shrink: 0; }
     .notif-mark-all-btn:hover { background: rgba(43,76,82,0.08); }
-    .notif-dropdown-list { overflow-y: auto; flex: 1; max-height: 400px; }
+    .notif-close { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(0,0,0,0.05); color: #64748b; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .notif-close:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+    .notif-dropdown-list { overflow-y: auto; flex: 1; min-height: 0; }
+    @keyframes notifFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes notifScaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+    @media (max-width: 480px) {
+      .notif-dropdown { padding: 0.75rem; }
+    }
     .notif-item { display: flex; gap: 0.7rem; padding: 0.75rem 1rem; border-bottom: 1px solid #f8fafc; cursor: pointer; transition: background 0.15s; text-decoration: none; color: inherit; align-items: flex-start; }
     .notif-item:hover { background: #f8fafc; }
     .notif-item.unread { background: rgba(43,76,82,0.04); }
@@ -1471,6 +1408,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
       .modal-close { min-width: 44px; min-height: 44px; }
       .sidebar-menu-item { padding: 0.75rem 1.25rem; }
       .notif-mark-all-btn { min-height: 44px; padding: 0.5rem 1rem; }
+      .notif-close { min-width: 44px; min-height: 44px; }
     }
   </style>
 </head>
@@ -1556,13 +1494,16 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
                 <i class="fas fa-bell"></i>
                 <span class="notif-bell-dot" id="notifBellDot" style="display:none;"></span>
               </button>
-              <div class="notif-dropdown" id="notifDropdown">
-                <div class="notif-dropdown-header">
-                  <span>Notifications</span>
-                  <button class="notif-mark-all-btn" id="notifMarkAll" onclick="markAllNotifRead()">Mark all read</button>
-                </div>
-                <div class="notif-dropdown-list" id="notifList">
-                  <div class="notif-loading">Loading...</div>
+              <div class="notif-dropdown" id="notifDropdown" onclick="if(event.target===this)closeNotifDropdown()">
+                <div class="notif-modal-box">
+                  <div class="notif-dropdown-header">
+                    <span>Notifications</span>
+                    <button class="notif-mark-all-btn" id="notifMarkAll" onclick="markAllNotifRead()">Mark all read</button>
+                    <button class="notif-close" onclick="closeNotifDropdown()" aria-label="Close notifications"><i class="fas fa-times"></i></button>
+                  </div>
+                  <div class="notif-dropdown-list" id="notifList">
+                    <div class="notif-loading">Loading...</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1689,137 +1630,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
           <?php endforeach; ?>
         </div>
 
-        <!-- ==================== WHY CHOOSE INKZION ==================== -->
-        <section class="bottom-section">
-          <div class="section-header">
-            <h2><i class="fas fa-check-circle" style="color:var(--primary);"></i> Why Choose Inkzion</h2>
-            <p>What sets us apart from the rest</p>
-          </div>
-          <div class="why-grid">
-            <div class="why-card">
-              <div class="why-icon" style="background:rgba(43, 76, 82,0.12);color:var(--primary);"><i class="fas fa-medal"></i></div>
-              <h3>Premium Quality</h3>
-              <p>Industry-leading print quality with state-of-the-art equipment and premium materials guaranteed to impress.</p>
-            </div>
-            <div class="why-card">
-              <div class="why-icon" style="background:rgba(16,185,129,0.12);color:var(--success);"><i class="fas fa-bolt"></i></div>
-              <h3>Fast Turnaround</h3>
-              <p>Express printing with 24-48 hour rush delivery available for urgent orders without compromise.</p>
-            </div>
-            <div class="why-card">
-              <div class="why-icon" style="background:rgba(245,158,11,0.12);color:var(--warning);"><i class="fas fa-headset"></i></div>
-              <h3>24/7 Support</h3>
-              <p>Dedicated customer service team available around the clock to assist with every order.</p>
-            </div>
-            <div class="why-card">
-              <div class="why-icon" style="background:rgba(99,102,241,0.12);color:#6366f1;"><i class="fas fa-palette"></i></div>
-              <h3>Custom Designs</h3>
-              <p>Free design consultation and unlimited revisions to bring your creative vision to life.</p>
-            </div>
-            <div class="why-card">
-              <div class="why-icon" style="background:rgba(239,68,68,0.12);color:var(--danger);"><i class="fas fa-truck"></i></div>
-              <h3>Free Delivery</h3>
-              <p>Complimentary shipping with real-time tracking and careful packaging.</p>
-            </div>
-            <div class="why-card">
-              <div class="why-icon" style="background:rgba(16,185,129,0.12);color:var(--success);"><i class="fas fa-leaf"></i></div>
-              <h3>Eco-Friendly</h3>
-              <p>Environmentally responsible printing with recycled materials and sustainable production processes.</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- ==================== PRINTING PROCESS ==================== -->
-        <section class="bottom-section">
-          <div class="section-header">
-            <h2><i class="fas fa-cogs" style="color:var(--primary);"></i> Our Printing Process</h2>
-            <p>From concept to creation in 4 simple steps</p>
-          </div>
-          <div class="process-steps">
-            <div class="process-step">
-              <div class="process-number">1</div>
-              <div class="process-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-              <h3>Upload Design</h3>
-              <p>Submit your artwork or choose from our templates</p>
-            </div>
-            <div class="process-connector"></div>
-            <div class="process-step">
-              <div class="process-number">2</div>
-              <div class="process-icon"><i class="fas fa-clipboard-check"></i></div>
-              <h3>Proof & Approve</h3>
-              <p>Review your digital proof and request changes</p>
-            </div>
-            <div class="process-connector"></div>
-            <div class="process-step">
-              <div class="process-number">3</div>
-              <div class="process-icon"><i class="fas fa-print"></i></div>
-              <h3>Production</h3>
-              <p>State-of-the-art printing with quality checks</p>
-            </div>
-            <div class="process-connector"></div>
-            <div class="process-step">
-              <div class="process-number">4</div>
-              <div class="process-icon"><i class="fas fa-truck"></i></div>
-              <h3>Delivery</h3>
-              <p>Carefully packaged and shipped to your door</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- ==================== FAQ ==================== -->
-        <section class="bottom-section">
-          <div class="section-header">
-            <h2><i class="fas fa-question-circle" style="color:var(--primary);"></i> Frequently Asked Questions</h2>
-            <p>Everything you need to know about our printing services</p>
-          </div>
-          <div class="faq-grid">
-            <div class="faq-item">
-              <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>What file formats do you accept?</span>
-                <i class="fas fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">We accept PSD, AI, PNG, PDF, JPG, and TIFF files. For best results, provide print-ready files in CMYK color mode at 300 DPI resolution.</div>
-            </div>
-            <div class="faq-item">
-              <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>What is your turnaround time?</span>
-                <i class="fas fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">Standard orders are completed within 3-5 business days. Rush orders can be processed in 24-48 hours for an additional fee. Delivery times vary by location.</div>
-            </div>
-            <div class="faq-item">
-              <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>Do you offer bulk discounts?</span>
-                <i class="fas fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">Yes! We offer tiered pricing for bulk orders. The more you order, the lower the unit price. Contact our sales team for a custom quote on large quantities.</div>
-            </div>
-            <div class="faq-item">
-              <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>Can I request a sample before ordering?</span>
-                <i class="fas fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">Absolutely! Request a sample pack through our website and we'll send physical samples of our paper stocks and finishes for you to evaluate.</div>
-            </div>
-            <div class="faq-item">
-              <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>How do I prepare my file for printing?</span>
-                <i class="fas fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">Use CMYK color mode, set resolution to 300 DPI, include 3mm bleeds, convert fonts to outlines, and save as PDF/X-1a for best results.</div>
-            </div>
-            <div class="faq-item">
-              <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-                <span>What is your return policy?</span>
-                <i class="fas fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">We stand by our quality. If there's a printing defect or error on our part, we'll reprint or refund at no cost. Custom designs cannot be returned due to personalization.</div>
-            </div>
-          </div>
-        </section>
-
-
-      </div>
+        </div>
     </main>
   </div>
 
@@ -1880,6 +1691,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
   </div>
 
   <script>
+    const CSRF_TOKEN = '<?php echo $csrfToken; ?>';
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('open');
       document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -2007,7 +1819,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
         const res = await fetch('../api/google-auth.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ credential: response.credential })
+          body: JSON.stringify({ credential: response.credential, csrf_token: CSRF_TOKEN })
         });
         const data = await res.json();
         if (data.ok) {
@@ -2064,7 +1876,7 @@ outputSEOTags($seoTitle, $seoDescription, $seoKeywords);
     }
 
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') { closeModal(); closeNotifDropdown(); }
     });
 
     function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }

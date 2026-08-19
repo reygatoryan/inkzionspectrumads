@@ -382,10 +382,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 mkdir($uploadDir, 0755, true);
             }
             $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
-            $safeName = uniqid('chat_', true) . '.' . $ext;
+            $safeName = uniqid('msg_', true) . '.' . $ext;
             $destPath = $uploadDir . $safeName;
             
             if (move_uploaded_file($_FILES['file']['tmp_name'], $destPath)) {
+                @chmod($destPath, 0644);
                 $fileUrl = 'uploads/chats/' . $safeName;
                 $fileName = $_FILES['file']['name'];
                 $fileType = $_FILES['file']['type'];
@@ -405,10 +406,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (preg_match('/^data:image\/(\w+);base64,/', $fileUrl, $m)) {
                 $ext = $m[1] === 'jpeg' ? 'jpg' : $m[1];
             }
-            $safeName = uniqid('chat_', true) . '.' . $ext;
+            $safeName = uniqid('msg_', true) . '.' . $ext;
             $destPath = $uploadDir . $safeName;
             $dataPieces = explode(',', $fileUrl);
             if (isset($dataPieces[1]) && file_put_contents($destPath, base64_decode($dataPieces[1])) !== false) {
+                @chmod($destPath, 0644);
                 $fileUrl = 'uploads/chats/' . $safeName;
             }
         }
