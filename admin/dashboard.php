@@ -41,7 +41,7 @@ $changeConv = calcChange($thisWeekConv, $prevConv);
 
 // ===== RECENT CUSTOMER ACTIVITY =====
 $activity = [];
-$r1 = $conn->query("SELECT id, order_reference, 'order' AS type, CONCAT('Order #', COALESCE(order_reference, CONCAT('INK-', LPAD(id, 6, '0')))) AS title, status, created_at, user_id FROM orders WHERE status = 'pending' ORDER BY created_at DESC LIMIT 10");
+$r1 = $conn->query("SELECT id, order_reference, 'order' AS type, CONCAT('Order #', COALESCE(order_reference, CONCAT('INK-', LPAD(id, 6, '0')))) AS title, status, created_at, user_id FROM orders ORDER BY created_at DESC LIMIT 10");
 while ($row = $r1->fetch_assoc()) {
     $stmt = $conn->prepare("SELECT name FROM users WHERE id = ?");
     $stmt->bind_param("i", $row['user_id']);
@@ -51,7 +51,7 @@ while ($row = $r1->fetch_assoc()) {
     $row['customer'] = $u['name'] ?? 'Guest';
     $activity[] = $row;
 }
-$r2 = $conn->query("SELECT id, 'request' AS type, CONCAT('Custom Request #', id) AS title, status, created_at, user_id FROM custom_printing_requests WHERE status IN ('pending','in_review') ORDER BY created_at DESC LIMIT 10");
+$r2 = $conn->query("SELECT id, 'request' AS type, CONCAT('Custom Request #', id) AS title, status, created_at, user_id FROM custom_printing_requests ORDER BY created_at DESC LIMIT 10");
 while ($row = $r2->fetch_assoc()) {
     $stmt = $conn->prepare("SELECT name FROM users WHERE id = ?");
     $stmt->bind_param("i", $row['user_id']);
@@ -86,6 +86,11 @@ $activity = array_slice($activity, 0, 10);
   .dash-activity-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem; }
   .dash-activity-link { font-size: 0.72rem; font-weight: 600; color: var(--primary); text-decoration: none; white-space: nowrap; }
   .dash-activity-link:hover { text-decoration: underline; }
+  .badge-status-pending { background: rgba(245,158,11,0.14); color: #b45309; }
+  .badge-status-info { background: rgba(59,130,246,0.12); color: #1d4ed8; }
+  .badge-status-success { background: rgba(16,185,129,0.14); color: #047857; }
+  .badge-status-danger { background: rgba(220,38,38,0.12); color: #dc2626; }
+  .badge-status-default { background: #f1f5f9; color: #475569; }
 
   .insight-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
   .insight-item { text-align: center; padding: 1.25rem 0.75rem; background: #f8fafc; border-radius: 14px; border: 1px solid var(--border-color); }
@@ -128,7 +133,7 @@ $activity = array_slice($activity, 0, 10);
   <div class="card-header">
     <h2><i class="fas fa-bell"></i> Recent Customer Activity</h2>
     <?php if (count($activity) > 0): ?>
-    <span style="font-size:0.72rem;color:var(--text-muted);"><?php echo count($activity); ?> pending items</span>
+    <span style="font-size:0.72rem;color:var(--text-muted);"><?php echo (int)$pendingOrders + (int)$pendingRequests; ?> awaiting your action</span>
     <?php endif; ?>
   </div>
   <?php if (empty($activity)): ?>
@@ -142,15 +147,27 @@ $activity = array_slice($activity, 0, 10);
     <?php foreach ($activity as $a):
       $icon = $a['type'] === 'order' ? 'fa-shopping-bag' : 'fa-paint-brush';
       $iconClass = $a['type'] === 'order' ? 'order' : 'request';
-      $link = $a['type'] === 'order' ? 'orders.php?tab=pending' : 'custom-requests.php';
-      $statusLabel = ucfirst(str_replace('_', ' ', $a['status']));
+      $st = strtolower((string)$a['status']);
+      $colorMap = [
+        'pending' => 'pending', 'in_review' => 'pending',
+        'confirmed' => 'info', 'shipped' => 'info', 'delivered' => 'info',
+        'completed' => 'success', 'approved' => 'success', 'ready_for_purchase' => 'success',
+        'cancelled' => 'danger', 'returned' => 'danger', 'rejected' => 'danger'
+      ];
+      $badgeKey = isset($colorMap[$st]) ? $colorMap[$st] : 'default';
+      $tabMap = [
+        'pending' => 'pending', 'confirmed' => 'pending', 'shipped' => 'shipping',
+        'delivered' => 'shipping', 'completed' => 'completed', 'returned' => 'returns', 'cancelled' => 'returns'
+      ];
+      $link = $a['type'] === 'order' ? 'orders.php?tab=' . ($tabMap[$st] ?? 'all') : 'custom-requests.php';
+      $statusLabel = ucfirst(str_replace('_', ' ', $st));
       $time = date('M d, g:i A', strtotime($a['created_at']));
     ?>
     <div class="dash-activity-item">
       <div class="dash-activity-icon <?php echo $iconClass; ?>"><i class="fas <?php echo $icon; ?>"></i></div>
       <div class="dash-activity-body">
         <div class="dash-activity-title"><?php echo htmlspecialchars($a['title']); ?> — <?php echo htmlspecialchars($a['customer']); ?></div>
-        <div class="dash-activity-meta"><?php echo $time; ?> · <span class="badge badge-<?php echo $a['status'] === 'pending' ? 'pending' : 'in-review'; ?>"><?php echo $statusLabel; ?></span></div>
+        <div class="dash-activity-meta"><?php echo $time; ?> · <span class="badge badge-status-<?php echo $badgeKey; ?>"><?php echo $statusLabel; ?></span></div>
       </div>
       <a href="<?php echo $link; ?>" class="dash-activity-link">Manage <i class="fas fa-arrow-right" style="font-size:0.6rem;"></i></a>
     </div>

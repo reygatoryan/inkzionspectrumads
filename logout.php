@@ -1,4 +1,4 @@
-okay than<?php
+<?php
 session_start();
 require_once __DIR__ . '/db-config.php';
 $uid = (int)($_SESSION['user_id'] ?? 0);

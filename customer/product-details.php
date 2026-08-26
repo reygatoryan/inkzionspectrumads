@@ -5,6 +5,7 @@ require_once __DIR__ . '/../includes/csrf-helper.php';
 $csrfToken = generateCsrfToken();
 require_once '../db-config.php';
 require_once '../includes/google-config.php';
+require_once __DIR__ . '/../includes/product-content.php';
 
 $loggedIn = !empty($_SESSION['user_id']);
 $isSeller = !empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
@@ -80,6 +81,11 @@ if (!$product) {
 if (!$product) {
     header('Location: store-product.php');
     exit;
+}
+
+// Unique feature bullets are shared display content (not stored in DB)
+if (isset($PRODUCT_CONTENT[$product['name']])) {
+    $product['features'] = $PRODUCT_CONTENT[$product['name']]['features'];
 }
 
 $displayPrice = $product['price'];
@@ -575,11 +581,17 @@ if (is_numeric($displayPrice)) {
             <div class="product-details-features">
               <h3>Product Details</h3>
               <ul class="feature-list">
-                <li>High-quality materials and craftsmanship</li>
-                <li>Customizable design options available</li>
-                <li>Fast turnaround time</li>
-                <li>Professional finishing</li>
-                <li>Competitive pricing</li>
+                <?php if (!empty($product['features']) && is_array($product['features'])): ?>
+                  <?php foreach ($product['features'] as $feature): ?>
+                    <li><?php echo htmlspecialchars($feature, ENT_QUOTES, 'UTF-8'); ?></li>
+                  <?php endforeach; ?>
+                <?php else: ?>
+                  <li>High-quality materials and craftsmanship</li>
+                  <li>Customizable design options available</li>
+                  <li>Fast turnaround time</li>
+                  <li>Professional finishing</li>
+                  <li>Competitive pricing</li>
+                <?php endif; ?>
               </ul>
             </div>
 

@@ -2,6 +2,14 @@
 // Run this script once after deployment to ensure all tables/columns exist.
 // Access via: http://localhost/inkzion101/migrate.php?run=1
 // Safe to run multiple times — all operations use IF NOT EXISTS / IF MISSING checks.
+// PROTECTED: only logged-in admins may execute this script.
+
+require_once __DIR__ . '/includes/session-helper.php';
+secureSessionStart();
+if (empty($_SESSION['user_id']) || ($_SESSION['user_role'] ?? '') !== 'admin') {
+    http_response_code(403);
+    exit('403 - Admin access required. Sign in with the admin Google account first.');
+}
 
 if (empty($_GET['run'])) {
     echo "<h2>Database Migration Script</h2>";

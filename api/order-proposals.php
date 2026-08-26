@@ -107,47 +107,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit;
     }
 
-    if ($action === 'get') {
-        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-        if (!$id) {
-            echo json_encode(['success' => false, 'error' => 'Proposal ID required']);
-            $conn->close();
-            exit;
-        }
-
-        if ($userRole === 'admin') {
-            $stmt = $conn->prepare("SELECT op.*, u.name as user_name, u.email as user_email FROM order_proposals op LEFT JOIN users u ON op.user_id = u.id WHERE op.id = ?");
-        } else {
-            $stmt = $conn->prepare("SELECT op.* FROM order_proposals op WHERE op.id = ? AND op.user_id = ?");
-            $stmt->bind_param('ii', $id, $userId);
-        }
-        if ($userRole === 'admin') {
-            $stmt->bind_param('i', $id);
-        }
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $proposal = $result->fetch_assoc();
-        $stmt->close();
-
-        if (!$proposal) {
-            echo json_encode(['success' => false, 'error' => 'Proposal not found']);
-            $conn->close();
-            exit;
-        }
-
-        $proposal['items'] = json_decode($proposal['items'], true) ?: [];
-        echo json_encode(['success' => true, 'proposal' => $proposal]);
-        $conn->close();
-        exit;
-    }
-
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => 'Invalid action']);
     $conn->close();
     exit;
 }
 
-// POST: create, update, approve, reject, submit_by_customer
+// POST: submit_details, approve, reject
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
     if (!$data) {
@@ -155,63 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $action = $data['action'] ?? '';
-
-    // Admin: create proposal
-    if ($action === 'create') {
-        if ($userRole !== 'admin') {
-            http_response_code(403);
-            echo json_encode(['success' => false, 'error' => 'Admin only']);
-            $conn->close();
-            exit;
-        }
-
-        $customerId = isset($data['user_id']) ? (int)$data['user_id'] : 0;
-        $requestId = isset($data['request_id']) ? (int)$data['request_id'] : 0;
-        $conversationId = isset($data['conversation_id']) ? (int)$data['conversation_id'] : 0;
-        $items = $data['items'] ?? [];
-        $shippingFee = floatval($data['shipping_fee'] ?? 0);
-        $adminNotes = trim($data['admin_notes'] ?? '');
-
-        if (!$customerId || empty($items)) {
-            echo json_encode(['success' => false, 'error' => 'Customer ID and items are required']);
-            $conn->close();
-            exit;
-        }
-
-        $subtotal = 0;
-        foreach ($items as $item) {
-            $subtotal += floatval($item['unit_price'] ?? 0) * intval($item['quantity'] ?? 1);
-        }
-        $totalAmount = $subtotal + $shippingFee;
-
-        $itemsJson = json_encode($items);
-
-        $stmt = $conn->prepare("
-            INSERT INTO order_proposals (user_id, admin_id, request_id, conversation_id, items, subtotal, shipping_fee, total_amount, admin_notes, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'sent', NOW())
-        ");
-        $stmt->bind_param('iiiisddds', $customerId, $userId, $requestId, $conversationId, $itemsJson, $subtotal, $shippingFee, $totalAmount, $adminNotes);
-
-        if ($stmt->execute()) {
-            $proposalId = $conn->insert_id;
-
-            // Notify customer
-            $notifStmt = $conn->prepare("
-                INSERT INTO notifications (user_id, type, title, body, related_type, related_id, created_at)
-                VALUES (?, 'proposal_sent', 'Order Form Ready', 'Admin has sent you an order form. Please fill in your details to proceed.', 'order_proposal', ?, NOW())
-            ");
-            $notifStmt->bind_param('ii', $customerId, $proposalId);
-            $notifStmt->execute();
-            $notifStmt->close();
-
-            echo json_encode(['success' => true, 'message' => 'Order form sent to customer!', 'proposal_id' => $proposalId]);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to create proposal']);
-        }
-        $stmt->close();
-        $conn->close();
-        exit;
-    }
 
     // Customer: fill and submit proposal
     if ($action === 'submit_details') {

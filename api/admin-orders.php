@@ -13,6 +13,74 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 $sellerId = $_SESSION['user_id'];
 $action = $_GET['action'] ?? '';
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $postAction = $input['action'] ?? '';
+
+    if ($postAction !== 'delete' || empty($input['order_id'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Invalid request']);
+        exit;
+    }
+
+    $orderId = (int)$input['order_id'];
+
+    $stmt = $conn->prepare("SELECT o.id, o.order_reference FROM orders o
+                            INNER JOIN order_items oi ON o.id = oi.order_id
+                            LEFT JOIN products p ON oi.product_id = p.id
+                            WHERE o.id = ? AND (p.admin_id = ? OR o.admin_id = ?)
+                            LIMIT 1");
+    $stmt->bind_param('iii', $orderId, $sellerId, $sellerId);
+    $stmt->execute();
+    $order = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!$order) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Order not found or not authorized']);
+        exit;
+    }
+
+    $ref = !empty($order['order_reference']) ? $order['order_reference'] : 'INK-' . str_pad((string)$orderId, 6, '0', STR_PAD_LEFT);
+
+    $conn->begin_transaction();
+    try {
+        $stmt = $conn->prepare("DELETE FROM order_items WHERE order_id = ?");
+        $stmt->bind_param('i', $orderId);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $conn->prepare("DELETE FROM notifications WHERE related_type = 'order' AND related_id = ?");
+        $stmt->bind_param('i', $orderId);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $conn->prepare("DELETE FROM orders WHERE id = ?");
+        $stmt->bind_param('i', $orderId);
+        $stmt->execute();
+        $deleted = $stmt->affected_rows > 0;
+        $stmt->close();
+
+        if (!$deleted) {
+            throw new Exception('Order row missing');
+        }
+
+        $logStmt = $conn->prepare("INSERT INTO activity_logs (user_id, action, description) VALUES (?, 'Deleted Order', ?)");
+        $desc = 'Admin deleted order #' . $ref;
+        $logStmt->bind_param('is', $sellerId, $desc);
+        $logStmt->execute();
+        $logStmt->close();
+
+        $conn->commit();
+        echo json_encode(['success' => true, 'message' => 'Order #' . $ref . ' deleted permanently.']);
+    } catch (Exception $e) {
+        $conn->rollback();
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Failed to delete order. Please try again.']);
+    }
+    exit;
+}
+
 if ($action === 'counts') {
     $tabs = ['all','unpaid','pending','shipping','completed','returns'];
     $counts = [];

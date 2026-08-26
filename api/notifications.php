@@ -94,18 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    if ($action === 'mark_read_by_related' && isset($data['related_type']) && isset($data['related_id'])) {
-        $relatedType = $data['related_type'];
-        $relatedId = (int)$data['related_id'];
-        $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND related_type = ? AND related_id = ? AND is_read = 0");
-        $stmt->bind_param('isi', $userId, $relatedType, $relatedId);
-        $stmt->execute();
-        $stmt->close();
-        echo json_encode(['success' => true]);
-        $conn->close();
-        exit;
-    }
-
     if ($action === 'mark_read_by_type' && isset($data['related_type'])) {
         $relatedType = $data['related_type'];
         $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND related_type = ? AND is_read = 0");

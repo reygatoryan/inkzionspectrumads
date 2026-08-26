@@ -33,50 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $action = isset($data['action']) ? trim($data['action']) : '';
 
-    // === ADMIN: Update request status ===
-    if ($action === 'update_status') {
-        if (!in_array($userRole, ['admin', 'admin'])) {
-            http_response_code(403);
-            echo json_encode(['success' => false, 'error' => 'Admin access required']);
-            exit;
-        }
-        $requestId = isset($data['request_id']) ? (int)$data['request_id'] : 0;
-        $newStatus = isset($data['status']) ? trim($data['status']) : '';
-        $adminNotes = isset($data['admin_notes']) ? trim($data['admin_notes']) : '';
-
-        $validStatuses = ['pending', 'in_review', 'approved', 'rejected', 'ready_for_purchase', 'completed'];
-        if (!in_array($newStatus, $validStatuses)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Invalid status']);
-            exit;
-        }
-
-        $stmt = $conn->prepare("UPDATE custom_printing_requests SET status = ?, admin_notes = ?, is_viewed = 0 WHERE id = ?");
-        $stmt->bind_param('ssi', $newStatus, $adminNotes, $requestId);
-        $stmt->execute();
-        $stmt->close();
-
-        $reqCheck = $conn->prepare("SELECT user_id FROM custom_printing_requests WHERE id = ?");
-        $reqCheck->bind_param('i', $requestId);
-        $reqCheck->execute();
-        $reqResult = $reqCheck->get_result();
-        $reqRow = $reqResult->fetch_assoc();
-        $reqCheck->close();
-        if ($reqRow) {
-            $customerId = (int)$reqRow['user_id'];
-            $notifStmt = $conn->prepare("INSERT INTO notifications (user_id, type, title, body, related_type, related_id, created_at) VALUES (?, 'custom_request_status', ?, ?, 'custom_request', ?, NOW())");
-            $notifTitle = "Custom Request #{$requestId} Status Updated";
-            $notifBody = "Your custom request #{$requestId} status has been updated to: {$newStatus}.";
-            $notifStmt->bind_param('issi', $customerId, $notifTitle, $notifBody, $requestId);
-            $notifStmt->execute();
-            $notifStmt->close();
-        }
-
-        echo json_encode(['success' => true, 'message' => 'Status updated']);
-        $conn->close();
-        exit;
-    }
-
     // === ADMIN: Set ready for purchase ===
     if ($action === 'set_ready_for_purchase') {
         if (!in_array($userRole, ['admin', 'admin'])) {

@@ -339,6 +339,7 @@ require_once __DIR__ . '/includes/admin-header.php';
               ${order.status === 'shipped' ? `<button class="btn btn-primary btn-sm" onclick="markDelivered(${order.id})"><i class="fas fa-check-circle"></i> Mark as Delivered</button>` : ''}
               ${order.status === 'delivered' ? `<button class="btn btn-primary btn-sm" onclick="markCompleted(${order.id})"><i class="fas fa-check-double"></i> Mark as Completed</button>` : ''}
               <button class="btn btn-outline btn-sm" onclick="viewOrder(${order.id})"><i class="fas fa-eye"></i> View</button>
+              <button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fecaca;" onclick="deleteOrder(${order.id})"><i class="fas fa-trash"></i> Delete</button>
             </div>
           </div>
         </div>
@@ -499,6 +500,29 @@ require_once __DIR__ . '/includes/admin-header.php';
   function markCompleted(orderId) {
     if (confirm('Mark Order #' + getOrderRef(orderId) + ' as Completed?')) {
       updateOrderStatus(orderId, 'completed', 'Order completed successfully.');
+    }
+  }
+
+  async function deleteOrder(orderId) {
+    const ref = getOrderRef(orderId);
+    if (!confirm('Permanently delete Order #' + ref + '?\n\nThis removes the order, all its items, and related notifications. This action cannot be undone.')) return;
+    try {
+      const res = await fetch('../api/admin-orders.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ action: 'delete', order_id: orderId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || ('Order #' + ref + ' deleted.'), 'success');
+        loadOrders();
+        loadCounts();
+      } else {
+        showToast(data.message || data.error || 'Failed to delete order.', 'error');
+      }
+    } catch (e) {
+      showToast('Network error. Please try again.', 'error');
     }
   }
 
